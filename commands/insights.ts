@@ -1055,7 +1055,7 @@ RESPOND WITH ONLY A VALID JSON OBJECT matching this schema:
 }
 
 /**
- * Detects multi-clauding (using multiple Claude sessions concurrently).
+ * Detects running multiple Open Code CLI sessions concurrently.
  * Uses a sliding window to find the pattern: session1 -> session2 -> session1
  * within a 30-minute window.
  */

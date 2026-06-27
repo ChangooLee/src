@@ -879,7 +879,7 @@ const PluginManifestSettingsSchema = lazySchema(() =>
  * still fail, since a typo there is more likely to be an author mistake
  * than a vendor extension. Type mismatches and other validation errors
  * still fail at all levels. For developer feedback on unknown top-level
- * fields, use `claude plugin validate`.
+ * fields, use `open-code-cli plugin validate`.
  */
 export const PluginManifestSchema = lazySchema(() =>
   z.object({

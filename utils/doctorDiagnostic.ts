@@ -459,23 +459,23 @@ async function detectConfigurationIssues(
 
   // Check if running local installation but it's not in PATH
   if (type === 'npm-local') {
-    // Check if claude is already accessible via PATH
+    // Check if open-code-cli is already accessible via PATH
     const whichResult = await which('claude')
     const claudeInPath = !!whichResult
 
-    // Only show warning if claude is NOT in PATH AND no valid alias exists
+    // Only show warning if open-code-cli is NOT in PATH AND no valid alias exists
     if (!claudeInPath && !validAlias) {
       if (existingAlias) {
         // Alias exists but points to invalid target
         warnings.push({
           issue: 'Local installation not accessible',
-          fix: `Alias exists but points to invalid target: ${existingAlias}. Update alias: alias claude="~/.claude/local/claude"`,
+          fix: `Alias exists but points to invalid target: ${existingAlias}. Update alias: alias open-code-cli="~/.open-code-cli/local/claude"`,
         })
       } else {
         // No alias exists and not in PATH
         warnings.push({
           issue: 'Local installation not accessible',
-          fix: 'Create alias: alias claude="~/.claude/local/claude"',
+          fix: 'Create alias: alias open-code-cli="~/.open-code-cli/local/claude"',
         })
       }
     }

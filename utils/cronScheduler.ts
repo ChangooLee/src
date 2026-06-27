@@ -345,7 +345,7 @@ export function createCronScheduler(
     }
 
     // File-backed tasks: only when we own the scheduler lock. The lock
-    // exists to stop two Claude sessions in the same cwd from double-firing
+    // exists to stop two Open Code CLI sessions in the same cwd from double-firing
     // the same on-disk task.
     if (isOwner) {
       for (const t of tasks) process(t, false)

@@ -143,7 +143,7 @@ const externalTips: Tip[] = [
   {
     id: 'git-worktrees',
     content: async () =>
-      'Use git worktrees to run multiple Claude sessions in parallel.',
+      'Use git worktrees to run multiple Open Code CLI sessions in parallel.',
     cooldownSessions: 10,
     isRelevant: async () => {
       try {
@@ -156,9 +156,9 @@ const externalTips: Tip[] = [
     },
   },
   {
-    id: 'color-when-multi-clauding',
+    id: 'color-when-running multiple Open Code CLI sessions',
     content: async () =>
-      'Running multiple Claude sessions? Use /color and /rename to tell them apart at a glance.',
+      'Running multiple Open Code CLI sessions? Use /color and /rename to tell them apart at a glance.',
     cooldownSessions: 10,
     isRelevant: async () => {
       if (getCurrentSessionAgentColor()) return false
