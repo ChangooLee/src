@@ -1,23 +1,18 @@
 import { feature } from 'bun:bundle'
-import type OpenAICompatibleProvider from 'src/services/api/openaiCompatible.js'
 import {
   APIConnectionError,
   APIError,
   APIUserAbortError,
+  type OpenAICompatibleClient,
 } from 'src/services/api/openaiCompatible.js'
 import type { QuerySource } from 'src/constants/querySource.js'
 import type { SystemAPIErrorMessage } from 'src/types/message.js'
-import { isAwsCredentialsProviderError } from 'src/utils/aws.js'
 import { logForDebugging } from 'src/utils/debug.js'
 import { logError } from 'src/utils/log.js'
 import { createSystemAPIErrorMessage } from 'src/utils/messages.js'
 import { getAPIProviderForStatsig } from 'src/utils/model/providers.js'
 import {
   clearApiKeyHelperCache,
-  clearAwsCredentialsCache,
-  clearGcpCredentialsCache,
-  getClaudeAIOAuthTokens,
-  handleOAuth401Error,
   isClaudeAISubscriber,
   isEnterpriseSubscriber,
 } from '../../utils/auth.js'
@@ -47,7 +42,7 @@ import {
 import { REPEATED_529_ERROR_MESSAGE } from './errors.js'
 import { extractConnectionErrorDetails } from './errorUtils.js'
 
-import { getOpenCodeCliEnv } from '../../utils/envUtils.js';
+import { getOpenCodeCliEnv } from '../../utils/envUtils.js'
 const abortError = () => new APIUserAbortError()
 
 const DEFAULT_MAX_RETRIES = 10
@@ -169,9 +164,9 @@ export class FallbackTriggeredError extends Error {
 }
 
 export async function* withRetry<T>(
-  getClient: () => Promise<OpenAICompatibleProvider>,
+  getClient: () => Promise<OpenAICompatibleClient>,
   operation: (
-    client: OpenAICompatibleProvider,
+    client: OpenAICompatibleClient,
     attempt: number,
     context: RetryContext,
   ) => Promise<T>,
@@ -183,7 +178,7 @@ export async function* withRetry<T>(
     thinkingConfig: options.thinkingConfig,
     ...(isFastModeEnabled() && { fastMode: options.fastMode }),
   }
-  let client: OpenAICompatibleProvider | null = null
+  let client: OpenAICompatibleClient | null = null
   let consecutive529Errors = options.initialConsecutive529Errors ?? 0
   let lastError: unknown
   let persistentAttempt = 0
@@ -210,11 +205,9 @@ export async function* withRetry<T>(
         }
       }
 
-      // Get a fresh client instance on first attempt or after authentication errors
-      // - 401 for first-party API authentication failures
-      // - 403 "OAuth token has been revoked" (another process refreshed the token)
-      // - OpenAICompatibleProvider-specific auth errors (403 or CredentialsProviderError)
-      // - OpenAICompatibleProvider-specific auth errors (credential refresh failures, 401)
+      // Get a fresh client instance on first attempt or after generic provider
+      // authentication errors. OpenAI-compatible providers use API keys; legacy
+      // OAuth/cloud credential refresh is not part of the runtime path.
       // - ECONNRESET/EPIPE: stale keep-alive socket; disable pooling and reconnect
       const isStaleConnection = isStaleConnectionError(lastError)
       if (
@@ -233,20 +226,10 @@ export async function* withRetry<T>(
       if (
         client === null ||
         (lastError instanceof APIError && lastError.status === 401) ||
-        isOAuthTokenRevokedError(lastError) ||
-        isOpenAICompatibleProviderAuthError(lastError) ||
-        isOpenAICompatibleProviderAuthError(lastError) ||
         isStaleConnection
       ) {
-        // On 401 "token expired" or 403 "token revoked", force a token refresh
-        if (
-          (lastError instanceof APIError && lastError.status === 401) ||
-          isOAuthTokenRevokedError(lastError)
-        ) {
-          const failedAccessToken = getClaudeAIOAuthTokens()?.accessToken
-          if (failedAccessToken) {
-            await handleOAuth401Error(failedAccessToken)
-          }
+        if (lastError instanceof APIError && lastError.status === 401) {
+          clearApiKeyHelperCache()
         }
         client = await getClient()
       }
@@ -372,13 +355,7 @@ export async function* withRetry<T>(
         throw new CannotRetryError(error, retryContext)
       }
 
-      // AWS/GCP errors aren't always APIError, but can be retried
-      const handledCloudAuthError =
-        handleAwsCredentialError(error) || handleGcpCredentialError(error)
-      if (
-        !handledCloudAuthError &&
-        (!(error instanceof APIError) || !shouldRetry(error))
-      ) {
+      if (!(error instanceof APIError) || !shouldRetry(error)) {
         throw new CannotRetryError(error, retryContext)
       }
 
@@ -621,79 +598,6 @@ export function is529Error(error: unknown): boolean {
   )
 }
 
-function isOAuthTokenRevokedError(error: unknown): boolean {
-  return (
-    error instanceof APIError &&
-    error.status === 403 &&
-    (error.message?.includes('OAuth token has been revoked') ?? false)
-  )
-}
-
-function isOpenAICompatibleProviderAuthError(error: unknown): boolean {
-  if (isEnvTruthy(process.env.OPEN_CODE_CLI_USE_BEDROCK)) {
-    // AWS libs reject without an API call if .aws holds a past Expiration value
-    // otherwise, API calls that receive expired tokens give generic 403
-    // "The security token included in the request is invalid"
-    if (
-      isAwsCredentialsProviderError(error) ||
-      (error instanceof APIError && error.status === 403)
-    ) {
-      return true
-    }
-  }
-  return false
-}
-
-/**
- * Clear AWS auth caches if appropriate.
- * @returns true if action was taken.
- */
-function handleAwsCredentialError(error: unknown): boolean {
-  if (isOpenAICompatibleProviderAuthError(error)) {
-    clearAwsCredentialsCache()
-    return true
-  }
-  return false
-}
-
-// google-auth-library throws plain Error (no typed name like AWS's
-// CredentialsProviderError). Match common SDK-level credential-failure messages.
-function isGoogleAuthLibraryCredentialError(error: unknown): boolean {
-  if (!(error instanceof Error)) return false
-  const msg = error.message
-  return (
-    msg.includes('Could not load the default credentials') ||
-    msg.includes('Could not refresh access token') ||
-    msg.includes('invalid_grant')
-  )
-}
-
-function isOpenAICompatibleProviderAuthError(error: unknown): boolean {
-  if (isEnvTruthy(process.env.OPEN_CODE_CLI_USE_VERTEX)) {
-    // SDK-level: google-auth-library fails in prepareOptions() before the HTTP call
-    if (isGoogleAuthLibraryCredentialError(error)) {
-      return true
-    }
-    // Server-side: OpenAICompatibleProvider returns 401 for expired/invalid tokens
-    if (error instanceof APIError && error.status === 401) {
-      return true
-    }
-  }
-  return false
-}
-
-/**
- * Clear GCP auth caches if appropriate.
- * @returns true if action was taken.
- */
-function handleGcpCredentialError(error: unknown): boolean {
-  if (isOpenAICompatibleProviderAuthError(error)) {
-    clearGcpCredentialsCache()
-    return true
-  }
-  return false
-}
-
 function shouldRetry(error: APIError): boolean {
   // Never retry mock errors - they're from /mock-limits command for testing
   if (isMockRateLimitError(error)) {
@@ -773,11 +677,6 @@ function shouldRetry(error: APIError): boolean {
   // OAuth token handling is done in the main retry loop via handleOAuth401Error.
   if (error.status === 401) {
     clearApiKeyHelperCache()
-    return true
-  }
-
-  // Retry on 403 "token revoked" (same refresh logic as 401, see above)
-  if (isOAuthTokenRevokedError(error)) {
     return true
   }
 

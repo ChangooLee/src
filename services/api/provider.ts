@@ -52,7 +52,6 @@ import {
   toolToAPISchema,
 } from '../../utils/api.js'
 import { getOauthAccountInfo } from '../../utils/auth.js'
-import { getMergedBetas, getModelBetas } from '../../utils/betas.js'
 import { getOrCreateUserID } from '../../utils/config.js'
 import {
   CAPPED_DEFAULT_MAX_TOKENS,
@@ -255,7 +254,7 @@ type JsonArray = JsonValue[]
 /**
  * Assemble the extra body parameters for the API request, based on the
  * OPEN_CODE_CLI_EXTRA_BODY environment variable if present and on any beta
- * headers (primarily for OpenAICompatibleProvider requests).
+ * headers (primarily for OpenAI-compatible provider requests).
  *
  * @param betaHeaders - An array of beta headers to include in the request.
  * @returns A JSON object representing the extra body parameters.
@@ -305,16 +304,16 @@ export function getExtraBodyParams(betaHeaders?: string[]): JsonObject {
 
   // Handle beta headers if provided
   if (betaHeaders && betaHeaders.length > 0) {
-    if (result.providerClient_beta && Array.isArray(result.providerClient_beta)) {
+    if (result.openai-compatible_beta && Array.isArray(result.openai-compatible_beta)) {
       // Add to existing array, avoiding duplicates
-      const existingHeaders = result.providerClient_beta as string[]
+      const existingHeaders = result.openai-compatible_beta as string[]
       const newHeaders = betaHeaders.filter(
         header => !existingHeaders.includes(header),
       )
-      result.providerClient_beta = [...existingHeaders, ...newHeaders]
+      result.openai-compatible_beta = [...existingHeaders, ...newHeaders]
     } else {
       // Create new array with the beta headers
-      result.providerClient_beta = betaHeaders
+      result.openai-compatible_beta = betaHeaders
     }
   }
 
@@ -382,7 +381,7 @@ export function getCacheControl({
  * TTLs when GrowthBook's disk cache updates mid-request.
  */
 function should1hCacheTTL(querySource?: QuerySource): boolean {
-  // 3P OpenAICompatibleProvider users get 1h TTL when opted in via env var — they manage their own billing
+  // 3P OpenAI-compatible provider users get 1h TTL when opted in via env var — they manage their own billing
   // No GrowthBook gating needed since 3P users don't have GrowthBook configured
   if (
     false &&
@@ -446,10 +445,10 @@ function configureEffortParams(
     outputConfig.effort = effortValue
     betas.push(EFFORT_BETA_HEADER)
   } else if (process.env.USER_TYPE === 'ant') {
-    // Numeric effort override - ant-only (uses providerClient_internal)
+    // Numeric effort override - ant-only (uses openai-compatible_internal)
     const existingInternal =
-      (extraBodyParams.providerClient_internal as Record<string, unknown>) || {}
-    extraBodyParams.providerClient_internal = {
+      (extraBodyParams.openai-compatible_internal as Record<string, unknown>) || {}
+    extraBodyParams.openai-compatible_internal = {
       ...existingInternal,
       effort_override: effortValue,
     }
@@ -530,9 +529,7 @@ export async function verifyApiKey(
   }
 
   try {
-    // WARNING: if you change this to use a non-Haiku model, this request will fail in 1P unless it uses getCLISyspromptPrefix.
     const model = getSmallFastModel()
-    const betas = getModelBetas(model)
     return await returnValue(
       withRetry(
         () =>
@@ -542,15 +539,14 @@ export async function verifyApiKey(
             model,
             source: 'verify_api_key',
           }),
-        async providerClient => {
+        async openai-compatible => {
           const messages: MessageParam[] = [{ role: 'user', content: 'test' }]
           // biome-ignore lint/plugin: API key verification is intentionally a minimal direct call
-          await providerClient.beta.messages.create({
+          await openai-compatible.beta.messages.create({
             model,
             max_tokens: 1,
             messages,
             temperature: 1,
-            ...(betas.length > 0 && { betas }),
             metadata: getAPIMetadata(),
             ...getExtraBodyParams(),
           })
@@ -565,13 +561,10 @@ export async function verifyApiKey(
       error = errorFromRetry.originalError
     }
     logError(error)
-    // Check for authentication error
-    if (
-      error instanceof Error &&
-      error.message.includes(
-        '{"type":"error","error":{"type":"authentication_error","message":"invalid x-api-key"}}',
-      )
-    ) {
+    if (error instanceof APIError && error.status === 401) {
+      return false
+    }
+    if (error instanceof Error && error.message.includes('Invalid API key')) {
       return false
     }
     throw error
@@ -841,7 +834,7 @@ export async function* executeNonStreamingRequest(
         fetchOverride: clientOptions.fetchOverride,
         source: clientOptions.source,
       }),
-    async (providerClient, attempt, context) => {
+    async (openai-compatible, attempt, context) => {
       const start = Date.now()
       const retryParams = paramsFromContext(context)
       captureRequest(retryParams)
@@ -854,7 +847,7 @@ export async function* executeNonStreamingRequest(
 
       try {
         // biome-ignore lint/plugin: non-streaming API call
-        return await providerClient.beta.messages.create(
+        return await openai-compatible.beta.messages.create(
           {
             ...adjustedParams,
             model: normalizeModelStringForAPI(adjustedParams.model),
@@ -1061,7 +1054,7 @@ async function* queryModel(
     options.querySource === 'sdk' ||
     options.querySource === 'hook_agent' ||
     options.querySource === 'verification_agent'
-  const betas = getMergedBetas(options.model, { isAgenticQuery })
+  const betas: string[] = []
 
   // Always send the advisor beta header when advisor is enabled, so
   // non-agentic queries (compact, side_question, extract_memories, etc.)
@@ -1165,8 +1158,8 @@ async function* queryModel(
   }
 
   // Add tool search beta header if enabled - required for defer_loading to be accepted
-  // Header differs by provider: 1P/OpenAICompatibleProvider use advanced-tool-use, OpenAICompatibleProvider/OpenAICompatibleProvider use tool-search-tool
-  // For OpenAICompatibleProvider, this header must go in extraBodyParams, not the betas array
+  // Header differs by provider: 1P/OpenAI-compatible provider use advanced-tool-use, OpenAI-compatible provider/OpenAI-compatible provider use tool-search-tool
+  // For OpenAI-compatible provider, this header must go in extraBodyParams, not the betas array
   const toolSearchHeader = useToolSearch ? getToolSearchBetaHeader() : null
   if (toolSearchHeader && true) {
     if (!betas.includes(toolSearchHeader)) {
@@ -1370,7 +1363,7 @@ async function* queryModel(
     skipGlobalCacheForSystemPrompt: needsToolBasedCacheMarker,
     querySource: options.querySource,
   })
-  const useBetas = betas.length > 0
+  const useBetas = false
 
   // Build minimal context for detailed tracing (when beta tracing is enabled)
   // Note: The actual new_context message extraction is done in sessionTracing.ts using
@@ -1539,7 +1532,7 @@ async function* queryModel(
       betasParams.push(CONTEXT_1M_BETA_HEADER)
     }
 
-    // For OpenAICompatibleProvider, include both model-based betas and dynamically-added tool search header
+    // For OpenAI-compatible provider, include both model-based betas and dynamically-added tool search header
     const extraBodyParams = getExtraBodyParams([])
 
     const outputConfig: BetaOutputConfig = {
@@ -1699,7 +1692,6 @@ async function* queryModel(
       ...(useBetas && { betas: betasParams }),
       metadata: getAPIMetadata(),
       max_tokens: maxOutputTokens,
-      thinking,
       ...(temperature !== undefined && { temperature }),
       ...(contextManagement &&
         useBetas &&
@@ -1769,7 +1761,7 @@ async function* queryModel(
           fetchOverride: options.fetchOverride,
           source: options.querySource,
         }),
-      async (providerClient, attempt, context) => {
+      async (openai-compatible, attempt, context) => {
         attemptNumber = attempt
         isFastModeRequest = context.fastMode ?? false
         start = Date.now()
@@ -1800,7 +1792,7 @@ async function* queryModel(
         // BetaMessageStream calls partialParse() on every input_json_delta, which we don't need
         // since we handle tool input accumulation ourselves
         // biome-ignore lint/plugin: main conversation loop handles attribution separately
-        const result = await providerClient.beta.messages
+        const result = await openai-compatible.beta.messages
           .create(
             { ...params, stream: true },
             {
@@ -2516,7 +2508,7 @@ async function* queryModel(
       // If the streaming failure was itself a 529, count it toward the
       // consecutive-529 budget so total 529s-before-model-fallback is the
       // same whether the overload was hit in streaming or non-streaming mode.
-      // This is a speculative fix for https://github.com/anthropics/open-code-cli/issues/1513
+      // This is a speculative fix for https://github.com/openai-compatibles/open-code-cli/issues/1513
       // Instrumentation: proves executeNonStreamingRequest was entered (vs. the
       // fallback event firing but the call itself hanging at dispatch).
       logForDiagnosticsNoPII('info', 'cli_nonstreaming_fallback_started')
@@ -2894,7 +2886,7 @@ export function cleanupStream(
 
 /**
  * Updates usage statistics with new values from streaming API events.
- * Note: OpenAICompatibleProvider's streaming API provides cumulative usage totals, not incremental deltas.
+ * Note: OpenAI-compatible provider's streaming API provides cumulative usage totals, not incremental deltas.
  * Each event contains the complete usage up to that point in the stream.
  *
  * Input-related tokens (input_tokens, cache_creation_input_tokens, cache_read_input_tokens)
@@ -3373,7 +3365,7 @@ export function adjustParamsForNonStreaming<
 }
 
 function isMaxTokensCapEnabled(): boolean {
-  // 3P default: false (not validated on OpenAICompatibleProvider/OpenAICompatibleProvider)
+  // 3P default: false (not validated on OpenAI-compatible provider/OpenAI-compatible provider)
   return getFeatureValue_CACHED_MAY_BE_STALE('tengu_otk_slot_v1', false)
 }
 
@@ -3384,7 +3376,7 @@ export function getMaxOutputTokensForModel(model: string): number {
   // = 4,911 tokens; 32k/64k defaults over-reserve 8-16× slot capacity.
   // Requests hitting the cap get one clean retry at 64k (query.ts
   // max_output_tokens_escalate). Math.min keeps models with lower native
-  // defaults (e.g. claude-3-opus at 4k) at their native value. Applied
+  // defaults (e.g. smaller OpenAI-compatible models at 4k) at their native value. Applied
   // before the env-var override so OPEN_CODE_CLI_MAX_OUTPUT_TOKENS still wins.
   const defaultTokens = isMaxTokensCapEnabled()
     ? Math.min(maxOutputTokens.default, CAPPED_DEFAULT_MAX_TOKENS)

@@ -1,9 +1,10 @@
 export const PRODUCT_URL = 'https://open-code-cli.dev'
 
 // Open Code CLI Remote session URLs
-export const OPEN_CODE_CLI_BASE_URL = 'https://claude.ai'
-export const OPEN_CODE_CLI_STAGING_BASE_URL = 'https://claude-ai.staging.ant.dev'
-export const OPEN_CODE_CLI_LOCAL_BASE_URL = 'http://localhost:4000'
+export const OPEN_CODE_CLI_REMOTE_BASE_URL = 'https://open-code-cli.dev'
+export const OPEN_CODE_CLI_REMOTE_STAGING_BASE_URL =
+  'https://staging.open-code-cli.dev'
+export const OPEN_CODE_CLI_REMOTE_LOCAL_BASE_URL = 'http://localhost:4000'
 
 /**
  * Determine if we're in a staging environment for remote sessions.
@@ -34,19 +35,19 @@ export function isRemoteSessionLocal(
 }
 
 /**
- * Get the base URL for Claude AI based on environment.
+ * Get the base URL for Open Code CLI remote sessions based on environment.
  */
-export function getClaudeAiBaseUrl(
+export function getOpenCodeCliRemoteBaseUrl(
   sessionId?: string,
   ingressUrl?: string,
 ): string {
   if (isRemoteSessionLocal(sessionId, ingressUrl)) {
-    return OPEN_CODE_CLI_LOCAL_BASE_URL
+    return OPEN_CODE_CLI_REMOTE_LOCAL_BASE_URL
   }
   if (isRemoteSessionStaging(sessionId, ingressUrl)) {
-    return OPEN_CODE_CLI_STAGING_BASE_URL
+    return OPEN_CODE_CLI_REMOTE_STAGING_BASE_URL
   }
-  return OPEN_CODE_CLI_BASE_URL
+  return OPEN_CODE_CLI_REMOTE_BASE_URL
 }
 
 /**
@@ -71,6 +72,6 @@ export function getRemoteSessionUrl(
     require('../bridge/sessionIdCompat.js') as typeof import('../bridge/sessionIdCompat.js')
   /* eslint-enable @typescript-eslint/no-require-imports */
   const compatId = toCompatSessionId(sessionId)
-  const baseUrl = getClaudeAiBaseUrl(compatId, ingressUrl)
+  const baseUrl = getOpenCodeCliRemoteBaseUrl(compatId, ingressUrl)
   return `${baseUrl}/code/${compatId}`
 }

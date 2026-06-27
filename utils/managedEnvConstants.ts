@@ -4,38 +4,24 @@
  *
  * When OPEN_CODE_CLI_PROVIDER_MANAGED_BY_HOST is truthy in the spawn env, these
  * are stripped from settings-sourced env so the host's routing config isn't
- * overridden by a user's ~/.open-code-cli/settings.json — e.g. a OpenAICompatibleProvider setup for
- * terminal CLI that would break a host that only supports first-party auth.
+ * overridden by a user's ~/.open-code-cli/settings.json.
  *
  * @[MODEL LAUNCH]: New models usually don't need changes here —
- * VERTEX_REGION_OPEN_CODE_* is prefix-matched. New providers or new routing
- * config vars (endpoint, project, region, auth) do.
+ * New providers or new routing config vars (endpoint, project, auth) do.
  */
 const PROVIDER_MANAGED_ENV_VARS = new Set([
   // The flag itself — settings can't unset it once the host set it
   'OPEN_CODE_CLI_PROVIDER_MANAGED_BY_HOST',
   // Provider selection
-  'OPEN_CODE_CLI_USE_BEDROCK',
-  'OPEN_CODE_CLI_USE_VERTEX',
-  'OPEN_CODE_CLI_USE_FOUNDRY',
   // Endpoint config (base URLs, project/resource identifiers)
+  'OPEN_CODE_CLI_PROVIDER_BASE_URL',
   'OPEN_CODE_CLI_BASE_URL',
-  'OPEN_CODE_CLI_BASE_URL',
-  'OPEN_CODE_CLI_BASE_URL',
-  'OPEN_CODE_CLI_BASE_URL',
+  'OPEN_CODE_CLI_REMOTE_BASE_URL',
   'OPEN_CODE_CLI_PROVIDER_RESOURCE',
   'OPEN_CODE_CLI_PROVIDER_PROJECT_ID',
-  // Region routing (per-model VERTEX_REGION_OPEN_CODE_* handled by prefix below)
-  'CLOUD_ML_REGION',
   // Auth
   'OPEN_CODE_CLI_API_KEY',
   'OPEN_CODE_CLI_AUTH_TOKEN',
-  'OPEN_CODE_CLI_OAUTH_TOKEN',
-  'AWS_BEARER_TOKEN_BEDROCK',
-  'OPEN_CODE_CLI_API_KEY',
-  'OPEN_CODE_CLI_SKIP_BEDROCK_AUTH',
-  'OPEN_CODE_CLI_SKIP_VERTEX_AUTH',
-  'OPEN_CODE_CLI_SKIP_FOUNDRY_AUTH',
   // Model defaults — often set to provider-specific ID formats
   'OPEN_CODE_CLI_MODEL',
   'OPEN_CODE_CLI_DEFAULT_SMALL_FAST_MODEL',
@@ -55,11 +41,7 @@ const PROVIDER_MANAGED_ENV_VARS = new Set([
   'OPEN_CODE_CLI_SUBAGENT_MODEL',
 ])
 
-const PROVIDER_MANAGED_ENV_PREFIXES = [
-  // Per-model OpenAICompatibleProvider region overrides — scales with model releases, so
-  // prefix-matched to avoid drift on each launch.
-  'VERTEX_REGION_OPEN_CODE_',
-]
+const PROVIDER_MANAGED_ENV_PREFIXES: string[] = []
 
 export function isProviderManagedEnvVar(key: string): boolean {
   const upper = key.toUpperCase()
@@ -92,7 +74,7 @@ export const DANGEROUS_SHELL_SETTINGS = [
  * Dangerous env vars (NOT in this list):
  *
  * === REDIRECT TO ATTACKER-CONTROLLED SERVER ===
- * - OPEN_CODE_CLI_BASE_URL, OPEN_CODE_CLI_BASE_URL, OPEN_CODE_CLI_BASE_URL, OPEN_CODE_CLI_BASE_URL
+ * - OPEN_CODE_CLI_PROVIDER_BASE_URL, OPEN_CODE_CLI_BASE_URL, OPEN_CODE_CLI_REMOTE_BASE_URL
  * - HTTP_PROXY, HTTPS_PROXY, NO_PROXY, http_proxy, https_proxy, no_proxy
  * - OTEL_EXPORTER_OTLP_ENDPOINT, OTEL_EXPORTER_OTLP_LOGS_ENDPOINT, OTEL_EXPORTER_OTLP_METRICS_ENDPOINT
  *
@@ -103,7 +85,6 @@ export const DANGEROUS_SHELL_SETTINGS = [
  * === SWITCH TO ATTACKER-CONTROLLED PROJECT ===
  * - OPEN_CODE_CLI_PROVIDER_RESOURCE
  * - OPEN_CODE_CLI_API_KEY, OPEN_CODE_CLI_AUTH_TOKEN
- * - AWS_BEARER_TOKEN_BEDROCK
  */
 export const SAFE_ENV_VARS = new Set([
   'OPEN_CODE_CLI_CUSTOM_HEADERS',
@@ -124,11 +105,7 @@ export const SAFE_ENV_VARS = new Set([
   'OPEN_CODE_CLI_DEFAULT_MODEL_SUPPORTED_CAPABILITIES',
   'OPEN_CODE_CLI_API_KEY',
   'OPEN_CODE_CLI_MODEL',
-  'OPEN_CODE_CLI_SMALL_FAST_MODEL_AWS_REGION',
   'OPEN_CODE_CLI_SMALL_FAST_MODEL',
-  'AWS_DEFAULT_REGION',
-  'AWS_PROFILE',
-  'AWS_REGION',
   'BASH_DEFAULT_TIMEOUT_MS',
   'BASH_MAX_OUTPUT_LENGTH',
   'BASH_MAX_TIMEOUT_MS',
@@ -141,13 +118,7 @@ export const SAFE_ENV_VARS = new Set([
   'OPEN_CODE_CLI_EXPERIMENTAL_AGENT_TEAMS',
   'OPEN_CODE_CLI_IDE_SKIP_AUTO_INSTALL',
   'OPEN_CODE_CLI_MAX_OUTPUT_TOKENS',
-  'OPEN_CODE_CLI_SKIP_BEDROCK_AUTH',
-  'OPEN_CODE_CLI_SKIP_FOUNDRY_AUTH',
-  'OPEN_CODE_CLI_SKIP_VERTEX_AUTH',
   'OPEN_CODE_CLI_SUBAGENT_MODEL',
-  'OPEN_CODE_CLI_USE_BEDROCK',
-  'OPEN_CODE_CLI_USE_FOUNDRY',
-  'OPEN_CODE_CLI_USE_VERTEX',
   'DISABLE_AUTOUPDATER',
   'DISABLE_BUG_COMMAND',
   'DISABLE_COST_WARNINGS',
@@ -179,13 +150,4 @@ export const SAFE_ENV_VARS = new Set([
   'OTEL_METRICS_INCLUDE_VERSION',
   'OTEL_RESOURCE_ATTRIBUTES',
   'USE_BUILTIN_RIPGREP',
-  'VERTEX_REGION_OPEN_CODE_3_5_HAIKU',
-  'VERTEX_REGION_OPEN_CODE_3_5_SONNET',
-  'VERTEX_REGION_OPEN_CODE_3_7_SONNET',
-  'VERTEX_REGION_OPEN_CODE_4_0_OPUS',
-  'VERTEX_REGION_OPEN_CODE_4_0_SONNET',
-  'VERTEX_REGION_OPEN_CODE_4_1_OPUS',
-  'VERTEX_REGION_OPEN_CODE_4_5_SONNET',
-  'VERTEX_REGION_OPEN_CODE_4_6_SONNET',
-  'VERTEX_REGION_OPEN_CODE_HAIKU_4_5',
 ])

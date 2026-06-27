@@ -1,6 +1,7 @@
 import { randomUUID } from 'crypto'
 import {
   APIConnectionError,
+  APIConnectionTimeoutError,
   APIError,
   APIUserAbortError,
   type BetaContentBlock,
@@ -16,7 +17,6 @@ import {
 } from './providerTypes.js'
 
 export * from './providerTypes.js'
-export { default } from './providerTypes.js'
 
 type OpenAIMessage =
   | { role: 'system'; content: string }
@@ -81,21 +81,6 @@ type RequestOptions = {
   headers?: Record<string, string>
 }
 
-type ChatCreate = {
-  (
-    params: BetaMessageStreamParams & { stream: true },
-    options?: RequestOptions,
-  ): ProviderResponse<Stream<BetaRawMessageStreamEvent>>
-  (
-    params: BetaMessageStreamParams & { stream?: false | undefined },
-    options?: RequestOptions,
-  ): ProviderResponse<BetaMessage>
-  (
-    params: BetaMessageStreamParams,
-    options?: RequestOptions,
-  ): ProviderResponse<BetaMessage | Stream<BetaRawMessageStreamEvent>>
-}
-
 class ProviderResponse<T> implements PromiseLike<T> {
   constructor(
     private readonly run: () => Promise<{ data: T; response: Response }>,
@@ -127,7 +112,9 @@ class ProviderResponse<T> implements PromiseLike<T> {
     return {
       data,
       response,
-      request_id: response.headers.get('x-request-id'),
+      request_id:
+        response.headers.get('x-request-id') ??
+        response.headers.get('openai-processing-ms'),
     }
   }
 }
@@ -135,7 +122,10 @@ class ProviderResponse<T> implements PromiseLike<T> {
 export class OpenAICompatibleClient {
   readonly beta: {
     messages: {
-      create: ChatCreate
+      create: (
+        params: BetaMessageStreamParams,
+        options?: RequestOptions,
+      ) => ProviderResponse<BetaMessage | Stream<BetaRawMessageStreamEvent>>
     }
   }
 
@@ -145,6 +135,7 @@ export class OpenAICompatibleClient {
       baseURL: string
       defaultHeaders?: Record<string, string>
       fetch?: typeof fetch
+      fetchOptions?: RequestInit
       timeout?: number
     },
   ) {
@@ -152,7 +143,7 @@ export class OpenAICompatibleClient {
       messages: {
         create: (params, options) =>
           new ProviderResponse(() => this.createChatCompletion(params, options)),
-      } as { create: ChatCreate },
+      },
     }
   }
 
@@ -194,6 +185,7 @@ export class OpenAICompatibleClient {
       const response = await fetchImpl(
         `${trimSlash(this.config.baseURL)}/chat/completions`,
         {
+          ...this.config.fetchOptions,
           method: 'POST',
           signal: controller.signal,
           headers: {
@@ -235,10 +227,11 @@ export function resolveProviderConfig({
   defaultHeaders?: Record<string, string>
   fetchOverride?: ClientOptions['fetch']
 }): ConstructorParameters<typeof OpenAICompatibleClient>[0] {
-  const resolvedApiKey = apiKey ?? process.env.OPEN_CODE_CLI_API_KEY
+  const resolvedApiKey =
+    apiKey ?? process.env.OPEN_CODE_CLI_API_KEY ?? process.env.OPENAI_API_KEY
   if (!resolvedApiKey) {
     throw new APIError(
-      'OPEN_CODE_CLI_API_KEY is required for OpenAI-compatible provider access',
+      'OPEN_CODE_CLI_API_KEY or OPENAI_API_KEY is required for OpenAI-compatible provider access',
     )
   }
 
@@ -250,7 +243,9 @@ export function resolveProviderConfig({
   return {
     apiKey: resolvedApiKey,
     baseURL:
-      process.env.OPEN_CODE_CLI_BASE_URL ?? 'https://openrouter.ai/api/v1',
+      process.env.OPEN_CODE_CLI_PROVIDER_BASE_URL ??
+      process.env.OPEN_CODE_CLI_BASE_URL ??
+      'https://openrouter.ai/api/v1',
     fetch: fetchOverride,
     timeout: parseInt(process.env.API_TIMEOUT_MS || String(600 * 1000), 10),
     defaultHeaders: {
@@ -287,6 +282,9 @@ function toOpenAIRequest(params: BetaMessageStreamParams): Record<string, unknow
         }
       : {}),
     ...(params.tool_choice ? { tool_choice: mapToolChoice(params.tool_choice) } : {}),
+    ...(params.output_config?.format && {
+      response_format: params.output_config.format,
+    }),
   }
 }
 
@@ -556,6 +554,9 @@ async function responseToAPIError(response: Response): Promise<APIError> {
       // keep status text
     }
   }
+  if (response.status === 408) {
+    return new APIConnectionTimeoutError(message) as APIError
+  }
   return new APIError(response.status, message, response.headers, body)
 }
 
@@ -632,3 +633,5 @@ function isToolResultBlock(
 function trimSlash(value: string): string {
   return value.endsWith('/') ? value.slice(0, -1) : value
 }
+
+export default OpenAICompatibleClient

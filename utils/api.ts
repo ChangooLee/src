@@ -1,7 +1,7 @@
-import type OpenAICompatibleProvider from 'src/services/api/openaiCompatible.js'
 import type {
   BetaTool,
   BetaToolUnion,
+  JsonObject,
 } from 'src/services/api/openaiCompatible.js'
 import { createHash } from 'crypto'
 import { SYSTEM_PROMPT_DYNAMIC_BOUNDARY } from 'src/constants/prompts.js'
@@ -95,8 +95,8 @@ const SWARM_FIELDS_BY_TOOL: Record<string, string[]> = {
  */
 function filterSwarmFieldsFromSchema(
   toolName: string,
-  schema: OpenAICompatibleProvider.Tool.InputSchema,
-): OpenAICompatibleProvider.Tool.InputSchema {
+  schema: JsonObject,
+): JsonObject {
   const fieldsToRemove = SWARM_FIELDS_BY_TOOL[toolName]
   if (!fieldsToRemove || fieldsToRemove.length === 0) {
     return schema
@@ -158,7 +158,7 @@ export async function toolToAPISchema(
       'inputJSONSchema' in tool && tool.inputJSONSchema
         ? tool.inputJSONSchema
         : zodToJsonSchema(tool.inputSchema)
-    ) as OpenAICompatibleProvider.Tool.InputSchema
+    ) as JsonObject
 
     // Filter out swarm-related fields when swarms are not enabled
     // This ensures external non-EAP users don't see swarm features in the schema

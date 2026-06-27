@@ -27,15 +27,15 @@ function getOpenCodeGuideBasePrompt(): string {
     ? `${FILE_READ_TOOL_NAME}, \`find\`, and \`grep\``
     : `${FILE_READ_TOOL_NAME}, ${GLOB_TOOL_NAME}, and ${GREP_TOOL_NAME}`
 
-  return `You are the Open Code CLI guide agent. Your primary responsibility is helping users understand and use Open Code CLI, the Claude Agent SDK, and the OpenAI-compatible API (formerly the OpenAICompatibleProvider API) effectively.
+  return `You are the Open Code CLI guide agent. Your primary responsibility is helping users understand and use Open Code CLI, the Open Code CLI Agent SDK, and OpenAI-compatible providers effectively.
 
 **Your expertise spans three domains:**
 
 1. **Open Code CLI** (the CLI tool): Installation, configuration, hooks, skills, MCP servers, keyboard shortcuts, IDE integrations, settings, and workflows.
 
-2. **Claude Agent SDK**: A framework for building custom AI agents based on Open Code CLI technology. Available for Node.js/TypeScript and Python.
+2. **Open Code CLI Agent SDK**: A framework for building custom AI agents based on Open Code CLI technology. Available for Node.js/TypeScript and Python.
 
-3. **OpenAI-compatible API**: The OpenAI-compatible API (formerly known as the OpenAICompatibleProvider API) for direct model interaction, tool use, and integrations.
+3. **OpenAI-compatible providers**: OpenAI/OpenRouter-compatible APIs for direct model interaction, tool use, and integrations.
 
 **Documentation sources:**
 
@@ -50,7 +50,7 @@ function getOpenCodeGuideBasePrompt(): string {
   - Subagents and plugins
   - Sandboxing and security
 
-- **Claude Agent SDK docs** (${CDP_DOCS_MAP_URL}): Fetch this for questions about building agents with the SDK, including:
+- **Open Code CLI Agent SDK docs** (${CDP_DOCS_MAP_URL}): Fetch this for questions about building agents with the SDK, including:
   - SDK overview and getting started (Python and TypeScript)
   - Agent configuration + custom tools
   - Session management and permissions
@@ -59,13 +59,13 @@ function getOpenCodeGuideBasePrompt(): string {
   - Cost tracking and context management
   Note: Agent SDK docs are part of the OpenAI-compatible API documentation at the same URL.
 
-- **OpenAI-compatible API docs** (${CDP_DOCS_MAP_URL}): Fetch this for questions about the OpenAI-compatible API (formerly the OpenAICompatibleProvider API), including:
+- **OpenAI-compatible provider docs** (${CDP_DOCS_MAP_URL}): Fetch this for questions about OpenAI/OpenRouter-compatible APIs, including:
   - Messages API and streaming
-  - Tool use (function calling) and OpenAICompatibleProvider-defined tools (computer use, code execution, web search, text editor, bash, programmatic tool calling, tool search tool, context editing, Files API, structured outputs)
+  - Tool use (function calling), code execution, web search, text editor, bash, programmatic tool calling, tool search, context editing, Files API, and structured outputs
   - Vision, PDF support, and citations
   - Extended thinking and structured outputs
   - MCP connector for remote MCP servers
-  - Cloud provider integrations (OpenAICompatibleProvider, OpenAICompatibleProvider AI, OpenAICompatibleProvider)
+  - OpenAI-compatible provider configuration
 
 **Approach:**
 1. Determine which domain the user's question falls into
@@ -87,7 +87,7 @@ Complete the user's request by providing accurate, documentation-based guidance.
 }
 
 function getFeedbackGuideline(): string {
-  // For 3P services (OpenAICompatibleProvider/OpenAICompatibleProvider/OpenAICompatibleProvider), /feedback command is disabled
+  // For external provider services, /feedback command is disabled
   // Direct users to the appropriate feedback channel instead
   if (isUsing3PServices()) {
     return `- When you cannot find an answer or the feature doesn't exist, direct the user to ${MACRO.ISSUES_EXPLAINER}`
@@ -97,7 +97,7 @@ function getFeedbackGuideline(): string {
 
 export const OPEN_CODE_GUIDE_AGENT: BuiltInAgentDefinition = {
   agentType: OPEN_CODE_GUIDE_AGENT_TYPE,
-  whenToUse: `Use this agent when the user asks questions ("Can Claude...", "Does Claude...", "How do I...") about: (1) Open Code CLI (the CLI tool) - features, hooks, slash commands, MCP servers, settings, IDE integrations, keyboard shortcuts; (2) Claude Agent SDK - building custom agents; (3) OpenAI-compatible API (formerly OpenAICompatibleProvider API) - API usage, tool use, OpenAICompatibleProvider SDK usage. **IMPORTANT:** Before spawning a new agent, check if there is already a running or recently completed open-code-cli-guide agent that you can continue via ${SEND_MESSAGE_TOOL_NAME}.`,
+  whenToUse: `Use this agent when the user asks questions ("Can Open Code CLI...", "Does Open Code CLI...", "How do I...") about: (1) Open Code CLI (the CLI tool) - features, hooks, slash commands, MCP servers, settings, IDE integrations, keyboard shortcuts; (2) Open Code CLI Agent SDK - building custom agents; (3) OpenAI-compatible providers - API usage, tool use, and provider configuration. **IMPORTANT:** Before spawning a new agent, check if there is already a running or recently completed open-code-cli-guide agent that you can continue via ${SEND_MESSAGE_TOOL_NAME}.`,
   // Ant-native builds: Glob/Grep tools are removed; use Bash (with embedded
   // bfs/ugrep via find/grep aliases) for local file search instead.
   tools: hasEmbeddedSearchTools()

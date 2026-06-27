@@ -1,10 +1,10 @@
 /**
  * Files API client for managing files
  *
- * This module provides functionality to download and upload files to OpenAICompatibleProvider Public Files API.
+ * This module provides functionality to download and upload files through an OpenAI-compatible Files API.
  * Used by the Open Code CLI agent to download file attachments at session startup.
  *
- * API Reference: https://docs.openai-compatible.com/en/api/files-content
+ * API Reference: https://platform.openai.com/docs/api-reference/files
  */
 
 import axios from 'axios'
@@ -27,10 +27,10 @@ import {
 const FILES_API_BETA_HEADER = 'files-api-2025-04-14,oauth-2025-04-20'
 const OPENAI_COMPATIBLE_VERSION = '2023-06-01'
 
-// API base URL - uses OPEN_CODE_CLI_BASE_URL set by env-manager for the appropriate environment
-// Falls back to public API for standalone usage
+// Files API base URL is provider-facing; remote/product URLs use separate envs.
 function getDefaultApiBaseUrl(): string {
   return (
+    process.env.OPEN_CODE_CLI_PROVIDER_BASE_URL ||
     process.env.OPEN_CODE_CLI_BASE_URL ||
     process.env.OPEN_CODE_CLI_API_BASE_URL ||
     'https://api.openai.com/v1'
@@ -123,7 +123,7 @@ async function retryWithBackoff<T>(
 }
 
 /**
- * Downloads a single file from the OpenAICompatibleProvider Public Files API
+ * Downloads a single file from the configured OpenAI-compatible Files API
  *
  * @param fileId - The file ID (e.g., "file_011CNha8iCJcU1wXNR6q4V8w")
  * @param config - Files API configuration

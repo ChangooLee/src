@@ -1,5 +1,14 @@
-import type OpenAICompatibleProvider from 'src/services/api/openaiCompatible.js'
-import type { BetaToolUnion } from 'src/services/api/openaiCompatible.js'
+import type {
+  BetaJSONOutputFormat,
+  BetaMessage,
+  BetaTool,
+  BetaToolChoiceAuto,
+  BetaToolChoiceTool,
+  BetaToolUnion,
+  JsonObject,
+  MessageParam,
+  TextBlockParam,
+} from 'src/services/api/openaiCompatible.js'
 import {
   getLastApiCompletionTimestamp,
   setLastApiCompletionTimestamp,
@@ -18,13 +27,9 @@ import { getModelBetas, modelSupportsStructuredOutputs } from './betas.js'
 import { computeFingerprint } from './fingerprint.js'
 import { normalizeModelStringForAPI } from './model/model.js'
 
-type MessageParam = OpenAICompatibleProvider.MessageParam
-type TextBlockParam = OpenAICompatibleProvider.TextBlockParam
-type Tool = OpenAICompatibleProvider.Tool
-type ToolChoice = OpenAICompatibleProvider.ToolChoice
-type BetaMessage = OpenAICompatibleProvider.Beta.Messages.BetaMessage
-type BetaJSONOutputFormat = OpenAICompatibleProvider.Beta.Messages.BetaJSONOutputFormat
-type BetaThinkingConfigParam = OpenAICompatibleProvider.Beta.Messages.BetaThinkingConfigParam
+type Tool = BetaTool
+type ToolChoice = BetaToolChoiceAuto | BetaToolChoiceTool
+type BetaThinkingConfigParam = JsonObject
 
 export type SideQueryOptions = {
   /** Model to use for the query */

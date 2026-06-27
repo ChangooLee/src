@@ -108,7 +108,7 @@ export function isOpenAICompatibleProviderAuthEnabled(): boolean {
   // oauth-2025 beta header to match what the proxy will inject). The remote's
   // ~/.open-code-cli settings (apiKeyHelper, settings.env.OPEN_CODE_CLI_API_KEY) MUST NOT
   // flip this — they'd cause a header mismatch with the proxy and a bogus
-  // "invalid x-api-key" from the API. See src/ssh/sshAuthProxy.ts.
+  // invalid API key error. See src/ssh/sshAuthProxy.ts.
   if (process.env.OPEN_CODE_CLI_UNIX_SOCKET) {
     return !!process.env.OPEN_CODE_CLI_OAUTH_TOKEN
   }

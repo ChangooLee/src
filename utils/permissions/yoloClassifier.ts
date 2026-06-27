@@ -1,6 +1,11 @@
 import { feature } from 'bun:bundle'
-import type OpenAICompatibleProvider from 'src/services/api/openaiCompatible.js'
-import type { BetaToolUnion } from 'src/services/api/openaiCompatible.js'
+import type {
+  BetaMessage,
+  BetaToolUnion,
+  ImageBlockParam,
+  MessageParam,
+  TextBlockParam,
+} from 'src/services/api/openaiCompatible.js'
 import { mkdir, writeFile } from 'fs/promises'
 import { dirname, join } from 'path'
 import { z } from 'zod/v4'
@@ -457,7 +462,7 @@ export function buildTranscriptForClassifier(
  * getUserContext), the classifier proceeds without OPEN_CODE.md — same as
  * pre-PR behavior.
  */
-function buildClaudeMdMessage(): OpenAICompatibleProvider.MessageParam | null {
+function buildClaudeMdMessage(): MessageParam | null {
   const claudeMd = getCachedClaudeMdContent()
   if (claudeMd === null) return null
   return {
@@ -607,7 +612,7 @@ function parseXmlThinking(text: string): string | null {
  * Extract usage stats from an API response.
  */
 function extractUsage(
-  result: OpenAICompatibleProvider.Beta.Messages.BetaMessage,
+  result: BetaMessage,
 ): ClassifierUsage {
   return {
     inputTokens: result.usage.input_tokens,
@@ -622,7 +627,7 @@ function extractUsage(
  * non-enumerable `_request_id` property on response objects.
  */
 function extractRequestId(
-  result: OpenAICompatibleProvider.Beta.Messages.BetaMessage,
+  result: BetaMessage,
 ): string | undefined {
   return (result as { _request_id?: string | null })._request_id ?? undefined
 }
@@ -709,11 +714,11 @@ function getClassifierThinkingConfig(
  * prompt caching (1h TTL) across calls.
  */
 async function classifyYoloActionXml(
-  prefixMessages: OpenAICompatibleProvider.MessageParam[],
+  prefixMessages: MessageParam[],
   systemPrompt: string,
   userPrompt: string,
   userContentBlocks: Array<
-    OpenAICompatibleProvider.TextBlockParam | OpenAICompatibleProvider.ImageBlockParam
+    TextBlockParam | ImageBlockParam
   >,
   model: string,
   promptLengths: {
@@ -739,7 +744,7 @@ async function classifyYoloActionXml(
         ? 'xml_fast'
         : 'xml_thinking'
   const xmlSystemPrompt = replaceOutputFormatWithXml(systemPrompt)
-  const systemBlocks: OpenAICompatibleProvider.TextBlockParam[] = [
+  const systemBlocks: TextBlockParam[] = [
     {
       type: 'text' as const,
       text: xmlSystemPrompt,
@@ -758,7 +763,7 @@ async function classifyYoloActionXml(
   // Wrap all content (transcript + action) in <transcript> tags.
   // The action is the final tool_use block in the transcript.
   const wrappedContent: Array<
-    OpenAICompatibleProvider.TextBlockParam | OpenAICompatibleProvider.ImageBlockParam
+    TextBlockParam | ImageBlockParam
   > = [
     { type: 'text' as const, text: '<transcript>\n' },
     ...userContentBlocks,
@@ -1031,13 +1036,13 @@ export async function classifyYoloAction(
   const systemPrompt = await buildYoloSystemPrompt(context)
   const transcriptEntries = buildTranscriptEntries(messages)
   const claudeMdMessage = buildClaudeMdMessage()
-  const prefixMessages: OpenAICompatibleProvider.MessageParam[] = claudeMdMessage
+  const prefixMessages: MessageParam[] = claudeMdMessage
     ? [claudeMdMessage]
     : []
 
   let toolCallsLength = actionCompact.length
   let userPromptsLength = 0
-  const userContentBlocks: OpenAICompatibleProvider.TextBlockParam[] = []
+  const userContentBlocks: TextBlockParam[] = []
   for (const entry of transcriptEntries) {
     for (const block of entry.content) {
       const serialized = toCompactBlock(block, entry.role, lookup)

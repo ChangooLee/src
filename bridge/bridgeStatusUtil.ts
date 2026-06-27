@@ -1,5 +1,5 @@
 import {
-  getClaudeAiBaseUrl,
+  getOpenCodeCliRemoteBaseUrl,
   getRemoteSessionUrl,
 } from '../constants/product.js'
 import { stringWidth } from '../ink/stringWidth.js'
@@ -40,7 +40,7 @@ export function buildBridgeConnectUrl(
   environmentId: string,
   ingressUrl?: string,
 ): string {
-  const baseUrl = getClaudeAiBaseUrl(undefined, ingressUrl)
+  const baseUrl = getOpenCodeCliRemoteBaseUrl(undefined, ingressUrl)
   return `${baseUrl}/code?bridge=${environmentId}`
 }
 

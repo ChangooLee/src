@@ -4,16 +4,15 @@ import { feature } from 'bun:bundle'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../services/analytics/growthbook.js'
 import { logForDebugging } from '../utils/debug.js'
 import { getOpenCodeCliEnv, isEnvDefinedFalsy } from '../utils/envUtils.js'
-import { getAPIProvider } from '../utils/model/providers.js'
 import { getWorkload } from '../utils/workloadContext.js'
 
 const DEFAULT_PREFIX = `You are an interactive code agent.`
-const AGENT_SDK_OPEN_CODE_CLI_PRESET_PREFIX = `You are an interactive code agent running within the Claude Agent SDK.`
-const AGENT_SDK_PREFIX = `You are a Claude agent, built on OpenAICompatibleProvider's Claude Agent SDK.`
+const AGENT_SDK_OPEN_CODE_PRESET_PREFIX = `You are an interactive code agent running within the Open Code CLI Agent SDK.`
+const AGENT_SDK_PREFIX = `You are an Open Code CLI agent built on the Open Code CLI Agent SDK.`
 
 const CLI_SYSPROMPT_PREFIX_VALUES = [
   DEFAULT_PREFIX,
-  AGENT_SDK_OPEN_CODE_CLI_PRESET_PREFIX,
+  AGENT_SDK_OPEN_CODE_PRESET_PREFIX,
   AGENT_SDK_PREFIX,
 ] as const
 
@@ -31,14 +30,9 @@ export function getCLISyspromptPrefix(options?: {
   isNonInteractive: boolean
   hasAppendSystemPrompt: boolean
 }): CLISyspromptPrefix {
-  const apiProvider = getAPIProvider()
-  if (apiProvider === 'openaiCompatible') {
-    return DEFAULT_PREFIX
-  }
-
   if (options?.isNonInteractive) {
     if (options.hasAppendSystemPrompt) {
-      return AGENT_SDK_OPEN_CODE_CLI_PRESET_PREFIX
+      return AGENT_SDK_OPEN_CODE_PRESET_PREFIX
     }
     return AGENT_SDK_PREFIX
   }
@@ -53,7 +47,7 @@ function isAttributionHeaderEnabled(): boolean {
   if (isEnvDefinedFalsy(getOpenCodeCliEnv('ATTRIBUTION_HEADER'))) {
     return false
   }
-  return getFeatureValue_CACHED_MAY_BE_STALE('open_code_cli_attribution_header', true)
+  return getFeatureValue_CACHED_MAY_BE_STALE('tengu_attribution_header', true)
 }
 
 /**
@@ -64,8 +58,8 @@ function isAttributionHeaderEnabled(): boolean {
  * When NATIVE_CLIENT_ATTESTATION is enabled, includes a `cch=00000` placeholder.
  * Before the request is sent, Bun's native HTTP stack finds this placeholder
  * in the request body and overwrites the zeros with a computed hash. The
- * server verifies this token to confirm the request came from a real Claude
- * Code client. See bun-openai-compatible/src/http/Attestation.zig for implementation.
+ * server verifies this token to confirm the request came from a real
+ * Open Code CLI client.
  *
  * We use a placeholder (instead of injecting from Zig) because same-length
  * replacement avoids Content-Length changes and buffer reallocation.
@@ -88,7 +82,7 @@ export function getAttributionHeader(fingerprint: string): string {
   // fields so old API deploys silently ignore this.
   const workload = getWorkload()
   const workloadPair = workload ? ` cc_workload=${workload};` : ''
-  const header = `x-openai-compatible-billing-header: cc_version=${version}; cc_entrypoint=${entrypoint};${cch}${workloadPair}`
+  const header = `x-open-code-cli-billing-header: cc_version=${version}; cc_entrypoint=${entrypoint};${cch}${workloadPair}`
 
   logForDebugging(`attribution header ${header}`)
   return header
