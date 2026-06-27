@@ -281,7 +281,7 @@ export const SettingsSchema = lazySchema(() =>
       // doesn't surface this in GlobalClaudeSettings. Read via getXaaIdpSettings().
       // .passthrough() on the outer object keeps an existing settings.json key
       // alive across env-var-off sessions — it's just not schema-validated then.
-      ...(isEnvTruthy((process.env.OPEN_CODE_CLI_ENABLE_XAA ?? process.env.CLAUDE_CODE_ENABLE_XAA))
+      ...(isEnvTruthy(process.env.CLAUDE_CODE_ENABLE_XAA)
         ? {
             xaaIdp: z
               .object({
@@ -361,13 +361,13 @@ export const SettingsSchema = lazySchema(() =>
         .optional()
         .describe(
           'Deprecated: Use attribution instead. ' +
-            "Whether to include Claude's co-authored by attribution in commits and PRs (defaults to true)",
+            "Whether to include Open Code CLI's co-authored by attribution in commits and PRs (defaults to true)",
         ),
       includeGitInstructions: z
         .boolean()
         .optional()
         .describe(
-          "Include built-in commit and PR workflow instructions in Claude's system prompt (default: true)",
+          "Include built-in commit and PR workflow instructions in Open Code CLI's system prompt (default: true)",
         ),
       permissions: PermissionsSchema()
         .optional()
@@ -644,7 +644,7 @@ export const SettingsSchema = lazySchema(() =>
         .string()
         .optional()
         .describe(
-          'Preferred language for Claude responses and voice dictation (e.g., "japanese", "spanish")',
+          'Preferred language for Open Code CLI responses and voice dictation (e.g., "japanese", "spanish")',
         ),
       skipWebFetchPreflight: z
         .boolean()
@@ -875,7 +875,7 @@ export const SettingsSchema = lazySchema(() =>
               .boolean()
               .optional()
               .describe(
-                'Start Claude in assistant mode (custom system prompt, brief view, scheduled check-in skills)',
+                'Start Open Code CLI in assistant mode (custom system prompt, brief view, scheduled check-in skills)',
               ),
             assistantName: z
               .string()
@@ -939,7 +939,7 @@ export const SettingsSchema = lazySchema(() =>
         .boolean()
         .optional()
         .describe(
-          'Enable auto-memory for this project. When false, Claude will not read from or write to the auto-memory directory.',
+          'Enable auto-memory for this project. When false, Open Code CLI will not read from or write to the auto-memory directory.',
         ),
       autoMemoryDirectory: z
         .string()
@@ -1040,7 +1040,7 @@ export const SettingsSchema = lazySchema(() =>
                 'Default working directory on the remote host. ' +
                   'Supports tilde expansion (e.g. ~/projects). ' +
                   'If not specified, defaults to the remote user home directory. ' +
-                  'Can be overridden by the [dir] positional argument in `open-code-cli ssh <config> [dir]`.',
+                  'Can be overridden by the [dir] positional argument in `claude ssh <config> [dir]`.',
               ),
           }),
         )

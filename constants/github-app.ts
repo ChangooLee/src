@@ -16,7 +16,7 @@ on:
     types: [submitted]
 
 jobs:
-  claude:
+  open-code-cli:
     if: |
       (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
       (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
@@ -28,7 +28,7 @@ jobs:
       pull-requests: read
       issues: read
       id-token: write
-      actions: read # Required for Claude to read CI results on PRs
+      actions: read # Required for Open Code CLI to read CI results on PRs
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -36,19 +36,19 @@ jobs:
           fetch-depth: 1
 
       - name: Run Open Code CLI
-        id: claude
+        id: open-code-cli
         uses: anthropics/open-code-cli-action@v1
         with:
           anthropic_api_key: \${{ secrets.ANTHROPIC_API_KEY }}
 
-          # This is an optional setting that allows Claude to read CI results on PRs
+          # This is an optional setting that allows Open Code CLI to read CI results on PRs
           additional_permissions: |
             actions: read
 
-          # Optional: Give a custom prompt to Claude. If this is not specified, Claude will perform the instructions specified in the comment that tagged it.
+          # Optional: Give a custom prompt to Open Code CLI. If this is not specified, Open Code CLI will perform the instructions specified in the comment that tagged it.
           # prompt: 'Update the pull request description to include a summary of changes.'
 
-          # Optional: Add claude_args to customize behavior and configuration
+          # Optional: Add claude_args to customize Open Code CLI behavior and configuration
           # See https://github.com/anthropics/open-code-cli-action/blob/main/docs/usage.md
           # or https://open-code-cli.dev/docs/cli-reference for available options
           # claude_args: '--allowed-tools Bash(gh pr:*)'
@@ -71,22 +71,22 @@ This PR adds a GitHub Actions workflow that enables Open Code CLI integration in
 
 ### How it works
 
-Once this PR is merged, we'll be able to interact with Claude by mentioning @claude in a pull request or issue comment.
-Once the workflow is triggered, Claude will analyze the comment and surrounding context, and execute on the request in a GitHub action.
+Once this PR is merged, we'll be able to interact with Open Code CLI by mentioning @claude (legacy GitHub App trigger) in a pull request or issue comment.
+Once the workflow is triggered, Open Code CLI will analyze the comment and surrounding context, and execute on the request in a GitHub action.
 
 ### Important Notes
 
 - **This workflow won't take effect until this PR is merged**
 - **@claude mentions won't work until after the merge is complete**
-- The workflow runs automatically whenever Claude is mentioned in PR or issue comments
-- Claude gets access to the entire PR or issue context including files, diffs, and previous comments
+- The workflow runs automatically whenever the legacy @claude GitHub App trigger is mentioned in PR or issue comments
+- Open Code CLI gets access to the entire PR or issue context including files, diffs, and previous comments
 
 ### Security
 
 - Our Anthropic API key is securely stored as a GitHub Actions secret
 - Only users with write access to the repository can trigger the workflow
-- All Claude runs are stored in the GitHub Actions run history
-- Claude's default tools are limited to reading/writing files and interacting with our repo by creating comments, branches, and commits.
+- All Open Code CLI runs are stored in the GitHub Actions run history
+- Open Code CLI's default tools are limited to reading/writing files and interacting with our repo by creating comments, branches, and commits.
 - We can add more allowed tools by adding them to the workflow file like:
 
 \`\`\`
@@ -95,7 +95,7 @@ allowed_tools: Bash(npm install),Bash(npm run build),Bash(npm run lint),Bash(npm
 
 There's more information in the [Open Code CLI action repo](https://github.com/anthropics/open-code-cli-action).
 
-After merging this PR, let's try mentioning @claude in a comment on any PR to get started!`
+After merging this PR, let's try mentioning @claude (legacy GitHub App trigger) in a comment on any PR to get started!`
 
 export const CODE_REVIEW_PLUGIN_WORKFLOW_CONTENT = `name: Open Code CLI Review
 
@@ -110,7 +110,7 @@ on:
     #   - "src/**/*.jsx"
 
 jobs:
-  claude-review:
+  open-code-cli-review:
     # Optional: Filter by PR author
     # if: |
     #   github.event.pull_request.user.login == 'external-contributor' ||
@@ -131,7 +131,7 @@ jobs:
           fetch-depth: 1
 
       - name: Run Open Code CLI Review
-        id: claude-review
+        id: open-code-cli-review
         uses: anthropics/open-code-cli-action@v1
         with:
           anthropic_api_key: \${{ secrets.ANTHROPIC_API_KEY }}

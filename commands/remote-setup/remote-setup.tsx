@@ -153,13 +153,13 @@ function Web({
     return <LoadingState message="Checking login status…" />;
   }
   if (step.name === 'uploading') {
-    return <LoadingState message="Connecting GitHub to Claude…" />;
+    return <LoadingState message="Connecting GitHub to Open Code CLI…" />;
   }
   const token = step.token;
-  return <Dialog title="Connect Claude on the web to GitHub?" onCancel={handleCancel} hideInputGuide>
+  return <Dialog title="Connect Open Code CLI on the web to GitHub?" onCancel={handleCancel} hideInputGuide>
       <Box flexDirection="column">
         <Text>
-          Claude on the web requires connecting to your GitHub account to clone
+          Open Code CLI on the web requires connecting to your GitHub account to clone
           and push code on your behalf.
         </Text>
         <Text dimColor>
