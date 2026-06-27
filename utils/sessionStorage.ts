@@ -69,7 +69,7 @@ import { updateSessionName } from './concurrentSessions.js'
 import { getCwd } from './cwd.js'
 import { logForDebugging } from './debug.js'
 import { logForDiagnosticsNoPII } from './diagLogs.js'
-import { getClaudeConfigHomeDir, isEnvTruthy } from './envUtils.js'
+import { getClaudeConfigHomeDir, getOpenCodeCliEnv, isEnvTruthy } from './envUtils.js'
 import { isFsInaccessible } from './errors.js'
 import type { FileHistorySnapshot } from './fileHistory.js'
 import { formatFileSize } from './format.js'
@@ -421,7 +421,7 @@ export function getUserType(): string {
 }
 
 function getEntrypoint(): string | undefined {
-  return process.env.CLAUDE_CODE_ENTRYPOINT
+  return getOpenCodeCliEnv('ENTRYPOINT')
 }
 
 export function isCustomTitleEnabled(): boolean {

@@ -1,5 +1,6 @@
 import type { AppState } from '../../state/AppState.js'
 import { logForDebugging } from '../debug.js'
+import { getOpenCodeCliEnv } from '../envUtils.js'
 import { updateHooksConfigSnapshot } from '../hooks/hooksConfigSnapshot.js'
 import {
   createDisabledBypassPermissionsContext,
@@ -50,7 +51,7 @@ export function applySettingsChange(
     // Ant-only: re-strip overly broad Bash allow rules after settings sync
     if (
       process.env.USER_TYPE === 'ant' &&
-      process.env.CLAUDE_CODE_ENTRYPOINT !== 'local-agent'
+      getOpenCodeCliEnv('ENTRYPOINT') !== 'local-agent'
     ) {
       const overlyBroad = findOverlyBroadBashPermissions(updatedRules, [])
       if (overlyBroad.length > 0) {

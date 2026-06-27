@@ -232,7 +232,7 @@ export function Feedback({
           last_assistant_message_id: lastAssistantMessageId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS
         });
         // 1P-only: freeform text approved for BQ. Join on feedback_id.
-        logEventTo1P('tengu_bug_report_description', {
+        logEventTo1P('open_code_cli_bug_report_description', {
           feedback_id: result.feedbackId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
           description: redactSensitiveInfo(description) as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS
         });

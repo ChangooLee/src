@@ -18,7 +18,7 @@ import {
   logEvent,
 } from '../services/analytics/index.js'
 import { logForDebugging } from './debug.js'
-import { isEnvTruthy } from './envUtils.js'
+import { getOpenCodeCliEnv, isEnvTruthy } from './envUtils.js'
 import { getPerformance } from './profilerBase.js'
 import { jsonStringify } from './slowOperations.js'
 
@@ -157,8 +157,9 @@ export function logHeadlessProfilerTurn(): void {
   metadata.checkpoint_count = marks.length
 
   // Add entrypoint for segmentation (sdk-ts, sdk-py, sdk-cli, or undefined)
-  if (process.env.CLAUDE_CODE_ENTRYPOINT) {
-    metadata.entrypoint = process.env.CLAUDE_CODE_ENTRYPOINT
+  const entrypoint = getOpenCodeCliEnv('ENTRYPOINT')
+  if (entrypoint) {
+    metadata.entrypoint = entrypoint
   }
 
   // Log to Statsig if sampled

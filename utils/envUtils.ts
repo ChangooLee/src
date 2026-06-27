@@ -1,4 +1,5 @@
 import memoize from 'lodash-es/memoize.js'
+import { existsSync } from 'fs'
 import { homedir } from 'os'
 import { join } from 'path'
 
@@ -37,19 +38,31 @@ export function syncOpenCodeCliEnvAliases(): void {
 
 syncOpenCodeCliEnvAliases()
 
-// Memoized: 150+ callers, many on hot paths. Keyed off CLAUDE_CONFIG_DIR so
-// tests that change the env var get a fresh value without explicit cache.clear.
-export const getClaudeConfigHomeDir = memoize(
+// Memoized: 150+ callers, many on hot paths. Keyed off config env vars so
+// tests that change env get a fresh value without explicit cache.clear.
+export const getOpenCodeCliConfigHomeDir = memoize(
   (): string => {
-    return (
-      process.env.CLAUDE_CONFIG_DIR ?? join(homedir(), '.claude')
+    const openCodeConfigDir = process.env.OPEN_CODE_CLI_CONFIG_DIR
+    if (openCodeConfigDir) return openCodeConfigDir.normalize('NFC')
+
+    const legacyConfigDir = process.env.CLAUDE_CONFIG_DIR
+    if (legacyConfigDir) return legacyConfigDir.normalize('NFC')
+
+    const primaryDir = join(homedir(), '.open-code-cli')
+    const legacyDir = join(homedir(), '.claude')
+    return (existsSync(primaryDir) || !existsSync(legacyDir)
+      ? primaryDir
+      : legacyDir
     ).normalize('NFC')
   },
-  () => process.env.CLAUDE_CONFIG_DIR,
+  () => `${process.env.OPEN_CODE_CLI_CONFIG_DIR ?? ''}:${process.env.CLAUDE_CONFIG_DIR ?? ''}`,
 )
 
+// Compatibility export for existing imports; primary naming is Open Code CLI.
+export const getClaudeConfigHomeDir = getOpenCodeCliConfigHomeDir
+
 export function getTeamsDir(): string {
-  return join(getClaudeConfigHomeDir(), 'teams')
+  return join(getOpenCodeCliConfigHomeDir(), 'teams')
 }
 
 /**

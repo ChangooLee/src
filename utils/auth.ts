@@ -92,7 +92,7 @@ const DEFAULT_API_KEY_HELPER_TTL = 5 * 60 * 1000
 function isManagedOAuthContext(): boolean {
   return (
     isEnvTruthy(getOpenCodeCliEnv('REMOTE')) ||
-    process.env.CLAUDE_CODE_ENTRYPOINT === 'claude-desktop'
+    getOpenCodeCliEnv('ENTRYPOINT') === 'claude-desktop'
   )
 }
 
@@ -102,7 +102,7 @@ export function isAnthropicAuthEnabled(): boolean {
   // --bare: API-key-only, never OAuth.
   if (isBareMode()) return false
 
-  // `claude ssh` remote: ANTHROPIC_UNIX_SOCKET tunnels API calls through a
+  // `open-code-cli ssh` remote: ANTHROPIC_UNIX_SOCKET tunnels API calls through a
   // local auth-injecting proxy. The launcher sets CLAUDE_CODE_OAUTH_TOKEN as a
   // placeholder iff the local side is a subscriber (so the remote includes the
   // oauth-2025 beta header to match what the proxy will inject). The remote's
@@ -1966,7 +1966,7 @@ export async function validateForceLoginOrg(): Promise<OrgValidationResult> {
         `This machine requires organization ${requiredOrgUuid} but the profile could not be fetched.\n` +
         `This may be a network error, or the token may lack the user:profile scope required for\n` +
         `verification (tokens from 'claude setup-token' do not include this scope).\n` +
-        `Try again, or obtain a full-scope token via 'claude auth login'.`,
+        `Try again, or obtain a full-scope token via 'open-code-cli auth login'.`,
     }
   }
 
@@ -1996,7 +1996,7 @@ export async function validateForceLoginOrg(): Promise<OrgValidationResult> {
     message:
       `Your authentication token belongs to organization ${tokenOrgUuid},\n` +
       `but this machine requires organization ${requiredOrgUuid}.\n\n` +
-      `Please log in with the correct organization: claude auth login`,
+      `Please log in with the correct organization: open-code-cli auth login`,
   }
 }
 

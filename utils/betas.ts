@@ -24,7 +24,7 @@ import {
 import { OAUTH_BETA_HEADER } from '../constants/oauth.js'
 import { isClaudeAISubscriber } from './auth.js'
 import { has1mContext } from './context.js'
-import { isEnvDefinedFalsy, isEnvTruthy } from './envUtils.js'
+import { getOpenCodeCliEnv, isEnvDefinedFalsy, isEnvTruthy } from './envUtils.js'
 import { getCanonicalName } from './model/model.js'
 import { get3PModelCapabilityOverride } from './model/modelSupportOverrides.js'
 import { getAPIProvider } from './model/providers.js'
@@ -241,7 +241,7 @@ export const getAllModelBetas = memoize((model: string): string[] => {
     betaHeaders.push(CLAUDE_CODE_20250219_BETA_HEADER)
     if (
       process.env.USER_TYPE === 'ant' &&
-      process.env.CLAUDE_CODE_ENTRYPOINT === 'cli'
+      getOpenCodeCliEnv('ENTRYPOINT') === 'cli'
     ) {
       if (CLI_INTERNAL_BETA_HEADER) {
         betaHeaders.push(CLI_INTERNAL_BETA_HEADER)
@@ -409,7 +409,7 @@ export function getMergedBetas(
     }
     if (
       process.env.USER_TYPE === 'ant' &&
-      process.env.CLAUDE_CODE_ENTRYPOINT === 'cli' &&
+      getOpenCodeCliEnv('ENTRYPOINT') === 'cli' &&
       CLI_INTERNAL_BETA_HEADER &&
       !baseBetas.includes(CLI_INTERNAL_BETA_HEADER)
     ) {

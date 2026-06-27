@@ -68,7 +68,7 @@ import {
   getSonnet1mExpTreatmentEnabled,
 } from '../../utils/context.js'
 import { resolveAppliedEffort } from '../../utils/effort.js'
-import { isEnvTruthy } from '../../utils/envUtils.js'
+import { getOpenCodeCliEnv, isEnvTruthy } from '../../utils/envUtils.js'
 import { errorMessage } from '../../utils/errors.js'
 import { computeFingerprintFromMessages } from '../../utils/fingerprint.js'
 import { captureAPIRequest, logError } from '../../utils/log.js'
@@ -101,7 +101,6 @@ import {
 } from '../claudeAiLimits.js'
 import { getAPIContextManagement } from '../compact/apiMicrocompact.js'
 
-import { getOpenCodeCliEnv } from '../../utils/envUtils.js';
 /* eslint-disable @typescript-eslint/no-require-imports */
 const autoModeStateModule = feature('TRANSCRIPT_CLASSIFIER')
   ? (require('../../utils/permissions/autoModeState.js') as typeof import('../../utils/permissions/autoModeState.js'))
@@ -264,7 +263,7 @@ type JsonArray = JsonValue[]
 
 /**
  * Assemble the extra body parameters for the API request, based on the
- * CLAUDE_CODE_EXTRA_BODY environment variable if present and on any beta
+ * OPEN_CODE_CLI_EXTRA_BODY environment variable if present and on any beta
  * headers (primarily for Bedrock requests).
  *
  * @param betaHeaders - An array of beta headers to include in the request.
@@ -272,7 +271,7 @@ type JsonArray = JsonValue[]
  */
 export function getExtraBodyParams(betaHeaders?: string[]): JsonObject {
   // Parse user's extra body parameters first
-  const extraBodyStr = process.env.CLAUDE_CODE_EXTRA_BODY
+  const extraBodyStr = getOpenCodeCliEnv('EXTRA_BODY')
   let result: JsonObject = {}
 
   if (extraBodyStr) {
@@ -287,13 +286,13 @@ export function getExtraBodyParams(betaHeaders?: string[]): JsonObject {
         result = { ...(parsed as JsonObject) }
       } else {
         logForDebugging(
-          `CLAUDE_CODE_EXTRA_BODY env var must be a JSON object, but was given ${extraBodyStr}`,
+          `OPEN_CODE_CLI_EXTRA_BODY env var must be a JSON object, but was given ${extraBodyStr}`,
           { level: 'error' },
         )
       }
     } catch (error) {
       logForDebugging(
-        `Error parsing CLAUDE_CODE_EXTRA_BODY: ${errorMessage(error)}`,
+        `Error parsing OPEN_CODE_CLI_EXTRA_BODY: ${errorMessage(error)}`,
         { level: 'error' },
       )
     }
@@ -302,7 +301,7 @@ export function getExtraBodyParams(betaHeaders?: string[]): JsonObject {
   // Anti-distillation: send fake_tools opt-in for 1P CLI only
   if (
     feature('ANTI_DISTILLATION_CC')
-      ? process.env.CLAUDE_CODE_ENTRYPOINT === 'cli' &&
+      ? getOpenCodeCliEnv('ENTRYPOINT') === 'cli' &&
         shouldIncludeFirstPartyOnlyBetas() &&
         getFeatureValue_CACHED_MAY_BE_STALE(
           'tengu_anti_distill_fake_tool_injection',

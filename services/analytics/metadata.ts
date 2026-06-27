@@ -104,7 +104,7 @@ export function isAnalyticsToolDetailsLoggingEnabled(
   mcpServerType: string | undefined,
   mcpServerBaseUrl: string | undefined,
 ): boolean {
-  if (process.env.CLAUDE_CODE_ENTRYPOINT === 'local-agent') {
+  if (getOpenCodeCliEnv('ENTRYPOINT') === 'local-agent') {
     return true
   }
   if (mcpServerType === 'claudeai-proxy') {
@@ -584,8 +584,8 @@ const buildEnvContext = memoize(async (): Promise<EnvContext> => {
     platform: getHostPlatformForAnalytics(),
     // Raw process.platform so freebsd/openbsd/aix/sunos are visible in BQ.
     // getHostPlatformForAnalytics() buckets those into 'linux'; here we want
-    // the truth. CLAUDE_CODE_HOST_PLATFORM still overrides for container/remote.
-    platformRaw: process.env.CLAUDE_CODE_HOST_PLATFORM || process.platform,
+    // the truth. OPEN_CODE_CLI_HOST_PLATFORM still overrides for container/remote.
+    platformRaw: getOpenCodeCliEnv('HOST_PLATFORM') || process.platform,
     arch: env.arch,
     nodeVersion: env.nodeVersion,
     terminal: envDynamic.terminal,
@@ -595,28 +595,28 @@ const buildEnvContext = memoize(async (): Promise<EnvContext> => {
     isCi: isEnvTruthy(process.env.CI),
     isClaubbit: isEnvTruthy(process.env.CLAUBBIT),
     isClaudeCodeRemote: isEnvTruthy(getOpenCodeCliEnv('REMOTE')),
-    isLocalAgentMode: process.env.CLAUDE_CODE_ENTRYPOINT === 'local-agent',
+    isLocalAgentMode: getOpenCodeCliEnv('ENTRYPOINT') === 'local-agent',
     isConductor: env.isConductor(),
     ...(getOpenCodeCliEnv('REMOTE_ENVIRONMENT_TYPE') && {
       remoteEnvironmentType: getOpenCodeCliEnv('REMOTE_ENVIRONMENT_TYPE'),
     }),
     // Gated by feature flag to prevent leaking "coworkerType" string in external builds
     ...(feature('COWORKER_TYPE_TELEMETRY')
-      ? process.env.CLAUDE_CODE_COWORKER_TYPE
-        ? { coworkerType: process.env.CLAUDE_CODE_COWORKER_TYPE }
+      ? getOpenCodeCliEnv('COWORKER_TYPE')
+        ? { coworkerType: getOpenCodeCliEnv('COWORKER_TYPE') }
         : {}
       : {}),
-    ...(process.env.CLAUDE_CODE_CONTAINER_ID && {
-      claudeCodeContainerId: process.env.CLAUDE_CODE_CONTAINER_ID,
+    ...(getOpenCodeCliEnv('CONTAINER_ID') && {
+      claudeCodeContainerId: getOpenCodeCliEnv('CONTAINER_ID'),
     }),
     ...(getOpenCodeCliEnv('REMOTE_SESSION_ID') && {
       claudeCodeRemoteSessionId: getOpenCodeCliEnv('REMOTE_SESSION_ID'),
     }),
-    ...(process.env.CLAUDE_CODE_TAGS && {
-      tags: process.env.CLAUDE_CODE_TAGS,
+    ...(getOpenCodeCliEnv('TAGS') && {
+      tags: getOpenCodeCliEnv('TAGS'),
     }),
     isGithubAction: isEnvTruthy(process.env.GITHUB_ACTIONS),
-    isClaudeCodeAction: isEnvTruthy(process.env.CLAUDE_CODE_ACTION),
+    isClaudeCodeAction: isEnvTruthy(getOpenCodeCliEnv('ACTION')),
     isClaudeAiAuth: isClaudeAISubscriber(),
     version: MACRO.VERSION,
     versionBase: getVersionBase(),
@@ -711,8 +711,8 @@ export async function getEventMetadata(
     userType: process.env.USER_TYPE || '',
     ...(betas.length > 0 ? { betas: betas } : {}),
     envContext,
-    ...(process.env.CLAUDE_CODE_ENTRYPOINT && {
-      entrypoint: process.env.CLAUDE_CODE_ENTRYPOINT,
+    ...(getOpenCodeCliEnv('ENTRYPOINT') && {
+      entrypoint: getOpenCodeCliEnv('ENTRYPOINT'),
     }),
     ...(process.env.CLAUDE_AGENT_SDK_VERSION && {
       agentSdkVersion: process.env.CLAUDE_AGENT_SDK_VERSION,

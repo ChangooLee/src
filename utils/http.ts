@@ -10,12 +10,13 @@ import {
   handleOAuth401Error,
   isClaudeAISubscriber,
 } from './auth.js'
-import { getClaudeCodeUserAgent } from './userAgent.js'
+import { getOpenCodeCliUserAgent } from './userAgent.js'
+import { getOpenCodeCliEnv } from './envUtils.js'
 import { getWorkload } from './workloadContext.js'
 
-// WARNING: We rely on `claude-cli` in the user agent for log filtering.
+// WARNING: Log filtering relies on the Open Code CLI product token below.
 // Please do NOT change this without making sure that logging also gets updated!
-export function getUserAgent(): string {
+export function getOpenCodeCliHttpUserAgent(): string {
   const agentSdkVersion = process.env.CLAUDE_AGENT_SDK_VERSION
     ? `, agent-sdk/${process.env.CLAUDE_AGENT_SDK_VERSION}`
     : ''
@@ -31,13 +32,17 @@ export function getUserAgent(): string {
   // so the read picks up the same setWorkload() value as getAttributionHeader.
   const workload = getWorkload()
   const workloadSuffix = workload ? `, workload/${workload}` : ''
-  return `claude-cli/${MACRO.VERSION} (${process.env.USER_TYPE}, ${process.env.CLAUDE_CODE_ENTRYPOINT ?? 'cli'}${agentSdkVersion}${clientApp}${workloadSuffix})`
+  return `open-code-cli/${MACRO.VERSION} (${process.env.USER_TYPE}, ${getOpenCodeCliEnv('ENTRYPOINT') ?? 'cli'}${agentSdkVersion}${clientApp}${workloadSuffix})`
 }
+
+// Compatibility export for existing callers; primary naming is Open Code CLI.
+export const getUserAgent = getOpenCodeCliHttpUserAgent
 
 export function getMCPUserAgent(): string {
   const parts: string[] = []
-  if (process.env.CLAUDE_CODE_ENTRYPOINT) {
-    parts.push(process.env.CLAUDE_CODE_ENTRYPOINT)
+  const entrypoint = getOpenCodeCliEnv('ENTRYPOINT')
+  if (entrypoint) {
+    parts.push(entrypoint)
   }
   if (process.env.CLAUDE_AGENT_SDK_VERSION) {
     parts.push(`agent-sdk/${process.env.CLAUDE_AGENT_SDK_VERSION}`)
@@ -54,7 +59,7 @@ export function getMCPUserAgent(): string {
 // operators match in robots.txt); the open-code-cli suffix lets them distinguish
 // local CLI traffic from claude.ai server-side fetches.
 export function getWebFetchUserAgent(): string {
-  return `Claude-User (${getClaudeCodeUserAgent()}; +https://support.anthropic.com/)`
+  return `Claude-User (${getOpenCodeCliUserAgent()}; +https://support.anthropic.com/)`
 }
 
 export type AuthHeaders = {

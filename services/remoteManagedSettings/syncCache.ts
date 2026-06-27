@@ -16,6 +16,7 @@ import {
   getAPIProvider,
   isFirstPartyAnthropicBaseUrl,
 } from '../../utils/model/providers.js'
+import { getOpenCodeCliEnv } from '../../utils/envUtils.js'
 
 import {
   resetSyncCache as resetLeafCache,
@@ -63,7 +64,7 @@ export function isRemoteManagedSettingsEligible(): boolean {
   // (designed for CLI/CCD) don't apply there, and per-surface settings don't
   // exist yet. MDM/file-based managed settings still apply via settings.ts —
   // those require physical deployment and a different IT intent.
-  if (process.env.CLAUDE_CODE_ENTRYPOINT === 'local-agent') {
+  if (getOpenCodeCliEnv('ENTRYPOINT') === 'local-agent') {
     return (cached = setEligibility(false))
   }
 

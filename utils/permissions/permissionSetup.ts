@@ -12,7 +12,7 @@ import type {
   ToolPermissionRulesBySource,
 } from '../../Tool.js'
 import { getCwd } from '../cwd.js'
-import { isEnvTruthy } from '../envUtils.js'
+import { getOpenCodeCliEnv, isEnvTruthy } from '../envUtils.js'
 import type { SettingSource } from '../settings/constants.js'
 import { SETTING_SOURCES } from '../settings/constants.js'
 import {
@@ -27,8 +27,6 @@ import {
 } from './PermissionMode.js'
 import { applyPermissionRulesToPermissionContext } from './permissions.js'
 import { loadAllPermissionRulesFromDisk } from './permissionsLoader.js'
-
-import { getOpenCodeCliEnv } from '../../utils/envUtils.js';
 /* eslint-disable @typescript-eslint/no-require-imports */
 const autoModeStateModule = feature('TRANSCRIPT_CLASSIFIER')
   ? (require('./autoModeState.js') as typeof import('./autoModeState.js'))
@@ -954,7 +952,7 @@ export async function initializeToolPermissionContext({
   if (
     process.env.USER_TYPE === 'ant' &&
     !isEnvTruthy(getOpenCodeCliEnv('REMOTE')) &&
-    process.env.CLAUDE_CODE_ENTRYPOINT !== 'local-agent'
+    getOpenCodeCliEnv('ENTRYPOINT') !== 'local-agent'
   ) {
     overlyBroadBashPermissions = [
       ...findOverlyBroadBashPermissions(rulesFromDisk, parsedAllowedToolsCli),

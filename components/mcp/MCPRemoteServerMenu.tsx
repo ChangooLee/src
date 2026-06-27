@@ -16,6 +16,7 @@ import { describeMcpConfigFilePath, excludeCommandsByServer, excludeResourcesByS
 import { useAppState, useSetAppState } from '../../state/AppState.js';
 import { getOauthAccountInfo } from '../../utils/auth.js';
 import { openBrowser } from '../../utils/browser.js';
+import { getOpenCodeCliEnv } from '../../utils/envUtils.js';
 import { errorMessage } from '../../utils/errors.js';
 import { logMCPDebug } from '../../utils/log.js';
 import { capitalize } from '../../utils/stringUtils.js';
@@ -221,7 +222,7 @@ export function MCPRemoteServerMenu({
       // Use the direct auth URL with org and server IDs
       // Replace 'mcprs' prefix with 'mcpsrv' if present
       const serverId = server.config.id.startsWith('mcprs') ? 'mcpsrv' + server.config.id.slice(5) : server.config.id;
-      const productSurface = encodeURIComponent(process.env.CLAUDE_CODE_ENTRYPOINT || 'cli');
+      const productSurface = encodeURIComponent(getOpenCodeCliEnv('ENTRYPOINT') || 'cli');
       authUrl = `${claudeAiBaseUrl}/api/organizations/${orgUuid}/mcp/start-auth/${serverId}?product_surface=${productSurface}`;
     } else {
       // Fall back to settings/connectors if we don't have the required IDs

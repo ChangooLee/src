@@ -206,13 +206,13 @@ export async function detectTerminal(): Promise<TerminalInfo | null> {
  *           are inherently shell-interpreted; no argv interface exists)
  *   Windows — PowerShell -Command, cmd.exe /k (no argv exec mode)
  *
- * For pure-argv paths: claudePath, --prefill, query, cwd travel as distinct
+ * For pure-argv paths: openCodeCliPath, --prefill, query, cwd travel as distinct
  * argv elements end-to-end. No sh -c. No shellQuote(). The terminal does
- * chdir(cwd) and execvp(claude, argv). Spaces/quotes/metacharacters in
+ * chdir(cwd) and execvp(Open Code CLI, argv). Spaces/quotes/metacharacters in
  * query or cwd are preserved by argv boundaries with zero interpretation.
  */
 export async function launchInTerminal(
-  claudePath: string,
+  openCodeCliPath: string,
   action: {
     query?: string
     cwd?: string
@@ -229,24 +229,24 @@ export async function launchInTerminal(
   logForDebugging(
     `Launching in terminal: ${terminal.name} (${terminal.command})`,
   )
-  const claudeArgs = ['--deep-link-origin']
+  const openCodeCliArgs = ['--deep-link-origin']
   if (action.repo) {
-    claudeArgs.push('--deep-link-repo', action.repo)
+    openCodeCliArgs.push('--deep-link-repo', action.repo)
     if (action.lastFetchMs !== undefined) {
-      claudeArgs.push('--deep-link-last-fetch', String(action.lastFetchMs))
+      openCodeCliArgs.push('--deep-link-last-fetch', String(action.lastFetchMs))
     }
   }
   if (action.query) {
-    claudeArgs.push('--prefill', action.query)
+    openCodeCliArgs.push('--prefill', action.query)
   }
 
   switch (process.platform) {
     case 'darwin':
-      return launchMacosTerminal(terminal, claudePath, claudeArgs, action.cwd)
+      return launchMacosTerminal(terminal, openCodeCliPath, openCodeCliArgs, action.cwd)
     case 'linux':
-      return launchLinuxTerminal(terminal, claudePath, claudeArgs, action.cwd)
+      return launchLinuxTerminal(terminal, openCodeCliPath, openCodeCliArgs, action.cwd)
     case 'win32':
-      return launchWindowsTerminal(terminal, claudePath, claudeArgs, action.cwd)
+      return launchWindowsTerminal(terminal, openCodeCliPath, openCodeCliArgs, action.cwd)
     default:
       return false
   }

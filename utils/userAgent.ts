@@ -5,6 +5,9 @@
  * import without pulling in auth.ts and its transitive dependency tree.
  */
 
-export function getClaudeCodeUserAgent(): string {
+export function getOpenCodeCliUserAgent(): string {
   return `open-code-cli/${MACRO.VERSION}`
 }
+
+// Compatibility export for existing imports; primary naming is Open Code CLI.
+export const getClaudeCodeUserAgent = getOpenCodeCliUserAgent

@@ -711,6 +711,7 @@ export const connectToServer = memoize(
           'User-Agent': getMCPUserAgent(),
           ...(serverRef.authToken && {
             'X-Open-Code-CLI-Ide-Authorization': serverRef.authToken,
+            // Keep the legacy header for IDE servers that have not yet migrated.
             'X-Claude-Code-Ide-Authorization': serverRef.authToken,
           }),
         }

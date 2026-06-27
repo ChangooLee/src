@@ -15,7 +15,7 @@ import { context as otelContext, type Span, trace } from '@opentelemetry/api'
 import { AsyncLocalStorage } from 'async_hooks'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../../services/analytics/growthbook.js'
 import type { AssistantMessage, UserMessage } from '../../types/message.js'
-import { isEnvDefinedFalsy, isEnvTruthy } from '../envUtils.js'
+import { getOpenCodeCliEnv, isEnvDefinedFalsy, isEnvTruthy } from '../envUtils.js'
 import { getTelemetryAttributes } from '../telemetryAttributes.js'
 import {
   addBetaInteractionAttributes,
@@ -126,7 +126,7 @@ function ensureCleanupInterval(): void {
 export function isEnhancedTelemetryEnabled(): boolean {
   if (feature('ENHANCED_TELEMETRY_BETA')) {
     const env =
-      process.env.CLAUDE_CODE_ENHANCED_TELEMETRY_BETA ??
+      getOpenCodeCliEnv('ENHANCED_TELEMETRY_BETA') ??
       process.env.ENABLE_ENHANCED_TELEMETRY_BETA
     if (isEnvTruthy(env)) {
       return true
@@ -150,7 +150,7 @@ function isAnyTracingEnabled(): boolean {
 }
 
 function getTracer() {
-  return trace.getTracer('com.anthropic.claude_code.tracing', '1.0.0')
+  return trace.getTracer('dev.open_code_cli.tracing', '1.0.0')
 }
 
 function createSpanAttributes(
@@ -213,7 +213,7 @@ export function startInteractionSpan(userPrompt: string): Span {
     'interaction.sequence': interactionSequence,
   })
 
-  const span = tracer.startSpan('claude_code.interaction', {
+  const span = tracer.startSpan('open_code_cli.interaction', {
     attributes,
   })
 
@@ -316,7 +316,7 @@ export function startLLMRequestSpan(
   const ctx = parentSpanCtx
     ? trace.setSpan(otelContext.active(), parentSpanCtx.span)
     : otelContext.active()
-  const span = tracer.startSpan('claude_code.llm_request', { attributes }, ctx)
+  const span = tracer.startSpan('open_code_cli.llm_request', { attributes }, ctx)
 
   // Add query_source (agent name) if provided
   if (newContext?.querySource) {
@@ -502,7 +502,7 @@ export function startToolSpan(
   const ctx = parentSpanCtx
     ? trace.setSpan(otelContext.active(), parentSpanCtx.span)
     : otelContext.active()
-  const span = tracer.startSpan('claude_code.tool', { attributes }, ctx)
+  const span = tracer.startSpan('open_code_cli.tool', { attributes }, ctx)
 
   // Add experimental tool input attributes
   if (toolInput) {
@@ -556,7 +556,7 @@ export function startToolBlockedOnUserSpan(): Span {
     ? trace.setSpan(otelContext.active(), parentSpanCtx.span)
     : otelContext.active()
   const span = tracer.startSpan(
-    'claude_code.tool.blocked_on_user',
+    'open_code_cli.tool.blocked_on_user',
     { attributes },
     ctx,
   )
@@ -637,7 +637,7 @@ export function startToolExecutionSpan(): Span {
     ? trace.setSpan(otelContext.active(), parentSpanCtx.span)
     : otelContext.active()
   const span = tracer.startSpan(
-    'claude_code.tool.execution',
+    'open_code_cli.tool.execution',
     { attributes },
     ctx,
   )
@@ -864,7 +864,7 @@ export function startHookSpan(
   const ctx = parentSpanCtx
     ? trace.setSpan(otelContext.active(), parentSpanCtx.span)
     : otelContext.active()
-  const span = tracer.startSpan('claude_code.hook', { attributes }, ctx)
+  const span = tracer.startSpan('open_code_cli.hook', { attributes }, ctx)
 
   const spanId = getSpanId(span)
   const spanContextObj: SpanContext = {
