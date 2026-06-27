@@ -98,7 +98,7 @@ export function isProcessRunning(pid: number): boolean {
  * Validate that a running process is actually a Open Code CLI process
  * This helps mitigate PID reuse issues
  */
-function isOpen Code CLIProcess(pid: number, expectedExecPath: string): boolean {
+function isOpenCodeCliProcess(pid: number, expectedExecPath: string): boolean {
   if (!isProcessRunning(pid)) {
     return false
   }
@@ -177,7 +177,7 @@ export function isLockActive(lockFilePath: string): boolean {
 
   // Secondary validation: is it actually a Open Code CLI process?
   // This helps with PID reuse scenarios
-  if (!isOpen Code CLIProcess(pid, execPath)) {
+  if (!isOpenCodeCliProcess(pid, execPath)) {
     logForDebugging(
       `Lock PID ${pid} is running but does not appear to be Open Code CLI - treating as stale`,
     )

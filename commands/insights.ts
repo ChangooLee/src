@@ -1085,7 +1085,7 @@ export function detectMultiClauding(
 
   allSessionMessages.sort((a, b) => a.ts - b.ts)
 
-  const multiOpen Code CLISessionPairs = new Set<string>()
+  const multiOpenCodeCliSessionPairs = new Set<string>()
   const messagesDuringMultiOpenCodeCli = new Set<string>()
 
   // Sliding window: sessionLastIndex tracks the most recent index for each session
@@ -1114,7 +1114,7 @@ export function detectMultiClauding(
         const between = allSessionMessages[j]!
         if (between.sessionId !== msg.sessionId) {
           const pair = [msg.sessionId, between.sessionId].sort().join(':')
-          multiOpen Code CLISessionPairs.add(pair)
+          multiOpenCodeCliSessionPairs.add(pair)
           messagesDuringMultiOpenCodeCli.add(
             `${allSessionMessages[prevIndex]!.ts}:${msg.sessionId}`,
           )
@@ -1129,14 +1129,14 @@ export function detectMultiClauding(
   }
 
   const sessionsWithOverlaps = new Set<string>()
-  for (const pair of multiOpen Code CLISessionPairs) {
+  for (const pair of multiOpenCodeCliSessionPairs) {
     const [s1, s2] = pair.split(':')
     if (s1) sessionsWithOverlaps.add(s1)
     if (s2) sessionsWithOverlaps.add(s2)
   }
 
   return {
-    overlap_events: multiOpen Code CLISessionPairs.size,
+    overlap_events: multiOpenCodeCliSessionPairs.size,
     sessions_involved: sessionsWithOverlaps.size,
     user_messages_during: messagesDuringMultiOpenCodeCli.size,
   }

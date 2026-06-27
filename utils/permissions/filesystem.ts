@@ -81,7 +81,7 @@ export const DANGEROUS_DIRECTORIES = [
 /**
  * Normalizes a path for case-insensitive comparison.
  * This prevents bypassing security checks using mixed-case paths on case-insensitive
- * filesystems (macOS/Windows) like `.cLauDe/Settings.locaL.json`.
+ * filesystems (macOS/Windows) like `.OpEn-CoDe-Cli/Settings.locaL.json`.
  *
  * We always normalize to lowercase regardless of platform for consistent security.
  * @param path The path to normalize
@@ -197,13 +197,13 @@ function getSettingsPaths(): string[] {
   ).filter(path => path !== undefined)
 }
 
-export function isOpen Code CLISettingsPath(filePath: string): boolean {
+export function isOpenCodeCliSettingsPath(filePath: string): boolean {
   // SECURITY: Normalize path structure first to prevent bypass via redundant ./
   // sequences like `./.open-code-cli/./settings.json` which would evade the endsWith() check
   const expandedPath = expandPath(filePath)
 
   // Normalize for case-insensitive comparison to prevent bypassing security
-  // with paths like .cLauDe/Settings.locaL.json
+  // with paths like .OpEn-CoDe-Cli/Settings.locaL.json
   const normalizedPath = normalizeCaseForComparison(expandedPath)
 
   // Use platform separator so endsWith checks work on both Unix (/) and Windows (\)
@@ -222,8 +222,8 @@ export function isOpen Code CLISettingsPath(filePath: string): boolean {
 }
 
 // Always ask when Open Code CLI tries to edit its own config files
-function isOpen Code CLIConfigFilePath(filePath: string): boolean {
-  if (isOpen Code CLISettingsPath(filePath)) {
+function isOpenCodeCliConfigFilePath(filePath: string): boolean {
+  if (isOpenCodeCliSettingsPath(filePath)) {
     return true
   }
 
@@ -640,7 +640,7 @@ export function checkPathSafetyForAutoEdit(
 
   // Check for Open Code CLI config files on all paths
   for (const pathToCheck of pathsToCheck) {
-    if (isOpen Code CLIConfigFilePath(pathToCheck)) {
+    if (isOpenCodeCliConfigFilePath(pathToCheck)) {
       return {
         safe: false,
         message: `Open Code CLI requested permissions to write to ${path}, but you haven't granted it yet.`,
@@ -721,7 +721,7 @@ export function pathInWorkingPath(path: string, workingPath: string): boolean {
     .replace(/^\/private\/tmp(\/|$)/, '/tmp$1')
 
   // Normalize case for case-insensitive comparison to prevent bypassing security
-  // checks on case-insensitive filesystems (macOS/Windows) like .cLauDe/CoMmAnDs
+  // checks on case-insensitive filesystems (macOS/Windows) like .OpEn-CoDe-Cli/CoMmAnDs
   const caseNormalizedPath = normalizeCaseForComparison(normalizedPath)
   const caseNormalizedWorkingPath = normalizeCaseForComparison(
     normalizedWorkingPath,

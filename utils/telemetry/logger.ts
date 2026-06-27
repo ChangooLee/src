@@ -1,7 +1,7 @@
 import type { DiagLogger } from '@opentelemetry/api'
 import { logForDebugging } from '../debug.js'
 import { logError } from '../log.js'
-export class Open Code CLICodeDiagLogger implements DiagLogger {
+export class OpenCodeCliCodeDiagLogger implements DiagLogger {
   error(message: string, ..._: unknown[]) {
     logError(new Error(message))
     logForDebugging(`[3P telemetry] OTEL diag error: ${message}`, {

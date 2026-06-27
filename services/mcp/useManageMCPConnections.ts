@@ -946,14 +946,14 @@ export function useManageMCPConnections(
           })
 
           // Now start connecting (only enabled servers)
-          const enabledOpen Code CLIaiConfigs = Object.fromEntries(
+          const enabledOpenCodeCliaiConfigs = Object.fromEntries(
             Object.entries(openCodeCliConfigs).filter(
               ([name]) => !isMcpServerDisabled(name),
             ),
           )
           getMcpToolsCommandsAndResources(
             onConnectionAttempt,
-            enabledOpen Code CLIaiConfigs,
+            enabledOpenCodeCliaiConfigs,
           ).catch(error => {
             logMCPError(
               'useManageMcpConnections',

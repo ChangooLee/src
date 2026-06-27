@@ -107,7 +107,7 @@ export function getOpenCodeCliSocketPath(): string | null {
  * Sets socket info after initialization.
  * Called after the tmux session is created.
  */
-export function setOpen Code CLISocketInfo(path: string, pid: number): void {
+export function setOpenCodeCliSocketInfo(path: string, pid: number): void {
   socketPath = path
   serverPid = pid
 }
@@ -358,7 +358,7 @@ async function doInitialize(): Promise<void> {
     if (path && pidStr) {
       const pid = parseInt(pidStr, 10)
       if (!isNaN(pid)) {
-        setOpen Code CLISocketInfo(path, pid)
+        setOpenCodeCliSocketInfo(path, pid)
         return
       }
     }
@@ -396,7 +396,7 @@ async function doInitialize(): Promise<void> {
       logForDebugging(
         `[Socket] Using fallback socket path: ${fallbackPath} (server PID: ${pid})`,
       )
-      setOpen Code CLISocketInfo(fallbackPath, pid)
+      setOpenCodeCliSocketInfo(fallbackPath, pid)
       return
     }
     // PID parsing failed

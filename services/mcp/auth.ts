@@ -965,7 +965,7 @@ export async function performMCPOAuthFlow(
       `Using redirect port: ${port}${configuredCallbackPort ? ' (from config)' : ''}`,
     )
 
-    const provider = new Open Code CLIAuthProvider(
+    const provider = new OpenCodeCliAuthProvider(
       serverName,
       serverConfig,
       redirectUri,
@@ -1353,7 +1353,7 @@ export async function performMCPOAuthFlow(
  */
 export function wrapFetchWithStepUpDetection(
   baseFetch: FetchLike,
-  provider: Open Code CLIAuthProvider,
+  provider: OpenCodeCliAuthProvider,
 ): FetchLike {
   return async (url, init) => {
     const response = await baseFetch(url, init)
@@ -1373,7 +1373,7 @@ export function wrapFetchWithStepUpDetection(
   }
 }
 
-export class Open Code CLIAuthProvider implements OAuthClientProvider {
+export class OpenCodeCliAuthProvider implements OAuthClientProvider {
   private serverName: string
   private serverConfig: McpSSEServerConfig | McpHTTPServerConfig
   private redirectUri: string

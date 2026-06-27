@@ -590,11 +590,11 @@ const externalTips: Tip[] = [
   {
     id: 'guest-passes',
     content: async ctx => {
-      const open-code-cli = color('open-code-cli', ctx.theme)
+      const openCodeCli = color('open-code-cli', ctx.theme)
       const reward = getCachedReferrerReward()
       return reward
-        ? `Share Open Code CLI and earn ${open-code-cli(formatCreditAmount(reward))} of extra usage · ${open-code-cli('/passes')}`
-        : `You have free guest passes to share · ${open-code-cli('/passes')}`
+        ? `Share Open Code CLI and earn ${openCodeCli(formatCreditAmount(reward))} of extra usage · ${openCodeCli('/passes')}`
+        : `You have free guest passes to share · ${openCodeCli('/passes')}`
     },
     cooldownSessions: 3,
     isRelevant: async () => {
@@ -609,12 +609,12 @@ const externalTips: Tip[] = [
   {
     id: 'overage-credit',
     content: async ctx => {
-      const open-code-cli = color('open-code-cli', ctx.theme)
+      const openCodeCli = color('open-code-cli', ctx.theme)
       const info = getCachedOverageCreditGrant()
       const amount = info ? formatGrantAmount(info) : null
       if (!amount) return ''
       // Copy from "OC & Bulk Overages copy" doc (#5 — CLI Rotating tip)
-      return `${open-code-cli(`${amount} in extra usage, on us`)} · third-party apps · ${open-code-cli('/extra-usage')}`
+      return `${openCodeCli(`${amount} in extra usage, on us`)} · third-party apps · ${openCodeCli('/extra-usage')}`
     },
     cooldownSessions: 3,
     isRelevant: async () => shouldShowOverageCreditUpsell(),

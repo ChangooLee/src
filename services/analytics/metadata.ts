@@ -426,7 +426,7 @@ export type EnvContext = {
   isRunningWithBun: boolean
   isCi: boolean
   isClaubbit: boolean
-  isOpen Code CLICodeRemote: boolean
+  isOpenCodeCliCodeRemote: boolean
   isLocalAgentMode: boolean
   isConductor: boolean
   remoteEnvironmentType?: string
@@ -435,7 +435,7 @@ export type EnvContext = {
   openCodeCliRemoteSessionId?: string
   tags?: string
   isGithubAction: boolean
-  isOpen Code CLICodeAction: boolean
+  isOpenCodeCliCodeAction: boolean
   isOpenCodeCliAuth: boolean
   version: string
   versionBase?: string
@@ -594,7 +594,7 @@ const buildEnvContext = memoize(async (): Promise<EnvContext> => {
     isRunningWithBun: env.isRunningWithBun(),
     isCi: isEnvTruthy(process.env.CI),
     isClaubbit: isEnvTruthy(process.env.CLAUBBIT),
-    isOpen Code CLICodeRemote: isEnvTruthy(getOpenCodeCliEnv('REMOTE')),
+    isOpenCodeCliCodeRemote: isEnvTruthy(getOpenCodeCliEnv('REMOTE')),
     isLocalAgentMode: getOpenCodeCliEnv('ENTRYPOINT') === 'local-agent',
     isConductor: env.isConductor(),
     ...(getOpenCodeCliEnv('REMOTE_ENVIRONMENT_TYPE') && {
@@ -616,7 +616,7 @@ const buildEnvContext = memoize(async (): Promise<EnvContext> => {
       tags: getOpenCodeCliEnv('TAGS'),
     }),
     isGithubAction: isEnvTruthy(process.env.GITHUB_ACTIONS),
-    isOpen Code CLICodeAction: isEnvTruthy(getOpenCodeCliEnv('ACTION')),
+    isOpenCodeCliCodeAction: isEnvTruthy(getOpenCodeCliEnv('ACTION')),
     isOpenCodeCliAuth: isOpenCodeCliSubscriber(),
     version: MACRO.VERSION,
     versionBase: getVersionBase(),
@@ -829,11 +829,11 @@ export function to1PEventFormat(
     is_running_with_bun: envContext.isRunningWithBun,
     is_ci: envContext.isCi,
     is_claubbit: envContext.isClaubbit,
-    is_open_code_cli_remote: envContext.isOpen Code CLICodeRemote,
+    is_open_code_cli_remote: envContext.isOpenCodeCliCodeRemote,
     is_local_agent_mode: envContext.isLocalAgentMode,
     is_conductor: envContext.isConductor,
     is_github_action: envContext.isGithubAction,
-    is_open_code_cli_action: envContext.isOpen Code CLICodeAction,
+    is_open_code_cli_action: envContext.isOpenCodeCliCodeAction,
     is_open_code_cli_ai_auth: envContext.isOpenCodeCliAuth,
     version: envContext.version,
     build_time: envContext.buildTime,

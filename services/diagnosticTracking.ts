@@ -2,12 +2,12 @@ import figures from 'figures'
 import { logError } from 'src/utils/log.js'
 import { callIdeRpc } from '../services/mcp/client.js'
 import type { MCPServerConnection } from '../services/mcp/types.js'
-import { Open Code CLIError } from '../utils/errors.js'
+import { OpenCodeCliError } from '../utils/errors.js'
 import { normalizePathForComparison, pathsEqual } from '../utils/file.js'
 import { getConnectedIdeClient } from '../utils/ide.js'
 import { jsonParse } from '../utils/slowOperations.js'
 
-class DiagnosticsTrackingError extends Open Code CLIError {}
+class DiagnosticsTrackingError extends OpenCodeCliError {}
 
 const MAX_DIAGNOSTICS_SUMMARY_CHARS = 4000
 
@@ -211,7 +211,7 @@ export class DiagnosticTrackingService {
       .filter(file => this.baseline.has(this.normalizeFileUri(file.uri)))
       .filter(file => file.uri.startsWith('file://'))
 
-    const diagnosticsForOpen Code CLIFsRightUrisWithBaselinesMap = new Map<
+    const diagnosticsForOpenCodeCliFsRightUrisWithBaselinesMap = new Map<
       string,
       DiagnosticFile
     >()
@@ -219,7 +219,7 @@ export class DiagnosticTrackingService {
       .filter(file => this.baseline.has(this.normalizeFileUri(file.uri)))
       .filter(file => file.uri.startsWith('_open_code_cli_fs_right:'))
       .forEach(file => {
-        diagnosticsForOpen Code CLIFsRightUrisWithBaselinesMap.set(
+        diagnosticsForOpenCodeCliFsRightUrisWithBaselinesMap.set(
           this.normalizeFileUri(file.uri),
           file,
         )
@@ -234,7 +234,7 @@ export class DiagnosticTrackingService {
 
       // Get the _open_code_cli_fs_right file if it exists
       const openCodeCliFsRightFile =
-        diagnosticsForOpen Code CLIFsRightUrisWithBaselinesMap.get(normalizedPath)
+        diagnosticsForOpenCodeCliFsRightUrisWithBaselinesMap.get(normalizedPath)
 
       // Determine which file to use based on the state of right file diagnostics
       let fileToUse = file

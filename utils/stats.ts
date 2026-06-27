@@ -50,7 +50,7 @@ export type SessionStats = {
   timestamp: string
 }
 
-export type Open Code CLICodeStats = {
+export type OpenCodeCliCodeStats = {
   // Activity overview
   totalSessions: number
   totalMessages: number
@@ -440,7 +440,7 @@ async function getAllSessionFiles(): Promise<string[]> {
 function cacheToStats(
   cache: PersistedStatsCache,
   todayStats: ProcessedStats | null,
-): Open Code CLICodeStats {
+): OpenCodeCliCodeStats {
   // Merge cache with today's stats
   const dailyActivityMap = new Map<string, DailyActivity>()
   for (const day of cache.dailyActivity) {
@@ -590,7 +590,7 @@ function cacheToStats(
     cache.totalSpeculationTimeSavedMs +
     (todayStats?.totalSpeculationTimeSavedMs || 0)
 
-  const result: Open Code CLICodeStats = {
+  const result: OpenCodeCliCodeStats = {
     totalSessions,
     totalMessages,
     totalDays,
@@ -637,7 +637,7 @@ function cacheToStats(
  * Aggregates stats from all Open Code CLI sessions across all projects.
  * Uses a disk cache to avoid reprocessing historical data.
  */
-export async function aggregateOpen Code CLICodeStats(): Promise<Open Code CLICodeStats> {
+export async function aggregateOpenCodeCliCodeStats(): Promise<OpenCodeCliCodeStats> {
   const allSessionFiles = await getAllSessionFiles()
 
   if (allSessionFiles.length === 0) {
@@ -715,11 +715,11 @@ export type StatsDateRange = '7d' | '30d' | 'all'
  * Aggregates stats for a specific date range.
  * For 'all', uses the cached aggregation. For other ranges, processes files directly.
  */
-export async function aggregateOpen Code CLICodeStatsForRange(
+export async function aggregateOpenCodeCliCodeStatsForRange(
   range: StatsDateRange,
-): Promise<Open Code CLICodeStats> {
+): Promise<OpenCodeCliCodeStats> {
   if (range === 'all') {
-    return aggregateOpen Code CLICodeStats()
+    return aggregateOpenCodeCliCodeStats()
   }
 
   const allSessionFiles = await getAllSessionFiles()
@@ -739,16 +739,16 @@ export async function aggregateOpen Code CLICodeStatsForRange(
     fromDate: fromDateStr,
   })
 
-  return processedStatsToOpen Code CLICodeStats(stats)
+  return processedStatsToOpenCodeCliCodeStats(stats)
 }
 
 /**
  * Convert ProcessedStats to Open Code CLICodeStats.
  * Used for filtered date ranges that bypass the cache.
  */
-function processedStatsToOpen Code CLICodeStats(
+function processedStatsToOpenCodeCliCodeStats(
   stats: ProcessedStats,
-): Open Code CLICodeStats {
+): OpenCodeCliCodeStats {
   const dailyActivitySorted = stats.dailyActivity
     .slice()
     .sort((a, b) => a.date.localeCompare(b.date))
@@ -809,7 +809,7 @@ function processedStatsToOpen Code CLICodeStats(
         ) + 1
       : 0
 
-  const result: Open Code CLICodeStats = {
+  const result: OpenCodeCliCodeStats = {
     totalSessions: stats.sessionStats.length,
     totalMessages: stats.totalMessages,
     totalDays,
@@ -1035,7 +1035,7 @@ export async function readSessionStartDate(
   }
 }
 
-function getEmptyStats(): Open Code CLICodeStats {
+function getEmptyStats(): OpenCodeCliCodeStats {
   return {
     totalSessions: 0,
     totalMessages: 0,

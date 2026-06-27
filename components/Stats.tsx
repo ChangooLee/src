@@ -18,7 +18,7 @@ import { formatDuration, formatNumber } from '../utils/format.js';
 import { generateHeatmap } from '../utils/heatmap.js';
 import { renderModelName } from '../utils/model/model.js';
 import { copyAnsiToClipboard } from '../utils/screenshotClipboard.js';
-import { aggregateOpen Code CLICodeStatsForRange, type Open Code CLICodeStats, type DailyModelTokens, type StatsDateRange } from '../utils/stats.js';
+import { aggregateOpenCodeCliCodeStatsForRange, type OpenCodeCliCodeStats, type DailyModelTokens, type StatsDateRange } from '../utils/stats.js';
 import { resolveThemeSetting } from '../utils/systemTheme.js';
 import { getTheme, themeColorToAnsi } from '../utils/theme.js';
 import { Pane } from './design-system/Pane.js';
@@ -38,7 +38,7 @@ type Props = {
 };
 type StatsResult = {
   type: 'success';
-  data: Open Code CLICodeStats;
+  data: OpenCodeCliCodeStats;
 } | {
   type: 'error';
   message: string;
@@ -61,7 +61,7 @@ function getNextDateRange(current: StatsDateRange): StatsDateRange {
  * Always loads all-time stats for the heatmap.
  */
 function createAllTimeStatsPromise(): Promise<StatsResult> {
-  return aggregateOpen Code CLICodeStatsForRange('all').then((data): StatsResult => {
+  return aggregateOpenCodeCliCodeStatsForRange('all').then((data): StatsResult => {
     if (!data || data.totalSessions === 0) {
       return {
         type: 'empty'
@@ -149,7 +149,7 @@ function StatsContent(t0) {
       }
       let cancelled = false;
       setIsLoadingFiltered(true);
-      aggregateOpen Code CLICodeStatsForRange(dateRange).then(data => {
+      aggregateOpenCodeCliCodeStatsForRange(dateRange).then(data => {
         if (!cancelled) {
           setStatsCache(prev => ({
             ...prev,
@@ -359,8 +359,8 @@ function OverviewTab({
   dateRange,
   isLoading
 }: {
-  stats: Open Code CLICodeStats;
-  allTimeStats: Open Code CLICodeStats;
+  stats: OpenCodeCliCodeStats;
+  allTimeStats: OpenCodeCliCodeStats;
   dateRange: StatsDateRange;
   isLoading: boolean;
 }): React.ReactNode {
@@ -685,7 +685,7 @@ const TIME_COMPARISONS = [{
   name: 'a full night of sleep',
   minutes: 480
 }];
-function generateFunFactoid(stats: Open Code CLICodeStats, totalTokens: number): string {
+function generateFunFactoid(stats: OpenCodeCliCodeStats, totalTokens: number): string {
   const factoids: string[] = [];
   if (totalTokens > 0) {
     const matchingBooks = BOOK_COMPARISONS.filter(book => totalTokens >= book.tokens);
@@ -1056,7 +1056,7 @@ function generateXAxisLabels(data: DailyModelTokens[], _chartWidth: number, yAxi
 }
 
 // Screenshot functionality
-async function handleScreenshot(stats: Open Code CLICodeStats, activeTab: 'Overview' | 'Models', setStatus: (status: string | null) => void): Promise<void> {
+async function handleScreenshot(stats: OpenCodeCliCodeStats, activeTab: 'Overview' | 'Models', setStatus: (status: string | null) => void): Promise<void> {
   setStatus('copying…');
   const ansiText = renderStatsToAnsi(stats, activeTab);
   const result = await copyAnsiToClipboard(ansiText);
@@ -1065,7 +1065,7 @@ async function handleScreenshot(stats: Open Code CLICodeStats, activeTab: 'Overv
   // Clear status after 2 seconds
   setTimeout(setStatus, 2000, null);
 }
-function renderStatsToAnsi(stats: Open Code CLICodeStats, activeTab: 'Overview' | 'Models'): string {
+function renderStatsToAnsi(stats: OpenCodeCliCodeStats, activeTab: 'Overview' | 'Models'): string {
   const lines: string[] = [];
   if (activeTab === 'Overview') {
     lines.push(...renderOverviewToAnsi(stats));
@@ -1092,10 +1092,10 @@ function renderStatsToAnsi(stats: Open Code CLICodeStats, activeTab: 'Overview' 
   }
   return lines.join('\n');
 }
-function renderOverviewToAnsi(stats: Open Code CLICodeStats): string[] {
+function renderOverviewToAnsi(stats: OpenCodeCliCodeStats): string[] {
   const lines: string[] = [];
   const theme = getTheme(resolveThemeSetting(getGlobalConfig().theme));
-  const h = (text: string) => applyColor(text, theme.open-code-cli as Color);
+  const h = (text: string) => applyColor(text, theme['open-code-cli'] as Color);
 
   // Two-column helper with fixed spacing
   // Column 1: label (18 chars) + value + padding to reach col 2
@@ -1188,7 +1188,7 @@ function renderOverviewToAnsi(stats: Open Code CLICodeStats): string[] {
   lines.push(chalk.gray(`Stats from the last ${stats.totalDays} days`));
   return lines;
 }
-function renderModelsToAnsi(stats: Open Code CLICodeStats): string[] {
+function renderModelsToAnsi(stats: OpenCodeCliCodeStats): string[] {
   const lines: string[] = [];
   const modelEntries = Object.entries(stats.modelUsage).sort(([, a], [, b]) => b.inputTokens + b.outputTokens - (a.inputTokens + a.outputTokens));
   if (modelEntries.length === 0) {

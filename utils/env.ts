@@ -11,7 +11,7 @@ import { which } from './which.js'
 type Platform = 'win32' | 'darwin' | 'linux'
 
 // Config and data paths
-export const getGlobalOpen Code CLIFile = memoize((): string => {
+export const getGlobalOpenCodeCliFile = memoize((): string => {
   // Legacy fallback for backwards compatibility
   if (
     getFsImplementation().existsSync(

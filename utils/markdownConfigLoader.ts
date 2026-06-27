@@ -38,10 +38,6 @@ export const OPEN_CODE_CLI_CONFIG_DIRECTORIES = [
 export type OpenCodeCliConfigDirectory =
   (typeof OPEN_CODE_CLI_CONFIG_DIRECTORIES)[number]
 
-// Compatibility export for existing integrations; primary naming is Open Code CLI.
-export const OPEN_CODE_CLI_CONFIG_DIRECTORIES = OPEN_CODE_CLI_CONFIG_DIRECTORIES
-export type Open Code CLIConfigDirectory = OpenCodeCliConfigDirectory
-
 export type MarkdownFile = {
   filePath: string
   baseDir: string
@@ -237,7 +233,7 @@ function resolveStopBoundary(cwd: string): string | null {
  * @returns Array of directory paths containing .open-code-cli/subdir, from most specific (cwd) to least specific
  */
 export function getProjectDirsUpToHome(
-  subdir: Open Code CLIConfigDirectory,
+  subdir: OpenCodeCliConfigDirectory,
   cwd: string,
 ): string[] {
   const home = resolve(homedir()).normalize('NFC')
@@ -301,7 +297,7 @@ export function getProjectDirsUpToHome(
  */
 export const loadMarkdownFilesForSubdir = memoize(
   async function (
-    subdir: Open Code CLIConfigDirectory,
+    subdir: OpenCodeCliConfigDirectory,
     cwd: string,
   ): Promise<MarkdownFile[]> {
     const searchStartTime = Date.now()
@@ -332,9 +328,9 @@ export const loadMarkdownFilesForSubdir = memoize(
         dir => normalizePathForComparison(dir) === worktreeSubdir,
       )
       if (!worktreeHasSubdir) {
-        const mainOpen Code CLISubdir = join(canonicalRoot, '.open-code-cli', subdir)
-        if (!projectDirs.includes(mainOpen Code CLISubdir)) {
-          projectDirs.push(mainOpen Code CLISubdir)
+        const mainOpenCodeCliSubdir = join(canonicalRoot, '.open-code-cli', subdir)
+        if (!projectDirs.includes(mainOpenCodeCliSubdir)) {
+          projectDirs.push(mainOpenCodeCliSubdir)
         }
       }
     }
@@ -431,7 +427,7 @@ export const loadMarkdownFilesForSubdir = memoize(
     return deduplicatedFiles
   },
   // Custom resolver creates cache key from both subdir and cwd parameters
-  (subdir: Open Code CLIConfigDirectory, cwd: string) => `${subdir}:${cwd}`,
+  (subdir: OpenCodeCliConfigDirectory, cwd: string) => `${subdir}:${cwd}`,
 )
 
 /**

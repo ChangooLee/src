@@ -1,6 +1,6 @@
 import { APIUserAbortError } from 'src/services/api/openaiCompatible.js'
 
-export class Open Code CLIError extends Error {
+export class OpenCodeCliError extends Error {
   constructor(message: string) {
     super(message)
     this.name = this.constructor.name

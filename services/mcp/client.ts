@@ -127,7 +127,7 @@ import { classifyMcpToolForCollapse } from '../../tools/MCPTool/classifyForColla
 import { clearKeychainCache } from '../../utils/secureStorage/macOsKeychainHelpers.js'
 import { sleep } from '../../utils/sleep.js'
 import {
-  Open Code CLIAuthProvider,
+  OpenCodeCliAuthProvider,
   hasMcpDiscoveryButNoToken,
   wrapFetchWithStepUpDetection,
 } from './auth.js'
@@ -618,7 +618,7 @@ export const connectToServer = memoize(
 
       if (serverRef.type === 'sse') {
         // Create an auth provider for this server
-        const authProvider = new Open Code CLIAuthProvider(name, serverRef)
+        const authProvider = new OpenCodeCliAuthProvider(name, serverRef)
 
         // Get combined headers (static + dynamic)
         const combinedHeaders = await getMcpServerHeaders(name, serverRef)
@@ -801,7 +801,7 @@ export const connectToServer = memoize(
         )
 
         // Create an auth provider for this server
-        const authProvider = new Open Code CLIAuthProvider(name, serverRef)
+        const authProvider = new OpenCodeCliAuthProvider(name, serverRef)
 
         // Get combined headers (static + dynamic)
         const combinedHeaders = await getMcpServerHeaders(name, serverRef)
@@ -912,14 +912,14 @@ export const connectToServer = memoize(
         const { createChromeContext } = await import(
           '../../utils/openCodeInChrome/mcpServer.js'
         )
-        const { createOpen Code CLIForChromeMcpServer } = await import(
+        const { createOpenCodeCliForChromeMcpServer } = await import(
           '@ant/open-code-cli-for-chrome-mcp'
         )
         const { createLinkedTransportPair } = await import(
           './InProcessTransport.js'
         )
         const context = createChromeContext(serverRef.env)
-        inProcessServer = createOpen Code CLIForChromeMcpServer(context)
+        inProcessServer = createOpenCodeCliForChromeMcpServer(context)
         const [clientTransport, serverTransport] = createLinkedTransportPair()
         await inProcessServer.connect(serverTransport)
         transport = clientTransport

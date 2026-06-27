@@ -9,7 +9,7 @@ import {
   logEvent,
 } from '../../services/analytics/index.js'
 import { getSSLErrorHint } from '../../services/api/errorUtils.js'
-import { fetchAndStoreOpen Code CLICodeFirstTokenDate } from '../../services/api/firstTokenDate.js'
+import { fetchAndStoreOpenCodeCliCodeFirstTokenDate } from '../../services/api/firstTokenDate.js'
 import {
   createAndStoreApiKey,
   fetchAndStoreUserRoles,
@@ -93,7 +93,7 @@ export async function installOAuthTokens(tokens: OAuthTokens): Promise<void> {
   )
 
   if (shouldUseOpenCodeCliAuth(tokens.scopes)) {
-    await fetchAndStoreOpen Code CLICodeFirstTokenDate().catch(err =>
+    await fetchAndStoreOpenCodeCliCodeFirstTokenDate().catch(err =>
       logForDebugging(String(err), { level: 'error' }),
     )
   } else {

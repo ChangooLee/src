@@ -9,7 +9,7 @@ import { getOpenCodeCliUserAgent } from '../../utils/userAgent.js'
  * Fetch the user's first Open Code CLI token date and store in config.
  * This is called after successful login to cache when they started using Open Code CLI.
  */
-export async function fetchAndStoreOpen Code CLICodeFirstTokenDate(): Promise<void> {
+export async function fetchAndStoreOpenCodeCliCodeFirstTokenDate(): Promise<void> {
   try {
     const config = getGlobalConfig()
 

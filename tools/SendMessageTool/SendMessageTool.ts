@@ -755,10 +755,10 @@ export const SendMessageTool: Tool<InputSchema, SendMessageToolOutput> =
             }
           }
           /* eslint-disable @typescript-eslint/no-require-imports */
-          const { postInterOpen Code CLIMessage } =
+          const { postInterOpenCodeCliMessage } =
             require('../../bridge/peerSessions.js') as typeof import('../../bridge/peerSessions.js')
           /* eslint-enable @typescript-eslint/no-require-imports */
-          const result = await postInterOpen Code CLIMessage(
+          const result = await postInterOpenCodeCliMessage(
             addr.target,
             input.message,
           )

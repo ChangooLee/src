@@ -4,7 +4,7 @@ import { env } from './env.js'
 export type Theme = {
   autoAccept: string
   bashBorder: string
-  open-code-cli: string
+  'open-code-cli': string
   openCodeCliShimmer: string // Lighter version of open-code-cli color for shimmer effect
   openCodeCliBlue_FOR_SYSTEM_SPINNER: string
   openCodeCliBlueShimmer_FOR_SYSTEM_SPINNER: string
@@ -70,7 +70,7 @@ export type Theme = {
   fastModeShimmer: string
   // Brief/assistant mode label colors
   briefLabelYou: string
-  briefLabelOpen Code CLI: string
+  'briefLabelOpen Code CLI': string
   // Rainbow colors for ultrathink keyword highlighting
   rainbow_red: string
   rainbow_orange: string
@@ -115,7 +115,7 @@ export type ThemeSetting = (typeof THEME_SETTINGS)[number]
 const lightTheme: Theme = {
   autoAccept: 'rgb(135,0,255)', // Electric violet
   bashBorder: 'rgb(255,0,135)', // Vibrant pink
-  open-code-cli: 'rgb(215,119,87)', // Open Code CLI orange
+  'open-code-cli': 'rgb(215,119,87)', // Open Code CLI orange
   openCodeCliShimmer: 'rgb(245,149,117)', // Lighter open-code-cli orange for shimmer effect
   openCodeCliBlue_FOR_SYSTEM_SPINNER: 'rgb(87,105,247)', // Medium blue for system spinner
   openCodeCliBlueShimmer_FOR_SYSTEM_SPINNER: 'rgb(117,135,255)', // Lighter blue for system spinner shimmer
@@ -173,7 +173,7 @@ const lightTheme: Theme = {
   fastModeShimmer: 'rgb(255,150,50)', // Lighter orange for shimmer
   // Brief/assistant mode
   briefLabelYou: 'rgb(37,99,235)', // Blue
-  briefLabelOpen Code CLI: 'rgb(215,119,87)', // Brand orange
+  'briefLabelOpen Code CLI': 'rgb(215,119,87)', // Brand orange
   rainbow_red: 'rgb(235,95,87)',
   rainbow_orange: 'rgb(245,139,87)',
   rainbow_yellow: 'rgb(250,195,95)',
@@ -197,7 +197,7 @@ const lightTheme: Theme = {
 const lightAnsiTheme: Theme = {
   autoAccept: 'ansi:magenta',
   bashBorder: 'ansi:magenta',
-  open-code-cli: 'ansi:redBright',
+  'open-code-cli': 'ansi:redBright',
   openCodeCliShimmer: 'ansi:yellowBright',
   openCodeCliBlue_FOR_SYSTEM_SPINNER: 'ansi:blue',
   openCodeCliBlueShimmer_FOR_SYSTEM_SPINNER: 'ansi:blueBright',
@@ -254,7 +254,7 @@ const lightAnsiTheme: Theme = {
   fastMode: 'ansi:red',
   fastModeShimmer: 'ansi:redBright',
   briefLabelYou: 'ansi:blue',
-  briefLabelOpen Code CLI: 'ansi:redBright',
+  'briefLabelOpen Code CLI': 'ansi:redBright',
   rainbow_red: 'ansi:red',
   rainbow_orange: 'ansi:redBright',
   rainbow_yellow: 'ansi:yellow',
@@ -278,7 +278,7 @@ const lightAnsiTheme: Theme = {
 const darkAnsiTheme: Theme = {
   autoAccept: 'ansi:magentaBright',
   bashBorder: 'ansi:magentaBright',
-  open-code-cli: 'ansi:redBright',
+  'open-code-cli': 'ansi:redBright',
   openCodeCliShimmer: 'ansi:yellowBright',
   openCodeCliBlue_FOR_SYSTEM_SPINNER: 'ansi:blueBright',
   openCodeCliBlueShimmer_FOR_SYSTEM_SPINNER: 'ansi:blueBright',
@@ -335,7 +335,7 @@ const darkAnsiTheme: Theme = {
   fastMode: 'ansi:redBright',
   fastModeShimmer: 'ansi:redBright',
   briefLabelYou: 'ansi:blueBright',
-  briefLabelOpen Code CLI: 'ansi:redBright',
+  'briefLabelOpen Code CLI': 'ansi:redBright',
   rainbow_red: 'ansi:red',
   rainbow_orange: 'ansi:redBright',
   rainbow_yellow: 'ansi:yellow',
@@ -359,7 +359,7 @@ const darkAnsiTheme: Theme = {
 const lightDaltonizedTheme: Theme = {
   autoAccept: 'rgb(135,0,255)', // Electric violet
   bashBorder: 'rgb(0,102,204)', // Blue instead of pink
-  open-code-cli: 'rgb(255,153,51)', // Orange adjusted for deuteranopia
+  'open-code-cli': 'rgb(255,153,51)', // Orange adjusted for deuteranopia
   openCodeCliShimmer: 'rgb(255,183,101)', // Lighter orange for shimmer effect
   openCodeCliBlue_FOR_SYSTEM_SPINNER: 'rgb(51,102,255)', // Bright blue for system spinner
   openCodeCliBlueShimmer_FOR_SYSTEM_SPINNER: 'rgb(101,152,255)', // Lighter bright blue for system spinner shimmer
@@ -416,7 +416,7 @@ const lightDaltonizedTheme: Theme = {
   fastMode: 'rgb(255,106,0)', // Electric orange (color-blind safe)
   fastModeShimmer: 'rgb(255,150,50)', // Lighter orange for shimmer
   briefLabelYou: 'rgb(37,99,235)', // Blue
-  briefLabelOpen Code CLI: 'rgb(255,153,51)', // Orange adjusted for deuteranopia (matches open-code-cli)
+  'briefLabelOpen Code CLI': 'rgb(255,153,51)', // Orange adjusted for deuteranopia (matches open-code-cli)
   rainbow_red: 'rgb(235,95,87)',
   rainbow_orange: 'rgb(245,139,87)',
   rainbow_yellow: 'rgb(250,195,95)',
@@ -440,7 +440,7 @@ const lightDaltonizedTheme: Theme = {
 const darkTheme: Theme = {
   autoAccept: 'rgb(175,135,255)', // Electric violet
   bashBorder: 'rgb(253,93,177)', // Bright pink
-  open-code-cli: 'rgb(215,119,87)', // Open Code CLI orange
+  'open-code-cli': 'rgb(215,119,87)', // Open Code CLI orange
   openCodeCliShimmer: 'rgb(235,159,127)', // Lighter open-code-cli orange for shimmer effect
   openCodeCliBlue_FOR_SYSTEM_SPINNER: 'rgb(147,165,255)', // Blue for system spinner
   openCodeCliBlueShimmer_FOR_SYSTEM_SPINNER: 'rgb(177,195,255)', // Lighter blue for system spinner shimmer
@@ -497,7 +497,7 @@ const darkTheme: Theme = {
   fastMode: 'rgb(255,120,20)', // Electric orange for dark bg
   fastModeShimmer: 'rgb(255,165,70)', // Lighter orange for shimmer
   briefLabelYou: 'rgb(122,180,232)', // Light blue
-  briefLabelOpen Code CLI: 'rgb(215,119,87)', // Brand orange
+  'briefLabelOpen Code CLI': 'rgb(215,119,87)', // Brand orange
   rainbow_red: 'rgb(235,95,87)',
   rainbow_orange: 'rgb(245,139,87)',
   rainbow_yellow: 'rgb(250,195,95)',
@@ -521,7 +521,7 @@ const darkTheme: Theme = {
 const darkDaltonizedTheme: Theme = {
   autoAccept: 'rgb(175,135,255)', // Electric violet
   bashBorder: 'rgb(51,153,255)', // Bright blue
-  open-code-cli: 'rgb(255,153,51)', // Orange adjusted for deuteranopia
+  'open-code-cli': 'rgb(255,153,51)', // Orange adjusted for deuteranopia
   openCodeCliShimmer: 'rgb(255,183,101)', // Lighter orange for shimmer effect
   openCodeCliBlue_FOR_SYSTEM_SPINNER: 'rgb(153,204,255)', // Light blue for system spinner
   openCodeCliBlueShimmer_FOR_SYSTEM_SPINNER: 'rgb(183,224,255)', // Lighter blue for system spinner shimmer
@@ -578,7 +578,7 @@ const darkDaltonizedTheme: Theme = {
   fastMode: 'rgb(255,120,20)', // Electric orange for dark bg (color-blind safe)
   fastModeShimmer: 'rgb(255,165,70)', // Lighter orange for shimmer
   briefLabelYou: 'rgb(122,180,232)', // Light blue
-  briefLabelOpen Code CLI: 'rgb(255,153,51)', // Orange adjusted for deuteranopia (matches open-code-cli)
+  'briefLabelOpen Code CLI': 'rgb(255,153,51)', // Orange adjusted for deuteranopia (matches open-code-cli)
   rainbow_red: 'rgb(235,95,87)',
   rainbow_orange: 'rgb(245,139,87)',
   rainbow_yellow: 'rgb(250,195,95)',

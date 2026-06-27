@@ -13,7 +13,7 @@ import {
   getIsNonInteractiveSession,
   getSessionId,
 } from '../../bootstrap/state.js'
-import { Open Code CLICodeInternalEvent } from '../../types/generated/events_mono/open_code_cli/v1/open_code_cli_internal_event.js'
+import { OpenCodeCliCodeInternalEvent } from '../../types/generated/events_mono/open_code_cli/v1/open_code_cli_internal_event.js'
 import { GrowthbookExperimentEvent } from '../../types/generated/events_mono/growthbook/v1/growthbook_experiment_event.js'
 import {
   getOpenCodeCliOAuthTokens,
@@ -689,7 +689,7 @@ export class FirstPartyEventLoggingExporter implements LogRecordExporter {
         }
         events.push({
           event_type: 'Open Code CLICodeInternalEvent',
-          event_data: Open Code CLICodeInternalEvent.toJSON({
+          event_data: OpenCodeCliCodeInternalEvent.toJSON({
             event_id: attributes.event_id as string | undefined,
             event_name: eventName,
             client_timestamp: this.hrTimeToDate(log.hrTime),
@@ -726,7 +726,7 @@ export class FirstPartyEventLoggingExporter implements LogRecordExporter {
 
       events.push({
         event_type: 'Open Code CLICodeInternalEvent',
-        event_data: Open Code CLICodeInternalEvent.toJSON({
+        event_data: OpenCodeCliCodeInternalEvent.toJSON({
           event_id: attributes.event_id as string | undefined,
           event_name: eventName,
           client_timestamp: this.hrTimeToDate(log.hrTime),

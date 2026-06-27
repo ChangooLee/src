@@ -12,7 +12,7 @@ import { type ReleaseChannel, saveGlobalConfig } from './config.js'
 import { logForDebugging } from './debug.js'
 import { env } from './env.js'
 import { getOpenCodeCliConfigHomeDir } from './envUtils.js'
-import { Open Code CLIError, getErrnoCode, isENOENT } from './errors.js'
+import { OpenCodeCliError, getErrnoCode, isENOENT } from './errors.js'
 import { execFileNoThrowWithCwd } from './execFileNoThrow.js'
 import { getFsImplementation } from './fsOperations.js'
 import { gracefulShutdownSync } from './gracefulShutdown.js'
@@ -30,7 +30,7 @@ import { jsonParse } from './slowOperations.js'
 const GCS_BUCKET_URL =
   'https://storage.googleapis.com/open-code-cli-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/open-code-cli-releases'
 
-class AutoUpdaterError extends Open Code CLIError {}
+class AutoUpdaterError extends OpenCodeCliError {}
 
 export type InstallStatus =
   | 'success'
@@ -470,7 +470,7 @@ export async function installGlobalPackage(
   }
 
   try {
-    await removeOpen Code CLIAliasesFromShellConfigs()
+    await removeOpenCodeCliAliasesFromShellConfigs()
     // Check if we're using npm from Windows path in WSL
     if (!env.isRunningWithBun() && env.isNpmFromWindowsPath()) {
       logError(new Error('Windows NPM detected in WSL environment'))
@@ -536,7 +536,7 @@ To fix this issue:
  * Remove open-code-cli aliases from shell configuration files
  * This helps clean up old installation methods when switching to native or npm global
  */
-async function removeOpen Code CLIAliasesFromShellConfigs(): Promise<void> {
+async function removeOpenCodeCliAliasesFromShellConfigs(): Promise<void> {
   const configMap = getShellConfigPaths()
 
   // Process each shell config file

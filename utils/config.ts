@@ -16,7 +16,7 @@ import { getCwd } from '../utils/cwd.js'
 import { registerCleanup } from './cleanupRegistry.js'
 import { logForDebugging } from './debug.js'
 import { logForDiagnosticsNoPII } from './diagLogs.js'
-import { getGlobalOpen Code CLIFile } from './env.js'
+import { getGlobalOpenCodeCliFile } from './env.js'
 import { getOpenCodeCliConfigHomeDir, isEnvTruthy } from './envUtils.js'
 import { ConfigParseError, getErrnoCode } from './errors.js'
 import { writeFileSyncAndFlush_DEPRECATED } from './file.js'
@@ -815,7 +815,7 @@ export function saveGlobalConfig(
   let written: GlobalConfig | null = null
   try {
     const didWrite = saveConfigWithLock(
-      getGlobalOpen Code CLIFile(),
+      getGlobalOpenCodeCliFile(),
       createDefaultGlobalConfig,
       current => {
         const config = updater(current)
@@ -845,7 +845,7 @@ export function saveGlobalConfig(
     // getConfig returns defaults. Refuse to write those over a good cached
     // config to avoid wiping auth. See GH #3117.
     const currentConfig = getConfig(
-      getGlobalOpen Code CLIFile(),
+      getGlobalOpenCodeCliFile(),
       createDefaultGlobalConfig,
     )
     if (wouldLoseAuthState(currentConfig)) {
@@ -865,7 +865,7 @@ export function saveGlobalConfig(
       ...config,
       projects: removeProjectHistory(currentConfig.projects),
     }
-    saveConfig(getGlobalOpen Code CLIFile(), written, DEFAULT_GLOBAL_CONFIG)
+    saveConfig(getGlobalOpenCodeCliFile(), written, DEFAULT_GLOBAL_CONFIG)
     writeThroughGlobalConfigCache(written)
   }
 }
@@ -1002,7 +1002,7 @@ let freshnessWatcherStarted = false
 function startGlobalConfigFreshnessWatcher(): void {
   if (freshnessWatcherStarted || process.env.NODE_ENV === 'test') return
   freshnessWatcherStarted = true
-  const file = getGlobalOpen Code CLIFile()
+  const file = getGlobalOpenCodeCliFile()
   watchFile(
     file,
     { interval: CONFIG_FRESHNESS_POLL_MS, persistent: false },
@@ -1066,12 +1066,12 @@ export function getGlobalConfig(): GlobalConfig {
   try {
     let stats: { mtimeMs: number; size: number } | null = null
     try {
-      stats = getFsImplementation().statSync(getGlobalOpen Code CLIFile())
+      stats = getFsImplementation().statSync(getGlobalOpenCodeCliFile())
     } catch {
       // File doesn't exist
     }
     const config = migrateConfigFields(
-      getConfig(getGlobalOpen Code CLIFile(), createDefaultGlobalConfig),
+      getConfig(getGlobalOpenCodeCliFile(), createDefaultGlobalConfig),
     )
     globalConfigCache = {
       config,
@@ -1085,7 +1085,7 @@ export function getGlobalConfig(): GlobalConfig {
   } catch {
     // If anything goes wrong, fall back to uncached behavior
     return migrateConfigFields(
-      getConfig(getGlobalOpen Code CLIFile(), createDefaultGlobalConfig),
+      getConfig(getGlobalOpenCodeCliFile(), createDefaultGlobalConfig),
     )
   }
 }
@@ -1144,7 +1144,7 @@ function saveConfig<A extends object>(
       mode: 0o600,
     },
   )
-  if (file === getGlobalOpen Code CLIFile()) {
+  if (file === getGlobalOpenCodeCliFile()) {
     globalConfigWriteCount++
   }
 }
@@ -1192,7 +1192,7 @@ function saveConfigWithLock<A extends object>(
 
     // Check for stale write - file changed since we last read it
     // Only check for global config file since lastReadFileStats tracks that specific file
-    if (lastReadFileStats && file === getGlobalOpen Code CLIFile()) {
+    if (lastReadFileStats && file === getGlobalOpenCodeCliFile()) {
       try {
         const currentStats = fs.statSync(file)
         if (
@@ -1219,7 +1219,7 @@ function saveConfigWithLock<A extends object>(
     // momentarily corrupted (concurrent writes, kill-during-write), this
     // returns defaults -- we must not write those back over good config.
     const currentConfig = getConfig(file, createDefault)
-    if (file === getGlobalOpen Code CLIFile() && wouldLoseAuthState(currentConfig)) {
+    if (file === getGlobalOpenCodeCliFile() && wouldLoseAuthState(currentConfig)) {
       logForDebugging(
         'saveConfigWithLock: re-read config is missing auth that cache has; refusing to write to avoid wiping ~/.open-code-cli.json. See GH #3117.',
         { level: 'error' },
@@ -1322,7 +1322,7 @@ function saveConfigWithLock<A extends object>(
         mode: 0o600,
       },
     )
-    if (file === getGlobalOpen Code CLIFile()) {
+    if (file === getGlobalOpenCodeCliFile()) {
       globalConfigWriteCount++
     }
     return true
@@ -1350,7 +1350,7 @@ export function enableConfigs(): void {
   configReadingAllowed = true
   // We only check the global config because currently all the configs share a file
   getConfig(
-    getGlobalOpen Code CLIFile(),
+    getGlobalOpenCodeCliFile(),
     createDefaultGlobalConfig,
     true /* throw on invalid */,
   )
@@ -1644,7 +1644,7 @@ export function saveCurrentProjectConfig(
   let written: GlobalConfig | null = null
   try {
     const didWrite = saveConfigWithLock(
-      getGlobalOpen Code CLIFile(),
+      getGlobalOpenCodeCliFile(),
       createDefaultGlobalConfig,
       current => {
         const currentProjectConfig =
@@ -1674,7 +1674,7 @@ export function saveCurrentProjectConfig(
 
     // Same race window as saveGlobalConfig's fallback -- refuse to write
     // defaults over good cached config. See GH #3117.
-    const config = getConfig(getGlobalOpen Code CLIFile(), createDefaultGlobalConfig)
+    const config = getConfig(getGlobalOpenCodeCliFile(), createDefaultGlobalConfig)
     if (wouldLoseAuthState(config)) {
       logForDebugging(
         'saveCurrentProjectConfig fallback: re-read config is missing auth that cache has; refusing to write. See GH #3117.',
@@ -1697,7 +1697,7 @@ export function saveCurrentProjectConfig(
         [absolutePath]: newProjectConfig,
       },
     }
-    saveConfig(getGlobalOpen Code CLIFile(), written, DEFAULT_GLOBAL_CONFIG)
+    saveConfig(getGlobalOpenCodeCliFile(), written, DEFAULT_GLOBAL_CONFIG)
     writeThroughGlobalConfigCache(written)
   }
 }
@@ -1803,11 +1803,11 @@ export function getMemoryPath(memoryType: MemoryType): string {
   return '' // unreachable in external builds where TeamMem is not in MemoryType
 }
 
-export function getManagedOpen Code CLIRulesDir(): string {
+export function getManagedOpenCodeCliRulesDir(): string {
   return join(getManagedFilePath(), '.open-code-cli', 'rules')
 }
 
-export function getUserOpen Code CLIRulesDir(): string {
+export function getUserOpenCodeCliRulesDir(): string {
   return join(getOpenCodeCliConfigHomeDir(), 'rules')
 }
 

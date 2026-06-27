@@ -35,7 +35,7 @@ type Props = {
   onSubmit: () => void;
   onTabPrev?: () => void;
   onTabNext?: () => void;
-  onRespondToOpen Code CLI: () => void;
+  onRespondToOpenCodeCli: () => void;
   onFinishPlanInterview: () => void;
   onImagePaste?: (base64Image: string, mediaType?: string, filename?: string, dimensions?: ImageDimensions, sourcePath?: string) => void;
   onRemoveImage?: (id: number) => void;
@@ -59,7 +59,7 @@ export function QuestionView(t0) {
     onSubmit,
     onTabPrev,
     onTabNext,
-    onRespondToOpen Code CLI,
+    onRespondToOpenCodeCli,
     onFinishPlanInterview,
     onImagePaste,
     pastedContents,
@@ -113,7 +113,7 @@ export function QuestionView(t0) {
   }
   const handleUpFromFooter = t5;
   let t6;
-  if ($[5] !== footerIndex || $[6] !== isFooterFocused || $[7] !== isInPlanMode || $[8] !== onCancel || $[9] !== onFinishPlanInterview || $[10] !== onRespondToOpen Code CLI) {
+  if ($[5] !== footerIndex || $[6] !== isFooterFocused || $[7] !== isInPlanMode || $[8] !== onCancel || $[9] !== onFinishPlanInterview || $[10] !== onRespondToOpenCodeCli) {
     t6 = e => {
       if (!isFooterFocused) {
         return;
@@ -137,7 +137,7 @@ export function QuestionView(t0) {
       if (e.key === "return") {
         e.preventDefault();
         if (footerIndex === 0) {
-          onRespondToOpen Code CLI();
+          onRespondToOpenCodeCli();
         } else {
           onFinishPlanInterview();
         }
@@ -153,7 +153,7 @@ export function QuestionView(t0) {
     $[7] = isInPlanMode;
     $[8] = onCancel;
     $[9] = onFinishPlanInterview;
-    $[10] = onRespondToOpen Code CLI;
+    $[10] = onRespondToOpenCodeCli;
     $[11] = t6;
   } else {
     t6 = $[11];
@@ -235,8 +235,8 @@ export function QuestionView(t0) {
   const hasAnyPreview = !question.multiSelect && question.options.some(_temp3);
   if (hasAnyPreview) {
     let t8;
-    if ($[30] !== answers || $[31] !== currentQuestionIndex || $[32] !== hideSubmitTab || $[33] !== minContentHeight || $[34] !== minContentWidth || $[35] !== onAnswer || $[36] !== onCancel || $[37] !== onFinishPlanInterview || $[38] !== onRespondToOpen Code CLI || $[39] !== onTabNext || $[40] !== onTabPrev || $[41] !== onTextInputFocus || $[42] !== onUpdateQuestionState || $[43] !== question || $[44] !== questionStates || $[45] !== questions) {
-      t8 = <PreviewQuestionView question={question} questions={questions} currentQuestionIndex={currentQuestionIndex} answers={answers} questionStates={questionStates} hideSubmitTab={hideSubmitTab} minContentHeight={minContentHeight} minContentWidth={minContentWidth} onUpdateQuestionState={onUpdateQuestionState} onAnswer={onAnswer} onTextInputFocus={onTextInputFocus} onCancel={onCancel} onTabPrev={onTabPrev} onTabNext={onTabNext} onRespondToOpen Code CLI={onRespondToOpen Code CLI} onFinishPlanInterview={onFinishPlanInterview} />;
+    if ($[30] !== answers || $[31] !== currentQuestionIndex || $[32] !== hideSubmitTab || $[33] !== minContentHeight || $[34] !== minContentWidth || $[35] !== onAnswer || $[36] !== onCancel || $[37] !== onFinishPlanInterview || $[38] !== onRespondToOpenCodeCli || $[39] !== onTabNext || $[40] !== onTabPrev || $[41] !== onTextInputFocus || $[42] !== onUpdateQuestionState || $[43] !== question || $[44] !== questionStates || $[45] !== questions) {
+      t8 = <PreviewQuestionView question={question} questions={questions} currentQuestionIndex={currentQuestionIndex} answers={answers} questionStates={questionStates} hideSubmitTab={hideSubmitTab} minContentHeight={minContentHeight} minContentWidth={minContentWidth} onUpdateQuestionState={onUpdateQuestionState} onAnswer={onAnswer} onTextInputFocus={onTextInputFocus} onCancel={onCancel} onTabPrev={onTabPrev} onTabNext={onTabNext} onRespondToOpenCodeCli={onRespondToOpenCodeCli} onFinishPlanInterview={onFinishPlanInterview} />;
       $[30] = answers;
       $[31] = currentQuestionIndex;
       $[32] = hideSubmitTab;
@@ -245,7 +245,7 @@ export function QuestionView(t0) {
       $[35] = onAnswer;
       $[36] = onCancel;
       $[37] = onFinishPlanInterview;
-      $[38] = onRespondToOpen Code CLI;
+      $[38] = onRespondToOpenCodeCli;
       $[39] = onTabNext;
       $[40] = onTabPrev;
       $[41] = onTextInputFocus;

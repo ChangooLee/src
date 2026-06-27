@@ -58,9 +58,6 @@ export const getOpenCodeCliConfigHomeDir = memoize(
   () => `${process.env.OPEN_CODE_CLI_CONFIG_DIR ?? ''}:${process.env.OPEN_CODE_CLI_CONFIG_DIR ?? ''}`,
 )
 
-// Compatibility export for existing imports; primary naming is Open Code CLI.
-export const getOpenCodeCliConfigHomeDir = getOpenCodeCliConfigHomeDir
-
 export function getTeamsDir(): string {
   return join(getOpenCodeCliConfigHomeDir(), 'teams')
 }

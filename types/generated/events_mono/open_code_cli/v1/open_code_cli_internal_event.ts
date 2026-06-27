@@ -77,7 +77,7 @@ export interface SlackContext {
  * This schema matches the structure in open-code-cli-internal/src/services/statsig.ts
  * Source table: proj-product-data-nhme.raw_statsig_internal_tools.events
  */
-export interface Open Code CLICodeInternalEvent {
+export interface OpenCodeCliCodeInternalEvent {
   /** Event name (e.g., "open_code_cli_binary_feedback", "open_code_cli_api_success") */
   event_name?: string | undefined
   /** Event timestamp */
@@ -549,7 +549,7 @@ export const SlackContext: MessageFns<SlackContext> = {
   },
 }
 
-function createBaseOpen Code CLICodeInternalEvent(): Open Code CLICodeInternalEvent {
+function createBaseOpenCodeCliCodeInternalEvent(): OpenCodeCliCodeInternalEvent {
   return {
     event_name: '',
     client_timestamp: undefined,
@@ -583,8 +583,8 @@ function createBaseOpen Code CLICodeInternalEvent(): Open Code CLICodeInternalEv
   }
 }
 
-export const Open Code CLICodeInternalEvent: MessageFns<Open Code CLICodeInternalEvent> = {
-  fromJSON(object: any): Open Code CLICodeInternalEvent {
+export const OpenCodeCliCodeInternalEvent: MessageFns<OpenCodeCliCodeInternalEvent> = {
+  fromJSON(object: any): OpenCodeCliCodeInternalEvent {
     return {
       event_name: isSet(object.event_name)
         ? globalThis.String(object.event_name)
@@ -668,7 +668,7 @@ export const Open Code CLICodeInternalEvent: MessageFns<Open Code CLICodeInterna
     }
   },
 
-  toJSON(message: Open Code CLICodeInternalEvent): unknown {
+  toJSON(message: OpenCodeCliCodeInternalEvent): unknown {
     const obj: any = {}
     if (message.event_name !== undefined) {
       obj.event_name = message.event_name
@@ -760,15 +760,15 @@ export const Open Code CLICodeInternalEvent: MessageFns<Open Code CLICodeInterna
     return obj
   },
 
-  create<I extends Exact<DeepPartial<Open Code CLICodeInternalEvent>, I>>(
+  create<I extends Exact<DeepPartial<OpenCodeCliCodeInternalEvent>, I>>(
     base?: I,
-  ): Open Code CLICodeInternalEvent {
-    return Open Code CLICodeInternalEvent.fromPartial(base ?? ({} as any))
+  ): OpenCodeCliCodeInternalEvent {
+    return OpenCodeCliCodeInternalEvent.fromPartial(base ?? ({} as any))
   },
-  fromPartial<I extends Exact<DeepPartial<Open Code CLICodeInternalEvent>, I>>(
+  fromPartial<I extends Exact<DeepPartial<OpenCodeCliCodeInternalEvent>, I>>(
     object: I,
-  ): Open Code CLICodeInternalEvent {
-    const message = createBaseOpen Code CLICodeInternalEvent()
+  ): OpenCodeCliCodeInternalEvent {
+    const message = createBaseOpenCodeCliCodeInternalEvent()
     message.event_name = object.event_name ?? ''
     message.client_timestamp = object.client_timestamp ?? undefined
     message.model = object.model ?? ''

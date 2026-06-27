@@ -1394,8 +1394,8 @@ export async function execIntoTmuxWorktree(args: string[]): Promise<{
 
   // For ants in open-code-cli-internal, set up dev panes (watch + start)
   const isAnt = process.env.USER_TYPE === 'ant'
-  const isOpen Code CLICliInternal = repoName === 'open-code-cli-internal'
-  const shouldSetupDevPanes = isAnt && isOpen Code CLICliInternal && !sessionExists
+  const isOpenCodeCliCliInternal = repoName === 'open-code-cli-internal'
+  const shouldSetupDevPanes = isAnt && isOpenCodeCliCliInternal && !sessionExists
 
   if (shouldSetupDevPanes) {
     // Create detached session with Open Code CLI in first pane

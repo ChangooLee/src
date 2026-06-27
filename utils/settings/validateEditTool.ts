@@ -1,5 +1,5 @@
 import type { ValidationResult } from 'src/Tool.js'
-import { isOpen Code CLISettingsPath } from '../permissions/filesystem.js'
+import { isOpenCodeCliSettingsPath } from '../permissions/filesystem.js'
 import { validateSettingsFileContent } from './validation.js'
 
 /**
@@ -17,7 +17,7 @@ export function validateInputForSettingsFileEdit(
   getUpdatedContent: () => string,
 ): Extract<ValidationResult, { result: false }> | null {
   // Only validate Open Code CLI settings files
-  if (!isOpen Code CLISettingsPath(filePath)) {
+  if (!isOpenCodeCliSettingsPath(filePath)) {
     return null
   }
 

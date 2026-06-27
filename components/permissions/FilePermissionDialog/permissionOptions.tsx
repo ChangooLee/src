@@ -12,7 +12,7 @@ import type { OptionWithDescription } from '../../CustomSelect/select.js';
  * Check if a path is within the project's .open-code-cli/ folder.
  * This is used to determine whether to show the special ".open-code-cli folder" permission option.
  */
-export function isInOpen Code CLIFolder(filePath: string): boolean {
+export function isInOpenCodeCliFolder(filePath: string): boolean {
   const absolutePath = expandPath(filePath);
   const openCodeCliFolderPath = expandPath(`${getOriginalCwd()}/.open-code-cli`);
 
@@ -31,12 +31,12 @@ export function isInOpen Code CLIFolder(filePath: string): boolean {
  * This is used to determine whether to show the special ".open-code-cli folder" permission option
  * for files in the user's home directory.
  */
-export function isInGlobalOpen Code CLIFolder(filePath: string): boolean {
+export function isInGlobalOpenCodeCliFolder(filePath: string): boolean {
   const absolutePath = expandPath(filePath);
-  const globalOpen Code CLIFolderPath = join(homedir(), '.open-code-cli');
+  const globalOpenCodeCliFolderPath = join(homedir(), '.open-code-cli');
   const normalizedAbsolutePath = normalizeCaseForComparison(absolutePath);
-  const normalizedGlobalOpen Code CLIFolderPath = normalizeCaseForComparison(globalOpen Code CLIFolderPath);
-  return normalizedAbsolutePath.startsWith(normalizedGlobalOpen Code CLIFolderPath + sep.toLowerCase()) || normalizedAbsolutePath.startsWith(normalizedGlobalOpen Code CLIFolderPath + '/');
+  const normalizedGlobalOpenCodeCliFolderPath = normalizeCaseForComparison(globalOpenCodeCliFolderPath);
+  return normalizedAbsolutePath.startsWith(normalizedGlobalOpenCodeCliFolderPath + sep.toLowerCase()) || normalizedAbsolutePath.startsWith(normalizedGlobalOpenCodeCliFolderPath + '/');
 }
 export type PermissionOption = {
   type: 'accept-once';
@@ -95,20 +95,20 @@ export function getFilePermissionOptions({
   const inAllowedPath = pathInAllowedWorkingPath(filePath, toolPermissionContext);
 
   // Check if this is a .open-code-cli/ folder path (project or global)
-  const inOpen Code CLIFolder = isInOpen Code CLIFolder(filePath);
-  const inGlobalOpen Code CLIFolder = isInGlobalOpen Code CLIFolder(filePath);
+  const inOpenCodeCliFolder = isInOpenCodeCliFolder(filePath);
+  const inGlobalOpenCodeCliFolder = isInGlobalOpenCodeCliFolder(filePath);
 
   // Option 2: For .open-code-cli/ folder, show special option instead of generic session option
   // Note: Session-level options are always shown since they only affect in-memory state,
   // not persisted settings. The allowManagedPermissionRulesOnly setting only restricts
   // persisted permission rules.
-  if ((inOpen Code CLIFolder || inGlobalOpen Code CLIFolder) && operationType !== 'read') {
+  if ((inOpenCodeCliFolder || inGlobalOpenCodeCliFolder) && operationType !== 'read') {
     options.push({
       label: 'Yes, and allow Open Code CLI to edit its own settings for this session',
       value: 'yes-open-code-cli-folder',
       option: {
         type: 'accept-session',
-        scope: inGlobalOpen Code CLIFolder ? 'global-open-code-cli-folder' : 'open-code-cli-folder'
+        scope: inGlobalOpenCodeCliFolder ? 'global-open-code-cli-folder' : 'open-code-cli-folder'
       }
     });
   } else {

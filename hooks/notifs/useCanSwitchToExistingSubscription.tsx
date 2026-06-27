@@ -22,7 +22,7 @@ async function _temp2() {
   if ((getGlobalConfig().subscriptionNoticeCount ?? 0) >= MAX_SHOW_COUNT) {
     return null;
   }
-  const subscriptionType = await getExistingOpen Code CLISubscription();
+  const subscriptionType = await getExistingOpenCodeCliSubscription();
   if (subscriptionType === null) {
     return null;
   }
@@ -40,7 +40,7 @@ function _temp(current) {
     subscriptionNoticeCount: (current.subscriptionNoticeCount ?? 0) + 1
   };
 }
-async function getExistingOpen Code CLISubscription(): Promise<'Max' | 'Pro' | null> {
+async function getExistingOpenCodeCliSubscription(): Promise<'Max' | 'Pro' | null> {
   // If already using subscription auth, there is nothing to switch to
   if (isOpenCodeCliSubscriber()) {
     return null;

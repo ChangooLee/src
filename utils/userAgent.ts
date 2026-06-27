@@ -8,6 +8,3 @@
 export function getOpenCodeCliUserAgent(): string {
   return `open-code-cli/${MACRO.VERSION}`
 }
-
-// Compatibility export for existing imports; primary naming is Open Code CLI.
-export const getOpenCodeCliUserAgent = getOpenCodeCliUserAgent

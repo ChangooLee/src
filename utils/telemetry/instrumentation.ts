@@ -59,7 +59,7 @@ import { jsonStringify } from '../slowOperations.js'
 import { profileCheckpoint } from '../startupProfiler.js'
 import { isBetaTracingEnabled } from './betaSessionTracing.js'
 import { BigQueryMetricsExporter } from './bigqueryExporter.js'
-import { Open Code CLICodeDiagLogger } from './logger.js'
+import { OpenCodeCliCodeDiagLogger } from './logger.js'
 import { initializePerfettoTracing } from './perfettoTracing.js'
 import {
   endInteractionSpan,
@@ -446,7 +446,7 @@ export async function initializeTelemetry() {
     }
   }
 
-  diag.setLogger(new Open Code CLICodeDiagLogger(), DiagLogLevel.ERROR)
+  diag.setLogger(new OpenCodeCliCodeDiagLogger(), DiagLogLevel.ERROR)
 
   // Initialize Perfetto tracing (independent of OTEL)
   // Enable via OPEN_CODE_CLI_PERFETTO_TRACE=1 or OPEN_CODE_CLI_PERFETTO_TRACE=<path>

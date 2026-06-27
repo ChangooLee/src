@@ -50,9 +50,9 @@ import { getAutoMemEntrypoint, isAutoMemoryEnabled } from '../memdir/paths.js'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../services/analytics/growthbook.js'
 import {
   getCurrentProjectConfig,
-  getManagedOpen Code CLIRulesDir,
+  getManagedOpenCodeCliRulesDir,
   getMemoryPath,
-  getUserOpen Code CLIRulesDir,
+  getUserOpenCodeCliRulesDir,
 } from './config.js'
 import { logForDebugging } from './debug.js'
 import { logForDiagnosticsNoPII } from './diagLogs.js'
@@ -811,10 +811,10 @@ export const getMemoryFiles = memoize(
       )),
     )
     // Process Managed .open-code-cli/rules/*.md files
-    const managedOpen Code CLIRulesDir = getManagedOpen Code CLIRulesDir()
+    const managedOpenCodeCliRulesDir = getManagedOpenCodeCliRulesDir()
     result.push(
       ...(await processMdRules({
-        rulesDir: managedOpen Code CLIRulesDir,
+        rulesDir: managedOpenCodeCliRulesDir,
         type: 'Managed',
         processedPaths,
         includeExternal,
@@ -834,10 +834,10 @@ export const getMemoryFiles = memoize(
         )),
       )
       // Process User ~/.open-code-cli/rules/*.md files
-      const userOpen Code CLIRulesDir = getUserOpen Code CLIRulesDir()
+      const userOpenCodeCliRulesDir = getUserOpenCodeCliRulesDir()
       result.push(
         ...(await processMdRules({
-          rulesDir: userOpen Code CLIRulesDir,
+          rulesDir: userOpenCodeCliRulesDir,
           type: 'User',
           processedPaths,
           includeExternal: true,
@@ -896,10 +896,10 @@ export const getMemoryFiles = memoize(
         )
 
         // Try reading .open-code-cli/OPEN_CODE.md (Project)
-        const dotOpen Code CLIPath = join(dir, '.open-code-cli', 'OPEN_CODE.md')
+        const dotOpenCodeCliPath = join(dir, '.open-code-cli', 'OPEN_CODE.md')
         result.push(
           ...(await processMemoryFile(
-            dotOpen Code CLIPath,
+            dotOpenCodeCliPath,
             'Project',
             processedPaths,
             includeExternal,
@@ -952,10 +952,10 @@ export const getMemoryFiles = memoize(
         )
 
         // Try reading .open-code-cli/OPEN_CODE.md from the additional directory
-        const dotOpen Code CLIPath = join(dir, '.open-code-cli', 'OPEN_CODE.md')
+        const dotOpenCodeCliPath = join(dir, '.open-code-cli', 'OPEN_CODE.md')
         result.push(
           ...(await processMemoryFile(
-            dotOpen Code CLIPath,
+            dotOpenCodeCliPath,
             'Project',
             processedPaths,
             includeExternal,
@@ -1209,11 +1209,11 @@ export async function getManagedAndUserConditionalRules(
   const result: MemoryFileInfo[] = []
 
   // Process Managed conditional .open-code-cli/rules/*.md files
-  const managedOpen Code CLIRulesDir = getManagedOpen Code CLIRulesDir()
+  const managedOpenCodeCliRulesDir = getManagedOpenCodeCliRulesDir()
   result.push(
     ...(await processConditionedMdRules(
       targetPath,
-      managedOpen Code CLIRulesDir,
+      managedOpenCodeCliRulesDir,
       'Managed',
       processedPaths,
       false,
@@ -1222,11 +1222,11 @@ export async function getManagedAndUserConditionalRules(
 
   if (isSettingSourceEnabled('userSettings')) {
     // Process User conditional .open-code-cli/rules/*.md files
-    const userOpen Code CLIRulesDir = getUserOpen Code CLIRulesDir()
+    const userOpenCodeCliRulesDir = getUserOpenCodeCliRulesDir()
     result.push(
       ...(await processConditionedMdRules(
         targetPath,
-        userOpen Code CLIRulesDir,
+        userOpenCodeCliRulesDir,
         'User',
         processedPaths,
         true,
@@ -1264,10 +1264,10 @@ export async function getMemoryFilesForNestedDirectory(
         false,
       )),
     )
-    const dotOpen Code CLIPath = join(dir, '.open-code-cli', 'OPEN_CODE.md')
+    const dotOpenCodeCliPath = join(dir, '.open-code-cli', 'OPEN_CODE.md')
     result.push(
       ...(await processMemoryFile(
-        dotOpen Code CLIPath,
+        dotOpenCodeCliPath,
         'Project',
         processedPaths,
         false,
