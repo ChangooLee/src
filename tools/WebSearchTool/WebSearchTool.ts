@@ -260,7 +260,7 @@ export const WebSearchTool = buildTool({
     const toolSchema = makeToolSchema(input)
 
     const useHaiku = getFeatureValue_CACHED_MAY_BE_STALE(
-      'tengu_plum_vx3',
+      'open_code_cli_plum_vx3',
       false,
     )
 

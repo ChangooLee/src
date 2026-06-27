@@ -4,33 +4,33 @@ import { homedir } from 'os'
 import { join } from 'path'
 
 const OPEN_CODE_CLI_ENV_PREFIX = 'OPEN_CODE_CLI_'
-const LEGACY_CLAUDE_CODE_ENV_PREFIX = 'CLAUDE_CODE_'
+const LEGACY_OPEN_CODE_CLI_ENV_PREFIX = 'OPEN_CODE_CLI_'
 
 export function getOpenCodeCliEnv(name: string): string | undefined {
   return (
     process.env[`${OPEN_CODE_CLI_ENV_PREFIX}${name}`] ??
-    process.env[`${LEGACY_CLAUDE_CODE_ENV_PREFIX}${name}`]
+    process.env[`${LEGACY_OPEN_CODE_CLI_ENV_PREFIX}${name}`]
   )
 }
 
 export function setOpenCodeCliEnv(name: string, value: string): void {
   process.env[`${OPEN_CODE_CLI_ENV_PREFIX}${name}`] = value
-  process.env[`${LEGACY_CLAUDE_CODE_ENV_PREFIX}${name}`] = value
+  process.env[`${LEGACY_OPEN_CODE_CLI_ENV_PREFIX}${name}`] = value
 }
 
 export function deleteOpenCodeCliEnv(name: string): void {
   delete process.env[`${OPEN_CODE_CLI_ENV_PREFIX}${name}`]
-  delete process.env[`${LEGACY_CLAUDE_CODE_ENV_PREFIX}${name}`]
+  delete process.env[`${LEGACY_OPEN_CODE_CLI_ENV_PREFIX}${name}`]
 }
 
 export function syncOpenCodeCliEnvAliases(): void {
   for (const [key, value] of Object.entries(process.env)) {
     if (value === undefined) continue
     if (key.startsWith(OPEN_CODE_CLI_ENV_PREFIX)) {
-      process.env[`${LEGACY_CLAUDE_CODE_ENV_PREFIX}${key.slice(OPEN_CODE_CLI_ENV_PREFIX.length)}`] =
+      process.env[`${LEGACY_OPEN_CODE_CLI_ENV_PREFIX}${key.slice(OPEN_CODE_CLI_ENV_PREFIX.length)}`] =
         value
-    } else if (key.startsWith(LEGACY_CLAUDE_CODE_ENV_PREFIX)) {
-      const openCodeCliKey = `${OPEN_CODE_CLI_ENV_PREFIX}${key.slice(LEGACY_CLAUDE_CODE_ENV_PREFIX.length)}`
+    } else if (key.startsWith(LEGACY_OPEN_CODE_CLI_ENV_PREFIX)) {
+      const openCodeCliKey = `${OPEN_CODE_CLI_ENV_PREFIX}${key.slice(LEGACY_OPEN_CODE_CLI_ENV_PREFIX.length)}`
       process.env[openCodeCliKey] ??= value
     }
   }
@@ -49,7 +49,7 @@ export const getOpenCodeCliConfigHomeDir = memoize(
     if (legacyConfigDir) return legacyConfigDir.normalize('NFC')
 
     const primaryDir = join(homedir(), '.open-code-cli')
-    const legacyDir = join(homedir(), '.claude')
+    const legacyDir = join(homedir(), '.open-code-cli')
     return (existsSync(primaryDir) || !existsSync(legacyDir)
       ? primaryDir
       : legacyDir
@@ -59,7 +59,7 @@ export const getOpenCodeCliConfigHomeDir = memoize(
 )
 
 // Compatibility export for existing imports; primary naming is Open Code CLI.
-export const getClaudeConfigHomeDir = getOpenCodeCliConfigHomeDir
+export const getOpenCodeCliConfigHomeDir = getOpenCodeCliConfigHomeDir
 
 export function getTeamsDir(): string {
   return join(getOpenCodeCliConfigHomeDir(), 'teams')

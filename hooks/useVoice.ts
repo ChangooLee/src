@@ -236,7 +236,7 @@ export function useVoice({
   // connectionRef mid-way through the next session.
   const sessionGenRef = useRef(0)
   // True if the early-error retry fired during this session.
-  // Tracked for the tengu_voice_recording_completed analytics event.
+  // Tracked for the open_code_cli_voice_recording_completed analytics event.
   const retryUsedRef = useRef(false)
   // Full audio captured this session, kept for silent-drop replay. ~1% of
   // sessions get a sticky-broken CE pod that accepts audio but returns zero

@@ -196,7 +196,7 @@ export function Config({
     onIsSearchModeChange?.(ownsEsc);
   }, [ownsEsc, onIsSearchModeChange]);
   const isConnectedToIde = hasAccessToIDEExtensionDiffFeature(context.options.mcpClients);
-  const isFileCheckpointingAvailable = !isEnvTruthy((process.env.OPEN_CODE_CLI_DISABLE_FILE_CHECKPOINTING ?? process.env.CLAUDE_CODE_DISABLE_FILE_CHECKPOINTING));
+  const isFileCheckpointingAvailable = !isEnvTruthy(process.env.OPEN_CODE_CLI_DISABLE_FILE_CHECKPOINTING);
   const memoryFiles = React.use(getMemoryFiles(true));
   const shouldShowExternalIncludesToggle = hasExternalClaudeMdIncludes(memoryFiles);
   const autoUpdaterDisabledReason = getAutoUpdaterDisabledReason();
@@ -376,7 +376,7 @@ export function Config({
         }));
       }
     }
-  }] : []), ...(getFeatureValue_CACHED_MAY_BE_STALE('tengu_chomp_inflection', false) ? [{
+  }] : []), ...(getFeatureValue_CACHED_MAY_BE_STALE('open_code_cli_chomp_inflection', false) ? [{
     id: 'promptSuggestionEnabled',
     label: 'Prompt suggestions',
     value: promptSuggestionEnabled,
@@ -455,7 +455,7 @@ export function Config({
         enabled: terminalProgressBarEnabled
       });
     }
-  }, ...(getFeatureValue_CACHED_MAY_BE_STALE('tengu_terminal_sidebar', false) ? [{
+  }, ...(getFeatureValue_CACHED_MAY_BE_STALE('open_code_cli_terminal_sidebar', false) ? [{
     id: 'showStatusInTerminalTab',
     label: 'Show status in terminal tab',
     value: globalConfig.showStatusInTerminalTab ?? false,
@@ -874,7 +874,7 @@ export function Config({
   }] : []), {
     id: 'claudeInChromeDefaultEnabled',
     label: 'Claude in Chrome enabled by default',
-    value: globalConfig.claudeInChromeDefaultEnabled ?? true,
+    value: globalConfig.open-code-cliInChromeDefaultEnabled ?? true,
     type: 'boolean' as const,
     onChange(enabled_5: boolean) {
       saveGlobalConfig(current_18 => ({
@@ -975,7 +975,7 @@ export function Config({
     }
   }] : []), ...(shouldShowExternalIncludesToggle ? [{
     id: 'showExternalIncludesDialog',
-    label: 'External CLAUDE.md includes',
+    label: 'External OPEN_CODE.md includes',
     value: (() => {
       const projectConfig = getCurrentProjectConfig();
       if (projectConfig.hasClaudeMdExternalIncludesApproved) {

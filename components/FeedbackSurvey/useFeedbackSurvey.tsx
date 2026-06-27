@@ -55,9 +55,9 @@ export function useFeedbackSurvey(messages: Message[], isLoading: boolean, submi
     timeLastShown: null,
     submitCountAtLastAppearance: null
   }));
-  const config = useDynamicConfig<FeedbackSurveyConfig>('tengu_feedback_survey_config', DEFAULT_FEEDBACK_SURVEY_CONFIG);
-  const badTranscriptAskConfig = useDynamicConfig<TranscriptAskConfig>('tengu_bad_survey_transcript_ask_config', DEFAULT_TRANSCRIPT_ASK_CONFIG);
-  const goodTranscriptAskConfig = useDynamicConfig<TranscriptAskConfig>('tengu_good_survey_transcript_ask_config', DEFAULT_TRANSCRIPT_ASK_CONFIG);
+  const config = useDynamicConfig<FeedbackSurveyConfig>('open_code_cli_feedback_survey_config', DEFAULT_FEEDBACK_SURVEY_CONFIG);
+  const badTranscriptAskConfig = useDynamicConfig<TranscriptAskConfig>('open_code_cli_bad_survey_transcript_ask_config', DEFAULT_TRANSCRIPT_ASK_CONFIG);
+  const goodTranscriptAskConfig = useDynamicConfig<TranscriptAskConfig>('open_code_cli_good_survey_transcript_ask_config', DEFAULT_TRANSCRIPT_ASK_CONFIG);
   const settingsRate = getInitialSettings().feedbackSurveyRate;
   const sessionStartTime = useRef(Date.now());
   const submitCountAtSessionStart = useRef(submitCount);
@@ -226,7 +226,7 @@ export function useFeedbackSurvey(messages: Message[], isLoading: boolean, submi
     if (!isModelAllowed) {
       return false;
     }
-    if (isEnvTruthy((process.env.OPEN_CODE_CLI_DISABLE_FEEDBACK_SURVEY ?? process.env.CLAUDE_CODE_DISABLE_FEEDBACK_SURVEY))) {
+    if (isEnvTruthy(process.env.OPEN_CODE_CLI_DISABLE_FEEDBACK_SURVEY)) {
       return false;
     }
     if (isFeedbackSurveyDisabled()) {

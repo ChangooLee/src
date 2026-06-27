@@ -1546,10 +1546,10 @@ export async function powershellToolHasPermission(
     // cwd-changing command (Set-Location/Push-Location/Pop-Location). The
     // synthetic single-statement AST strips compound context, so
     // checkPermissionMode cannot see the cd in other statements. Without this
-    // gate, `Set-Location ./.claude; Set-Content ./settings.json '...'` would
+    // gate, `Set-Location ./.open-code-cli; Set-Content ./settings.json '...'` would
     // pass: Set-Content is checked in isolation, matches ACCEPT_EDITS_ALLOWED_CMDLETS,
     // and auto-allows — but PowerShell runs it from the changed cwd, writing to
-    // .claude/settings.json (a Claude config file the path validator didn't check).
+    // .open-code-cli/settings.json (a Open Code CLI config file the path validator didn't check).
     // This matches BashTool's compoundCommandHasCd guard.
     if (statement !== null && !hasCdSubCommand && !hasSymlinkCreate) {
       const subModeResult = checkPermissionMode(

@@ -51,7 +51,7 @@ function isPermissionMode(raw: string): raw is PermissionMode {
 function getChromeBridgeUrl(): string | undefined {
   const bridgeEnabled =
     process.env.USER_TYPE === 'ant' ||
-    getFeatureValue_CACHED_MAY_BE_STALE('tengu_copper_bridge', false)
+    getFeatureValue_CACHED_MAY_BE_STALE('open_code_cli_copper_bridge', false)
 
   if (!bridgeEnabled) {
     return undefined
@@ -65,10 +65,10 @@ function getChromeBridgeUrl(): string | undefined {
   }
 
   if (isEnvTruthy(process.env.USE_STAGING_OAUTH)) {
-    return 'wss://bridge-staging.claudeusercontent.com'
+    return 'wss://bridge-staging.open-code-cliusercontent.com'
   }
 
-  return 'wss://bridge.claudeusercontent.com'
+  return 'wss://bridge.open-code-cliusercontent.com'
 }
 
 function isLocalBridge(): boolean {

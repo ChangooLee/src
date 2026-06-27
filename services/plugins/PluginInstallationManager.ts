@@ -128,7 +128,7 @@ export async function performBackgroundPluginInstallations(
     logEvent('open_code_cli_marketplace_background_install', metrics)
     logForDiagnosticsNoPII(
       'info',
-      'tengu_marketplace_background_install',
+      'open_code_cli_marketplace_background_install',
       metrics,
     )
 

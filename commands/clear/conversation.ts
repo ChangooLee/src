@@ -65,7 +65,7 @@ export async function clearConversation({
   setConversationId?: (id: UUID) => void
 }): Promise<void> {
   // Execute SessionEnd hooks before clearing (bounded by
-  // CLAUDE_CODE_SESSIONEND_HOOKS_TIMEOUT_MS, default 1.5s)
+  // OPEN_CODE_CLI_SESSIONEND_HOOKS_TIMEOUT_MS, default 1.5s)
   const sessionEndTimeoutMs = getSessionEndHookTimeoutMs()
   await executeSessionEndHooks('clear', {
     getAppState,
@@ -203,7 +203,7 @@ export async function clearConversation({
   // Set the old session as parent for analytics lineage tracking
   regenerateSessionId({ setCurrentAsParent: true })
   // Update the environment variable so subprocesses use the new session ID
-  if (process.env.USER_TYPE === 'ant' && (process.env.OPEN_CODE_CLI_SESSION_ID ?? process.env.CLAUDE_CODE_SESSION_ID)) {
+  if (process.env.USER_TYPE === 'ant' && process.env.OPEN_CODE_CLI_SESSION_ID) {
     setOpenCodeCliEnv('SESSION_ID', getSessionId())
   }
   await resetSessionFilePointer()

@@ -124,7 +124,7 @@ export async function showSetupScreens(root: Root, permissionMode: PermissionMod
 
   // Always show the trust dialog in interactive sessions, regardless of permission mode.
   // The trust dialog is the workspace trust boundary — it warns about untrusted repos
-  // and checks CLAUDE.md external includes. bypassPermissions mode
+  // and checks OPEN_CODE.md external includes. bypassPermissions mode
   // only affects tool execution permissions, not workspace trust.
   // Note: non-interactive sessions (CI/CD with -p) never reach showSetupScreens at all.
   // Skip permission checks in claubbit
@@ -239,7 +239,7 @@ export async function showSetupScreens(root: Root, permissionMode: PermissionMod
   // is NOT bypassed — gateChannelServer() still runs; this flag only exists
   // to sidestep the --channels approved-server allowlist.
   if (feature('KAIROS') || feature('KAIROS_CHANNELS')) {
-    // gateChannelServer and ChannelsNotice read tengu_harbor after this
+    // gateChannelServer and ChannelsNotice read open_code_cli_harbor after this
     // function returns. A cold disk cache (fresh install, or first run after
     // the flag was added server-side) defaults to false and silently drops
     // channel notifications for the whole session — gh#37026.
@@ -248,7 +248,7 @@ export async function showSetupScreens(root: Root, permissionMode: PermissionMod
     // initializeGrowthBook promise fired earlier). Also warms the
     // isChannelsEnabled() check in the dev-channels dialog below.
     if (getAllowedChannels().length > 0 || (devChannels?.length ?? 0) > 0) {
-      await checkGate_CACHED_OR_BLOCKING('tengu_harbor');
+      await checkGate_CACHED_OR_BLOCKING('open_code_cli_harbor');
     }
     if (devChannels && devChannels.length > 0) {
       const [{
@@ -256,7 +256,7 @@ export async function showSetupScreens(root: Root, permissionMode: PermissionMod
       }, {
         getClaudeAIOAuthTokens
       }] = await Promise.all([import('./services/mcp/channelAllowlist.js'), import('./utils/auth.js')]);
-      // Skip the dialog when channels are blocked (tengu_harbor off or no
+      // Skip the dialog when channels are blocked (open_code_cli_harbor off or no
       // OAuth) — accepting then immediately seeing "not available" in
       // ChannelsNotice is worse than no dialog. Append entries anyway so
       // ChannelsNotice renders the blocked branch with the dev entries
@@ -316,7 +316,7 @@ export function getRenderContext(exitOnCtrlC: boolean): {
   // offline analysis by bench/repl-scroll.ts. Captures the full TUI
   // render pipeline (yoga → screen buffer → diff → optimize → stdout)
   // so perf work on any phase can be validated against real user flows.
-  const frameTimingLogPath = (process.env.OPEN_CODE_CLI_FRAME_TIMING_LOG ?? process.env.CLAUDE_CODE_FRAME_TIMING_LOG);
+  const frameTimingLogPath = process.env.OPEN_CODE_CLI_FRAME_TIMING_LOG;
   return {
     getFpsMetrics: () => fpsTracker.getMetrics(),
     stats,

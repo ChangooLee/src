@@ -11,7 +11,7 @@ import { logOTelEvent } from '../../utils/telemetry/events.js';
 import { useSurveyState } from './useSurveyState.js';
 import type { FeedbackSurveyResponse } from './utils.js';
 const HIDE_THANKS_AFTER_MS = 3000;
-const POST_COMPACT_SURVEY_GATE = 'tengu_post_compact_survey';
+const POST_COMPACT_SURVEY_GATE = 'open_code_cli_post_compact_survey';
 const SURVEY_PROBABILITY = 0.2; // Show survey 20% of the time after compaction
 
 function hasMessageAfterBoundary(messages: Message[], boundaryUuid: string): boolean {
@@ -119,7 +119,7 @@ export function usePostCompactSurvey(messages, isLoading, t0, t1) {
       if (isFeedbackSurveyDisabled()) {
         return;
       }
-      if (isEnvTruthy((process.env.OPEN_CODE_CLI_DISABLE_FEEDBACK_SURVEY ?? process.env.CLAUDE_CODE_DISABLE_FEEDBACK_SURVEY))) {
+      if (isEnvTruthy(process.env.OPEN_CODE_CLI_DISABLE_FEEDBACK_SURVEY)) {
         return;
       }
       if (pendingCompactBoundaryUuid.current !== null) {

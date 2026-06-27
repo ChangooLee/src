@@ -31,15 +31,15 @@ export type ClientSideInstruction = {
  * False → prompts.ts keeps its DANGEROUS_uncachedSystemPromptSection
  * (rebuilt every turn; cache-busts on late connect).
  *
- * Env override for local testing: CLAUDE_CODE_MCP_INSTR_DELTA=true/false
+ * Env override for local testing: OPEN_CODE_CLI_MCP_INSTR_DELTA=true/false
  * wins over both ant bypass and the GrowthBook gate.
  */
 export function isMcpInstructionsDeltaEnabled(): boolean {
-  if (isEnvTruthy((process.env.OPEN_CODE_CLI_MCP_INSTR_DELTA ?? process.env.CLAUDE_CODE_MCP_INSTR_DELTA))) return true
-  if (isEnvDefinedFalsy((process.env.OPEN_CODE_CLI_MCP_INSTR_DELTA ?? process.env.CLAUDE_CODE_MCP_INSTR_DELTA))) return false
+  if (isEnvTruthy(process.env.OPEN_CODE_CLI_MCP_INSTR_DELTA)) return true
+  if (isEnvDefinedFalsy(process.env.OPEN_CODE_CLI_MCP_INSTR_DELTA)) return false
   return (
     process.env.USER_TYPE === 'ant' ||
-    getFeatureValue_CACHED_MAY_BE_STALE('tengu_basalt_3kr', false)
+    getFeatureValue_CACHED_MAY_BE_STALE('open_code_cli_basalt_3kr', false)
   )
 }
 
@@ -109,7 +109,7 @@ export function getMcpInstructionsDelta(
 
   if (added.length === 0 && removed.length === 0) return null
 
-  // Same diagnostic fields as tengu_deferred_tools_pool_change — same
+  // Same diagnostic fields as open_code_cli_deferred_tools_pool_change — same
   // scan-fails-in-prod bug, same attachment persistence path.
   logEvent('open_code_cli_mcp_instructions_pool_change', {
     addedCount: added.length,

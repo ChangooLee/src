@@ -47,7 +47,7 @@ type PluginCliCommand =
 
 /**
  * Generic error handler for plugin CLI commands. Emits
- * tengu_plugin_command_failed before exit so dashboards can compute a
+ * open_code_cli_plugin_command_failed before exit so dashboards can compute a
  * success rate against the corresponding success events.
  */
 function handlePluginCommandError(

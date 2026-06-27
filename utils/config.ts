@@ -17,7 +17,7 @@ import { registerCleanup } from './cleanupRegistry.js'
 import { logForDebugging } from './debug.js'
 import { logForDiagnosticsNoPII } from './diagLogs.js'
 import { getGlobalClaudeFile } from './env.js'
-import { getClaudeConfigHomeDir, isEnvTruthy } from './envUtils.js'
+import { getOpenCodeCliConfigHomeDir, isEnvTruthy } from './envUtils.js'
 import { ConfigParseError, getErrnoCode } from './errors.js'
 import { writeFileSyncAndFlush_DEPRECATED } from './file.js'
 import { getFsImplementation } from './fsOperations.js'
@@ -200,9 +200,9 @@ export type GlobalConfig = {
   lastOnboardingVersion?: string
   // Tracks the last version for which release notes were seen, used for managing release notes
   lastReleaseNotesSeen?: string
-  // Timestamp when changelog was last fetched (content stored in ~/.claude/cache/changelog.md)
+  // Timestamp when changelog was last fetched (content stored in ~/.open-code-cli/cache/changelog.md)
   changelogLastFetched?: number
-  // @deprecated - Migrated to ~/.claude/cache/changelog.md. Keep for migration support.
+  // @deprecated - Migrated to ~/.open-code-cli/cache/changelog.md. Keep for migration support.
   cachedChangelog?: string
   mcpServers?: Record<string, McpServerConfig>
   // claude.ai MCP connectors that have successfully connected at least once.
@@ -394,7 +394,7 @@ export type GlobalConfig = {
   agentPushNotifEnabled?: boolean
 
   // Open Code CLI usage tracking
-  claudeCodeFirstTokenDate?: string // ISO timestamp of the user's first Open Code CLI OAuth token
+  openCodeCliFirstTokenDate?: string // ISO timestamp of the user's first Open Code CLI OAuth token
 
   // Model switch callout tracking (ant-only)
   modelSwitchCalloutDismissed?: boolean // Whether user chose "Don't show again"
@@ -519,7 +519,7 @@ export type GlobalConfig = {
     disabled?: boolean
   }
   // @deprecated Legacy Open Code CLI hint state key. Read as fallback only.
-  claudeCodeHints?: {
+  openCodeCliHints?: {
     plugin?: string[]
     disabled?: boolean
   }
@@ -544,7 +544,7 @@ export type GlobalConfig = {
   penguinModeOrgEnabled?: boolean
 
   // Epoch ms when background refreshes last ran (fast mode, quota, passes, client data).
-  // Used with tengu_cicada_nap_ms to throttle API calls
+  // Used with open_code_cli_cicada_nap_ms to throttle API calls
   startupPrefetchedAt?: number
 
   // Run Remote Control at startup (requires BRIDGE_MODE)
@@ -568,9 +568,9 @@ export type GlobalConfig = {
   // Additional model options for the model picker (fetched during bootstrap).
   additionalModelOptionsCache?: ModelOption[]
 
-  // Disk cache for /api/claude_code/organizations/metrics_enabled.
+  // Disk cache for /api/open_code_cli/organizations/metrics_enabled.
   // Org-level settings change rarely; persisting across processes avoids a
-  // cold API call on every `claude -p` invocation.
+  // cold API call on every `open-code-cli -p` invocation.
   metricsStatusCache?: {
     enabled: boolean
     timestamp: number
@@ -882,7 +882,7 @@ let configCacheHits = 0
 let configCacheMisses = 0
 // Session-total count of actual disk writes to the global config file.
 // Exposed for ant-only dev diagnostics (see inc-4552) so anomalous write
-// rates surface in the UI before they corrupt ~/.claude.json.
+// rates surface in the UI before they corrupt ~/.open-code-cli.json.
 let globalConfigWriteCount = 0
 
 export function getGlobalConfigWriteCount(): number {
@@ -1221,7 +1221,7 @@ function saveConfigWithLock<A extends object>(
     const currentConfig = getConfig(file, createDefault)
     if (file === getGlobalClaudeFile() && wouldLoseAuthState(currentConfig)) {
       logForDebugging(
-        'saveConfigWithLock: re-read config is missing auth that cache has; refusing to write to avoid wiping ~/.claude.json. See GH #3117.',
+        'saveConfigWithLock: re-read config is missing auth that cache has; refusing to write to avoid wiping ~/.open-code-cli.json. See GH #3117.',
         { level: 'error' },
       )
       logEvent('open_code_cli_config_auth_loss_prevented', {})
@@ -1245,7 +1245,7 @@ function saveConfigWithLock<A extends object>(
 
     // Create timestamped backup of existing config before writing
     // We keep multiple backups to prevent data loss if a reset/corrupted config
-    // overwrites a good backup. Backups are stored in ~/.claude/backups/ to
+    // overwrites a good backup. Backups are stored in ~/.open-code-cli/backups/ to
     // keep the home directory clean.
     try {
       const fileBase = basename(file)
@@ -1362,15 +1362,15 @@ export function enableConfigs(): void {
 
 /**
  * Returns the directory where config backup files are stored.
- * Uses ~/.claude/backups/ to keep the home directory clean.
+ * Uses ~/.open-code-cli/backups/ to keep the home directory clean.
  */
 function getConfigBackupDir(): string {
-  return join(getClaudeConfigHomeDir(), 'backups')
+  return join(getOpenCodeCliConfigHomeDir(), 'backups')
 }
 
 /**
  * Find the most recent backup file for a given config file.
- * Checks ~/.claude/backups/ first, then falls back to the legacy location
+ * Checks ~/.open-code-cli/backups/ first, then falls back to the legacy location
  * (next to the config file) for backwards compatibility.
  * Returns the full path to the most recent backup, or null if none exist.
  */
@@ -1786,13 +1786,13 @@ export function getMemoryPath(memoryType: MemoryType): string {
 
   switch (memoryType) {
     case 'User':
-      return join(getClaudeConfigHomeDir(), 'CLAUDE.md')
+      return join(getOpenCodeCliConfigHomeDir(), 'OPEN_CODE.md')
     case 'Local':
       return join(cwd, 'CLAUDE.local.md')
     case 'Project':
-      return join(cwd, 'CLAUDE.md')
+      return join(cwd, 'OPEN_CODE.md')
     case 'Managed':
-      return join(getManagedFilePath(), 'CLAUDE.md')
+      return join(getManagedFilePath(), 'OPEN_CODE.md')
     case 'AutoMem':
       return getAutoMemEntrypoint()
   }
@@ -1804,11 +1804,11 @@ export function getMemoryPath(memoryType: MemoryType): string {
 }
 
 export function getManagedClaudeRulesDir(): string {
-  return join(getManagedFilePath(), '.claude', 'rules')
+  return join(getManagedFilePath(), '.open-code-cli', 'rules')
 }
 
 export function getUserClaudeRulesDir(): string {
-  return join(getClaudeConfigHomeDir(), 'rules')
+  return join(getOpenCodeCliConfigHomeDir(), 'rules')
 }
 
 // Exported for testing only

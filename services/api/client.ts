@@ -107,7 +107,7 @@ export async function getAnthropicClient({
     'User-Agent': getUserAgent(),
     'X-Open-Code-CLI-Session-Id': getSessionId(),
     // Legacy header is sent alongside the primary header for backend compatibility.
-    'X-Claude-Code-Session-Id': getSessionId(),
+    'X-Open-Code-CLI-Session-Id': getSessionId(),
     ...customHeaders,
     ...(containerId ? { 'x-claude-remote-container-id': containerId } : {}),
     ...(remoteSessionId

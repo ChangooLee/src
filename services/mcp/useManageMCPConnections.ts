@@ -45,7 +45,7 @@ import {
   dedupClaudeAiMcpServers,
   doesEnterpriseMcpConfigExist,
   filterMcpServersByPolicy,
-  getClaudeCodeMcpConfigs,
+  getOpenCodeCliMcpConfigs,
   isMcpServerDisabled,
   setMcpServerEnabled,
 } from 'src/services/mcp/config.js'
@@ -147,7 +147,7 @@ export function useManageMCPConnections(
   const store = useAppStateStore()
   const _authVersion = useAppState(s => s.authVersion)
   // Incremented by /reload-plugins (refreshActivePlugins) to pick up newly
-  // enabled plugin MCP servers. getClaudeCodeMcpConfigs() reads loadAllPlugins()
+  // enabled plugin MCP servers. getOpenCodeCliMcpConfigs() reads loadAllPlugins()
   // which has been cleared by refreshActivePlugins, so the effects below see
   // fresh plugin data on re-run.
   const _pluginReconnectKey = useAppState(s => s.mcp.pluginReconnectKey)
@@ -478,7 +478,7 @@ export function useManageMCPConnections(
             )
             const entry = findChannelEntry(client.name, getAllowedChannels())
             // Plugin identifier for telemetry — log name@marketplace for any
-            // plugin-kind entry (same tier as tengu_plugin_installed, which
+            // plugin-kind entry (same tier as open_code_cli_plugin_installed, which
             // logs arbitrary plugin_id+marketplace_name ungated). server-kind
             // names are MCP-server-name tier; those are opt-in-only elsewhere
             // (see isAnalyticsToolDetailsLoggingEnabled in metadata.ts) and
@@ -773,7 +773,7 @@ export function useManageMCPConnections(
     async function initializeServersAsPending() {
       const { servers: existingConfigs, errors: mcpErrors } = isStrictMcpConfig
         ? { servers: {}, errors: [] }
-        : await getClaudeCodeMcpConfigs(dynamicMcpConfig)
+        : await getOpenCodeCliMcpConfigs(dynamicMcpConfig)
       const configs = { ...existingConfigs, ...dynamicMcpConfig }
 
       // Add MCP errors to plugin errors for UI visibility (deduplicated)
@@ -862,7 +862,7 @@ export function useManageMCPConnections(
       // Clear claude.ai MCP cache so we fetch fresh configs with current auth
       // state. This is important when authVersion changes (e.g., after login/
       // logout). Kick off the fetch now so it overlaps with loadAllPlugins()
-      // inside getClaudeCodeMcpConfigs; it's awaited only at the dedup step.
+      // inside getOpenCodeCliMcpConfigs; it's awaited only at the dedup step.
       // Phase 2 below awaits the same promise — no second network call.
       let claudeaiPromise: Promise<Record<string, ScopedMcpServerConfig>>
       if (isStrictMcpConfig || doesEnterpriseMcpConfigExist()) {
@@ -875,16 +875,16 @@ export function useManageMCPConnections(
       // Phase 1: Load Open Code CLI configs. Plugin MCP servers that duplicate a
       // --mcp-config entry or a claude.ai connector are suppressed here so they
       // don't connect alongside the connector in Phase 2.
-      const { servers: claudeCodeConfigs, errors: mcpErrors } =
+      const { servers: openCodeCliConfigs, errors: mcpErrors } =
         isStrictMcpConfig
           ? { servers: {}, errors: [] }
-          : await getClaudeCodeMcpConfigs(dynamicMcpConfig, claudeaiPromise)
+          : await getOpenCodeCliMcpConfigs(dynamicMcpConfig, claudeaiPromise)
       if (cancelled) return
 
       // Add MCP errors to plugin errors for UI visibility (deduplicated)
       addErrorsToAppState(setAppState, mcpErrors)
 
-      const configs = { ...claudeCodeConfigs, ...dynamicMcpConfig }
+      const configs = { ...openCodeCliConfigs, ...dynamicMcpConfig }
 
       // Start connecting to Open Code CLI servers (don't wait - runs concurrently with Phase 2)
       // Filter out disabled servers to avoid unnecessary connection attempts
@@ -964,7 +964,7 @@ export function useManageMCPConnections(
       }
 
       // Log server counts after both phases complete
-      const allConfigs = { ...configs, ...claudeaiConfigs }
+      const allConfigs = { ...configs, ...open-code-cliaiConfigs }
       const counts = {
         enterprise: 0,
         global: 0,
@@ -983,7 +983,7 @@ export function useManageMCPConnections(
         else if (serverConfig.scope === 'project') counts.project++
         else if (serverConfig.scope === 'local') counts.user++
         else if (serverConfig.scope === 'dynamic') counts.plugin++
-        else if (serverConfig.scope === 'claudeai') counts.claudeai++
+        else if (serverConfig.scope === 'claudeai') counts.open-code-cliai++
 
         if (
           process.env.USER_TYPE === 'ant' &&

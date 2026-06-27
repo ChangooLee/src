@@ -80,7 +80,7 @@ const KAIROS_BRIEF_REFRESH_MS = 5 * 60 * 1000
  * listing should be honored. Use `isBriefEnabled()` to decide whether the
  * tool is actually active in the current session.
  *
- * CLAUDE_CODE_BRIEF env var force-grants entitlement for dev/testing —
+ * OPEN_CODE_CLI_BRIEF env var force-grants entitlement for dev/testing —
  * bypasses the GB gate so you can test without being enrolled. Still
  * requires an opt-in action to activate (--brief, defaultView, etc.), but
  * the env var alone also sets userMsgOptIn via maybeActivateBrief().
@@ -90,9 +90,9 @@ export function isBriefEntitled(): boolean {
   // would not eliminate the GB gate string from external builds.
   return feature('KAIROS') || feature('KAIROS_BRIEF')
     ? getKairosActive() ||
-        isEnvTruthy((process.env.OPEN_CODE_CLI_BRIEF ?? process.env.CLAUDE_CODE_BRIEF)) ||
+        isEnvTruthy(process.env.OPEN_CODE_CLI_BRIEF) ||
         getFeatureValue_CACHED_WITH_REFRESH(
-          'tengu_kairos_brief',
+          'open_code_cli_kairos_brief',
           false,
           KAIROS_BRIEF_REFRESH_MS,
         )
@@ -110,12 +110,12 @@ export function isBriefEntitled(): boolean {
  *   - `/brief` slash command (brief.ts)
  *   - `/config` defaultView picker (Config.tsx)
  *   - SendUserMessage in `--tools` / SDK `tools` option (main.tsx)
- *   - CLAUDE_CODE_BRIEF env var (maybeActivateBrief — dev/testing bypass)
+ *   - OPEN_CODE_CLI_BRIEF env var (maybeActivateBrief — dev/testing bypass)
  * Assistant mode (kairosActive) bypasses opt-in since its system prompt
  * hard-codes "you MUST use SendUserMessage" (systemPrompt.md:14).
  *
  * The GB gate is re-checked here as a kill-switch AND — flipping
- * tengu_kairos_brief off mid-session disables the tool on the next 5-min
+ * open_code_cli_kairos_brief off mid-session disables the tool on the next 5-min
  * refresh even for opted-in sessions. No opt-in → always false regardless
  * of GB (this is the fix for "brief defaults on for enrolled ants").
  *

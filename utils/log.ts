@@ -140,7 +140,7 @@ export function attachErrorLogSink(newSink: ErrorLogSink): void {
  * - Debug logs (visible via `open-code-cli --debug` or `tail -f ~/.open-code-cli/debug/latest`)
  * - In-memory error log (accessible via `getInMemoryErrors()`, useful for including
  *   in bug reports or displaying recent errors to users)
- * - Persistent error log file (only for internal 'ant' users, stored in ~/.claude/errors/)
+ * - Persistent error log file (only for internal 'ant' users, stored in ~/.open-code-cli/errors/)
  *
  * Usage:
  * ```ts
@@ -167,9 +167,9 @@ export function logError(error: unknown): void {
     // Check if error reporting should be disabled
     if (
       // Cloud providers (Bedrock/Vertex/Foundry) always disable features
-      isEnvTruthy((process.env.OPEN_CODE_CLI_USE_BEDROCK ?? process.env.CLAUDE_CODE_USE_BEDROCK)) ||
-      isEnvTruthy((process.env.OPEN_CODE_CLI_USE_VERTEX ?? process.env.CLAUDE_CODE_USE_VERTEX)) ||
-      isEnvTruthy((process.env.OPEN_CODE_CLI_USE_FOUNDRY ?? process.env.CLAUDE_CODE_USE_FOUNDRY)) ||
+      isEnvTruthy(process.env.OPEN_CODE_CLI_USE_BEDROCK) ||
+      isEnvTruthy(process.env.OPEN_CODE_CLI_USE_VERTEX) ||
+      isEnvTruthy(process.env.OPEN_CODE_CLI_USE_FOUNDRY) ||
       process.env.DISABLE_ERROR_REPORTING ||
       isEssentialTrafficOnly()
     ) {
@@ -345,7 +345,7 @@ export function captureAPIRequest(
   setLastAPIRequest(paramsWithoutMessages)
   // For ant users only: also keep a reference to the final messages array so
   // /share's serialized_conversation.json captures the exact post-compaction,
-  // CLAUDE.md-injected payload the API received. Overwritten each turn;
+  // OPEN_CODE.md-injected payload the API received. Overwritten each turn;
   // dumpPrompts.ts already holds 5 full request bodies for ants, so this is
   // not a new retention class.
   setLastAPIRequestMessages(process.env.USER_TYPE === 'ant' ? messages : null)

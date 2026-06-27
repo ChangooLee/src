@@ -272,7 +272,7 @@ export function useManagePlugins({
       const { ant_enabled_names, ...baseMetrics } = metrics
       const allMetrics = {
         ...baseMetrics,
-        has_custom_plugin_cache_dir: !!(process.env.OPEN_CODE_CLI_PLUGIN_CACHE_DIR ?? process.env.CLAUDE_CODE_PLUGIN_CACHE_DIR),
+        has_custom_plugin_cache_dir: !!process.env.OPEN_CODE_CLI_PLUGIN_CACHE_DIR,
       }
       logEvent('open_code_cli_plugins_loaded', {
         ...allMetrics,
@@ -280,7 +280,7 @@ export function useManagePlugins({
           enabled_names: ant_enabled_names,
         }),
       })
-      logForDiagnosticsNoPII('info', 'tengu_plugins_loaded', allMetrics)
+      logForDiagnosticsNoPII('info', 'open_code_cli_plugins_loaded', allMetrics)
     })
   }, [initialPluginLoad, enabled])
 

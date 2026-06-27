@@ -51,7 +51,7 @@ export type WebSocketTransportOptions = {
    *  disconnect. Use this when the caller has its own recovery mechanism
    *  (e.g. the REPL bridge poll loop). Defaults to true. */
   autoReconnect?: boolean
-  /** Gates the tengu_ws_transport_* telemetry events. Set true at the
+  /** Gates the open_code_cli_ws_transport_* telemetry events. Set true at the
    *  REPL-bridge construction site so only Remote Control sessions (the
    *  Cloudflare-idle-timeout population) emit; print-mode workers stay
    *  silent. Defaults to false. */

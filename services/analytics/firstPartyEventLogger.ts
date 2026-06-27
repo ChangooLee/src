@@ -35,7 +35,7 @@ export type EventSamplingConfig = {
   }
 }
 
-const EVENT_SAMPLING_CONFIG_NAME = 'tengu_event_sampling_config'
+const EVENT_SAMPLING_CONFIG_NAME = 'open_code_cli_event_sampling_config'
 /**
  * Get the event sampling configuration from GrowthBook.
  * Uses cached value if available, updates cache in background.
@@ -84,7 +84,7 @@ export function shouldSampleEvent(eventName: string): number | null {
   return Math.random() < sampleRate ? sampleRate : 0
 }
 
-const BATCH_CONFIG_NAME = 'tengu_1p_event_batch_config'
+const BATCH_CONFIG_NAME = 'open_code_cli_1p_event_batch_config'
 type BatchConfig = {
   scheduledDelayMillis?: number
   maxExportBatchSize?: number
@@ -150,7 +150,7 @@ export function is1PEventLoggingEnabled(): boolean {
  * This enriches the event with core metadata (model, session, env context, etc.)
  * at log time, similar to logEventToStatsig.
  *
- * @param eventName - Name of the event (e.g., 'tengu_api_query')
+ * @param eventName - Name of the event (e.g., 'open_code_cli_api_query')
  * @param metadata - Additional metadata for the event (intentionally no strings, to avoid accidentally logging code/filepaths)
  */
 async function logEventTo1PAsync(
@@ -210,7 +210,7 @@ async function logEventTo1PAsync(
  * Log a 1st-party event for internal analytics.
  * Events are batched and exported to /api/event_logging/batch
  *
- * @param eventName - Name of the event (e.g., 'tengu_api_query')
+ * @param eventName - Name of the event (e.g., 'open_code_cli_api_query')
  * @param metadata - Additional metadata for the event (intentionally no strings, to avoid accidentally logging code/filepaths)
  */
 export function logEventTo1P(

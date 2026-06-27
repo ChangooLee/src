@@ -9,7 +9,7 @@
  *
  * Volume: these fire at startup (install-counts 24h-TTL)
  * and on explicit user action (install/update). NOT per-interaction. Similar
- * envelope to tengu_binary_download_*.
+ * envelope to open_code_cli_binary_download_*.
  */
 
 import {
@@ -84,7 +84,7 @@ export function logPluginFetch(
   errorKind?: string,
 ): void {
   // String values are bounded enums / hostname-only — no code, no paths,
-  // no raw error messages. Same privacy envelope as tengu_web_fetch_host.
+  // no raw error messages. Same privacy envelope as open_code_cli_web_fetch_host.
   logEvent('open_code_cli_plugin_remote_fetch', {
     source: source as SafeString,
     host: (urlOrSpec ? extractHost(urlOrSpec) : 'unknown') as SafeString,

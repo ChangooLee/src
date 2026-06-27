@@ -89,7 +89,7 @@ function shouldRetry529(querySource: QuerySource | undefined): boolean {
   )
 }
 
-// CLAUDE_CODE_UNATTENDED_RETRY: for unattended sessions (ant-only). Retries 429/529
+// OPEN_CODE_CLI_UNATTENDED_RETRY: for unattended sessions (ant-only). Retries 429/529
 // indefinitely with higher backoff and periodic keep-alive yields so the host
 // environment does not mark the session idle mid-wait.
 // TODO(ANT-344): the keep-alive via SystemAPIErrorMessage yields is a stopgap
@@ -100,7 +100,7 @@ const HEARTBEAT_INTERVAL_MS = 30_000
 
 function isPersistentRetryEnabled(): boolean {
   return feature('UNATTENDED_RETRY')
-    ? isEnvTruthy((process.env.OPEN_CODE_CLI_UNATTENDED_RETRY ?? process.env.CLAUDE_CODE_UNATTENDED_RETRY))
+    ? isEnvTruthy(process.env.OPEN_CODE_CLI_UNATTENDED_RETRY)
     : false
 }
 
@@ -220,7 +220,7 @@ export async function* withRetry<T>(
       if (
         isStaleConnection &&
         getFeatureValue_CACHED_MAY_BE_STALE(
-          'tengu_disable_keepalive_on_econnreset',
+          'open_code_cli_disable_keepalive_on_econnreset',
           false,
         )
       ) {
@@ -630,7 +630,7 @@ function isOAuthTokenRevokedError(error: unknown): boolean {
 }
 
 function isBedrockAuthError(error: unknown): boolean {
-  if (isEnvTruthy((process.env.OPEN_CODE_CLI_USE_BEDROCK ?? process.env.CLAUDE_CODE_USE_BEDROCK))) {
+  if (isEnvTruthy(process.env.OPEN_CODE_CLI_USE_BEDROCK)) {
     // AWS libs reject without an API call if .aws holds a past Expiration value
     // otherwise, API calls that receive expired tokens give generic 403
     // "The security token included in the request is invalid"
@@ -669,7 +669,7 @@ function isGoogleAuthLibraryCredentialError(error: unknown): boolean {
 }
 
 function isVertexAuthError(error: unknown): boolean {
-  if (isEnvTruthy((process.env.OPEN_CODE_CLI_USE_VERTEX ?? process.env.CLAUDE_CODE_USE_VERTEX))) {
+  if (isEnvTruthy(process.env.OPEN_CODE_CLI_USE_VERTEX)) {
     // SDK-level: google-auth-library fails in prepareOptions() before the HTTP call
     if (isGoogleAuthLibraryCredentialError(error)) {
       return true
@@ -788,8 +788,8 @@ function shouldRetry(error: APIError): boolean {
 }
 
 export function getDefaultMaxRetries(): number {
-  if ((process.env.OPEN_CODE_CLI_MAX_RETRIES ?? process.env.CLAUDE_CODE_MAX_RETRIES)) {
-    return parseInt((process.env.OPEN_CODE_CLI_MAX_RETRIES ?? process.env.CLAUDE_CODE_MAX_RETRIES), 10)
+  if (process.env.OPEN_CODE_CLI_MAX_RETRIES) {
+    return parseInt(process.env.OPEN_CODE_CLI_MAX_RETRIES, 10)
   }
   return DEFAULT_MAX_RETRIES
 }

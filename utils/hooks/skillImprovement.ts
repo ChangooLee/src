@@ -175,7 +175,7 @@ Output <updates>[]</updates> if no updates are needed.`,
 export function initSkillImprovement(): void {
   if (
     feature('SKILL_IMPROVEMENT') &&
-    getFeatureValue_CACHED_MAY_BE_STALE('tengu_copper_panda', false)
+    getFeatureValue_CACHED_MAY_BE_STALE('open_code_cli_copper_panda', false)
   ) {
     registerPostSamplingHook(createSkillImprovementHook())
   }
@@ -194,8 +194,8 @@ export async function applySkillImprovement(
   const { join } = await import('path')
   const fs = await import('fs/promises')
 
-  // Skills live at .claude/skills/<name>/SKILL.md relative to CWD
-  const filePath = join(getCwd(), '.claude', 'skills', skillName, 'SKILL.md')
+  // Skills live at .open-code-cli/skills/<name>/SKILL.md relative to CWD
+  const filePath = join(getCwd(), '.open-code-cli', 'skills', skillName, 'SKILL.md')
 
   let currentContent: string
   try {

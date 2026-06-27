@@ -36,7 +36,7 @@ import {
 import { createSignal } from './signal.js'
 
 export function isFastModeEnabled(): boolean {
-  return !isEnvTruthy((process.env.OPEN_CODE_CLI_DISABLE_FAST_MODE ?? process.env.CLAUDE_CODE_DISABLE_FAST_MODE))
+  return !isEnvTruthy(process.env.OPEN_CODE_CLI_DISABLE_FAST_MODE)
 }
 
 export function isFastModeAvailable(): boolean {
@@ -75,7 +75,7 @@ export function getFastModeUnavailableReason(): string | null {
   }
 
   const statigReason = getFeatureValue_CACHED_MAY_BE_STALE(
-    'tengu_penguins_off',
+    'open_code_cli_penguins_off',
     null,
   )
   // Statsig reason has priority over other reasons.
@@ -88,7 +88,7 @@ export function getFastModeUnavailableReason(): string | null {
   // longer necessary, but we keep this option behind a flag just in case.
   if (
     !isInBundledMode() &&
-    getFeatureValue_CACHED_MAY_BE_STALE('tengu_marble_sandcastle', false)
+    getFeatureValue_CACHED_MAY_BE_STALE('open_code_cli_marble_sandcastle', false)
   ) {
     return 'Fast mode requires the native binary · Install from: https://claude.com/product/open-code-cli'
   }
@@ -122,10 +122,10 @@ export function getFastModeUnavailableReason(): string | null {
       orgStatus.reason === 'unknown'
     ) {
       // The org check can fail behind corporate proxies that block the
-      // endpoint. We add CLAUDE_CODE_SKIP_FAST_MODE_NETWORK_ERRORS=1 to
+      // endpoint. We add OPEN_CODE_CLI_SKIP_FAST_MODE_NETWORK_ERRORS=1 to
       // bypass this check in the CC binary. This is OK since we have
       // another check in the API to error out when disabled by org.
-      if (isEnvTruthy((process.env.OPEN_CODE_CLI_SKIP_FAST_MODE_NETWORK_ERRORS ?? process.env.CLAUDE_CODE_SKIP_FAST_MODE_NETWORK_ERRORS))) {
+      if (isEnvTruthy(process.env.OPEN_CODE_CLI_SKIP_FAST_MODE_NETWORK_ERRORS)) {
         return null
       }
     }
@@ -367,7 +367,7 @@ type FastModeResponse = {
 async function fetchFastModeStatus(
   auth: { accessToken: string } | { apiKey: string },
 ): Promise<FastModeResponse> {
-  const endpoint = `${getOauthConfig().BASE_API_URL}/api/claude_code_penguin_mode`
+  const endpoint = `${getOauthConfig().BASE_API_URL}/api/open_code_cli_penguin_mode`
   const headers: Record<string, string> =
     'accessToken' in auth
       ? {

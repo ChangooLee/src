@@ -54,7 +54,7 @@ import { FILE_EDIT_TOOL_NAME } from 'src/tools/FileEditTool/constants.js'
 import { FILE_READ_TOOL_NAME } from 'src/tools/FileReadTool/prompt.js'
 import { WEB_FETCH_TOOL_NAME } from 'src/tools/WebFetchTool/prompt.js'
 import { errorMessage } from '../errors.js'
-import { getClaudeTempDir } from '../permissions/filesystem.js'
+import { getOpenCodeCliTempDir } from '../permissions/filesystem.js'
 import type { PermissionRuleValue } from '../permissions/PermissionRule.js'
 import { ripgrepCommand } from '../ripgrep.js'
 
@@ -220,9 +220,9 @@ export function convertToSandboxRuntimeConfig(
   }
 
   // Extract filesystem paths from Edit and Read rules
-  // Always include current directory and Claude temp directory as writable
+  // Always include current directory and Open Code CLI temp directory as writable
   // The temp directory is needed for Shell.ts cwd tracking files
-  const allowWrite: string[] = ['.', getClaudeTempDir()]
+  const allowWrite: string[] = ['.', getOpenCodeCliTempDir()]
   const denyWrite: string[] = []
   const denyRead: string[] = []
   const allowRead: string[] = []
@@ -240,18 +240,18 @@ export function convertToSandboxRuntimeConfig(
   const cwd = getCwdState()
   const originalCwd = getOriginalCwd()
   if (cwd !== originalCwd) {
-    denyWrite.push(resolve(cwd, '.claude', 'settings.json'))
-    denyWrite.push(resolve(cwd, '.claude', 'settings.local.json'))
+    denyWrite.push(resolve(cwd, '.open-code-cli', 'settings.json'))
+    denyWrite.push(resolve(cwd, '.open-code-cli', 'settings.local.json'))
   }
 
-  // Block writes to .claude/skills in both original and current working directories.
-  // The sandbox-runtime's getDangerousDirectories() protects .claude/commands and
-  // .claude/agents but not .claude/skills. Skills have the same privilege level
+  // Block writes to .open-code-cli/skills in both original and current working directories.
+  // The sandbox-runtime's getDangerousDirectories() protects .open-code-cli/commands and
+  // .open-code-cli/agents but not .open-code-cli/skills. Skills have the same privilege level
   // (auto-discovered, auto-loaded, full Claude capabilities) so they need the
   // same OS-level sandbox protection.
-  denyWrite.push(resolve(originalCwd, '.claude', 'skills'))
+  denyWrite.push(resolve(originalCwd, '.open-code-cli', 'skills'))
   if (cwd !== originalCwd) {
-    denyWrite.push(resolve(cwd, '.claude', 'skills'))
+    denyWrite.push(resolve(cwd, '.open-code-cli', 'skills'))
   }
 
   // SECURITY: Git's is_git_directory() treats cwd as a bare repo if it has
@@ -922,7 +922,7 @@ export interface ISandboxManager {
 }
 
 /**
- * Open Code CLI sandbox manager - wraps sandbox-runtime with Claude-specific features
+ * Open Code CLI sandbox manager - wraps sandbox-runtime with CLI-specific features
  */
 export const SandboxManager: ISandboxManager = {
   // Custom implementations

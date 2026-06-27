@@ -2,7 +2,7 @@ import { feature } from 'bun:bundle'
 import type { UUID } from 'crypto'
 import type { Dirent } from 'fs'
 // Sync fs primitives for readFileTailSync — separate from fs/promises
-// imports above. Named (not wildcard) per CLAUDE.md style; no collisions
+// imports above. Named (not wildcard) per OPEN_CODE.md style; no collisions
 // with the async-suffixed names.
 import { closeSync, fstatSync, openSync, readSync } from 'fs'
 import {
@@ -69,7 +69,7 @@ import { updateSessionName } from './concurrentSessions.js'
 import { getCwd } from './cwd.js'
 import { logForDebugging } from './debug.js'
 import { logForDiagnosticsNoPII } from './diagLogs.js'
-import { getClaudeConfigHomeDir, getOpenCodeCliEnv, isEnvTruthy } from './envUtils.js'
+import { getOpenCodeCliConfigHomeDir, getOpenCodeCliEnv, isEnvTruthy } from './envUtils.js'
 import { isFsInaccessible } from './errors.js'
 import type { FileHistorySnapshot } from './fileHistory.js'
 import { formatFileSize } from './format.js'
@@ -196,7 +196,7 @@ export function isEphemeralToolProgress(dataType: unknown): boolean {
 }
 
 export function getProjectsDir(): string {
-  return join(getClaudeConfigHomeDir(), 'projects')
+  return join(getOpenCodeCliConfigHomeDir(), 'projects')
 }
 
 export function getTranscriptPath(): string {
@@ -952,7 +952,7 @@ class Project {
 
   /**
    * True when test env / cleanupPeriodDays=0 / --no-session-persistence /
-   * CLAUDE_CODE_SKIP_PROMPT_HISTORY should suppress all transcript writes.
+   * OPEN_CODE_CLI_SKIP_PROMPT_HISTORY should suppress all transcript writes.
    * Shared guard for appendEntry and materializeSessionFile so both skip
    * consistently. The env var is set by tmuxSocket.ts so Tungsten-spawned
    * test sessions don't pollute the user's --resume list.
@@ -965,7 +965,7 @@ class Project {
       (getNodeEnv() === 'test' && !allowTestPersistence) ||
       getSettings_DEPRECATED()?.cleanupPeriodDays === 0 ||
       isSessionPersistenceDisabled() ||
-      isEnvTruthy((process.env.OPEN_CODE_CLI_SKIP_PROMPT_HISTORY ?? process.env.CLAUDE_CODE_SKIP_PROMPT_HISTORY))
+      isEnvTruthy(process.env.OPEN_CODE_CLI_SKIP_PROMPT_HISTORY)
     )
   }
 
@@ -2208,7 +2208,7 @@ function recoverOrphanedParallelToolResults(
 /**
  * Find the latest turn_duration checkpoint in the reconstructed chain and
  * compare its recorded messageCount against the chain's position at that
- * point. Emits tengu_resume_consistency_delta for BigQuery monitoring of
+ * point. Emits open_code_cli_resume_consistency_delta for BigQuery monitoring of
  * write→load round-trip drift — the class of bugs where snip/compact/
  * parallel-TR operations mutate in-memory but the parentUuid walk on disk
  * reconstructs a different set (adamr-20260320-165831: 397K displayed →
@@ -2651,7 +2651,7 @@ export async function saveCustomTitle(
  * - CAS semantics: VS Code's `onlyIfNoCustomTitle` check scans for the
  *   `customTitle` field only, so AI can overwrite its own previous AI
  *   title but never a user title.
- * - Metrics: `tengu_session_renamed` is not fired for AI titles.
+ * - Metrics: `open_code_cli_session_renamed` is not fired for AI titles.
  *
  * Because the entry is never re-appended, it scrolls out of the 64KB tail
  * window once enough messages accumulate. Readers (`readLiteMetadata`,
@@ -2673,7 +2673,7 @@ export function saveAiGeneratedTitle(sessionId: UUID, aiTitle: string): void {
 }
 
 /**
- * Append a periodic task summary for `claude ps`. Unlike ai-title this is
+ * Append a periodic task summary for `open-code-cli ps`. Unlike ai-title this is
  * not re-appended by reAppendSessionMetadata — it's a rolling snapshot of
  * what the agent is doing *now*, so staleness is fine; ps reads the most
  * recent one from the tail.
@@ -3533,7 +3533,7 @@ export async function loadTranscriptFile(
     let buf: Buffer | null = null
     let metadataLines: string[] | null = null
     let hasPreservedSegment = false
-    if (!isEnvTruthy((process.env.OPEN_CODE_CLI_DISABLE_PRECOMPACT_SKIP ?? process.env.CLAUDE_CODE_DISABLE_PRECOMPACT_SKIP))) {
+    if (!isEnvTruthy(process.env.OPEN_CODE_CLI_DISABLE_PRECOMPACT_SKIP)) {
       const { size } = await stat(filePath)
       if (size > SKIP_PRECOMPACT_THRESHOLD) {
         const scan = await readTranscriptForLoad(filePath, size)
@@ -3565,14 +3565,14 @@ export async function loadTranscriptFile(
     // preservedSegment (those messages keep their pre-compact parentUuid on
     // disk -- applyPreservedSegmentRelinks splices them in-memory AFTER
     // parse, so a pre-parse chain walk would drop them as orphans), and when
-    // CLAUDE_CODE_DISABLE_PRECOMPACT_SKIP is set (that kill switch means
+    // OPEN_CODE_CLI_DISABLE_PRECOMPACT_SKIP is set (that kill switch means
     // "load everything, skip nothing"; this is another skip-before-parse
     // optimization and the scan it depends on for hasPreservedSegment did
     // not run).
     if (
       !opts?.keepAllLeaves &&
       !hasPreservedSegment &&
-      !isEnvTruthy((process.env.OPEN_CODE_CLI_DISABLE_PRECOMPACT_SKIP ?? process.env.CLAUDE_CODE_DISABLE_PRECOMPACT_SKIP)) &&
+      !isEnvTruthy(process.env.OPEN_CODE_CLI_DISABLE_PRECOMPACT_SKIP) &&
       buf.length > SKIP_PRECOMPACT_THRESHOLD
     ) {
       buf = walkChainBeforeParse(buf)
@@ -3728,7 +3728,7 @@ export async function loadTranscriptFile(
   const leafUuids = new Set<UUID>()
   let hasCycle = false
 
-  if (getFeatureValue_CACHED_MAY_BE_STALE('tengu_pebble_leaf_prune', false)) {
+  if (getFeatureValue_CACHED_MAY_BE_STALE('open_code_cli_pebble_leaf_prune', false)) {
     // Build a set of UUIDs that have user/assistant children
     // (these are mid-conversation nodes, not dead ends)
     const hasUserAssistantChild = new Set<UUID>()
@@ -4357,7 +4357,7 @@ export function isLoggableMessage(m: Message): boolean {
   if (m.type === 'attachment' && getUserType() !== 'ant') {
     if (
       m.attachment.type === 'hook_additional_context' &&
-      isEnvTruthy((process.env.OPEN_CODE_CLI_SAVE_HOOK_ADDITIONAL_CONTEXT ?? process.env.CLAUDE_CODE_SAVE_HOOK_ADDITIONAL_CONTEXT))
+      isEnvTruthy(process.env.OPEN_CODE_CLI_SAVE_HOOK_ADDITIONAL_CONTEXT)
     ) {
       return true
     }

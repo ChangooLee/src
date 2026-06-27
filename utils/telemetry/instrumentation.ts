@@ -449,7 +449,7 @@ export async function initializeTelemetry() {
   diag.setLogger(new ClaudeCodeDiagLogger(), DiagLogLevel.ERROR)
 
   // Initialize Perfetto tracing (independent of OTEL)
-  // Enable via CLAUDE_CODE_PERFETTO_TRACE=1 or CLAUDE_CODE_PERFETTO_TRACE=<path>
+  // Enable via OPEN_CODE_CLI_PERFETTO_TRACE=1 or OPEN_CODE_CLI_PERFETTO_TRACE=<path>
   initializePerfettoTracing()
 
   const readers = []

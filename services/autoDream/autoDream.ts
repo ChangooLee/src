@@ -66,14 +66,14 @@ const DEFAULTS: AutoDreamConfig = {
 }
 
 /**
- * Thresholds from tengu_onyx_plover. The enabled gate lives in config.ts
+ * Thresholds from open_code_cli_onyx_plover. The enabled gate lives in config.ts
  * (isAutoDreamEnabled); this returns only the scheduling knobs. Defensive
  * per-field validation since GB cache can return stale wrong-type values.
  */
 function getConfig(): AutoDreamConfig {
   const raw =
     getFeatureValue_CACHED_MAY_BE_STALE<Partial<AutoDreamConfig> | null>(
-      'tengu_onyx_plover',
+      'open_code_cli_onyx_plover',
       null,
     )
   return {

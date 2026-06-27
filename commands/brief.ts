@@ -33,11 +33,11 @@ const DEFAULT_BRIEF_CONFIG: BriefConfig = {
 // No TTL — this gate controls slash-command *visibility*, not a kill switch.
 // CACHED_MAY_BE_STALE still has one background-update flip (first call kicks
 // off fetch; second call sees fresh value), but no additional flips after that.
-// The tool-availability gate (tengu_kairos_brief in isBriefEnabled) keeps its
+// The tool-availability gate (open_code_cli_kairos_brief in isBriefEnabled) keeps its
 // 5-min TTL because that one IS a kill switch.
 function getBriefConfig(): BriefConfig {
   const raw = getFeatureValue_CACHED_MAY_BE_STALE<unknown>(
-    'tengu_kairos_brief_config',
+    'open_code_cli_kairos_brief_config',
     DEFAULT_BRIEF_CONFIG,
   )
   const parsed = briefConfigSchema().safeParse(raw)

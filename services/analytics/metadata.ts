@@ -30,7 +30,7 @@ import {
 } from '../../utils/platform.js'
 import type { CoreUserData } from 'src/utils/user.js'
 import { getAgentContext } from '../../utils/agentContext.js'
-import type { EnvironmentMetadata } from '../../types/generated/events_mono/claude_code/v1/claude_code_internal_event.js'
+import type { EnvironmentMetadata } from '../../types/generated/events_mono/open_code_cli/v1/open_code_cli_internal_event.js'
 import type { PublicApiAuth } from '../../types/generated/events_mono/common/v1/auth.js'
 import { jsonStringify } from '../../utils/slowOperations.js'
 import {
@@ -141,7 +141,7 @@ const BUILTIN_MCP_SERVER_NAMES: ReadonlySet<string> = new Set(
 /**
  * Spreadable helper for logEvent payloads — returns {mcpServerName, mcpToolName}
  * if the gate passes, empty object otherwise. Consolidates the identical IIFE
- * pattern at each tengu_tool_use_* call site.
+ * pattern at each open_code_cli_tool_use_* call site.
  */
 export function mcpToolDetailsForAnalytics(
   toolName: string,
@@ -431,8 +431,8 @@ export type EnvContext = {
   isConductor: boolean
   remoteEnvironmentType?: string
   coworkerType?: string
-  claudeCodeContainerId?: string
-  claudeCodeRemoteSessionId?: string
+  openCodeCliContainerId?: string
+  openCodeCliRemoteSessionId?: string
   tags?: string
   isGithubAction: boolean
   isClaudeCodeAction: boolean
@@ -485,15 +485,15 @@ export type EventMetadata = {
   sweBenchInstanceId: string
   sweBenchTaskId: string
   // Swarm/team agent identification for analytics attribution
-  agentId?: string // CLAUDE_CODE_AGENT_ID (format: agentName@teamName) or subagent UUID
-  parentSessionId?: string // CLAUDE_CODE_PARENT_SESSION_ID (team lead's session)
+  agentId?: string // OPEN_CODE_CLI_AGENT_ID (format: agentName@teamName) or subagent UUID
+  parentSessionId?: string // OPEN_CODE_CLI_PARENT_SESSION_ID (team lead's session)
   agentType?: 'teammate' | 'subagent' | 'standalone' // Distinguishes swarm teammates, Agent tool subagents, and standalone agents
   teamName?: string // Team name for swarm agents (from env var or AsyncLocalStorage)
   subscriptionType?: string // OAuth subscription tier (max, pro, enterprise, team)
   rh?: string // Hashed repo remote URL (first 16 chars of SHA256), for joining with server-side data
   kairosActive?: true // KAIROS assistant mode active (ant-only; set in main.tsx after gate check)
   skillMode?: 'discovery' | 'coach' | 'discovery_and_coach' // Which skill surfacing mechanism(s) are gated on (ant-only; for BQ session segmentation)
-  observerMode?: 'backseat' | 'skillcoach' | 'both' // Which observer classifiers are gated on (ant-only; for BQ cohort splits on tengu_backseat_* events)
+  observerMode?: 'backseat' | 'skillcoach' | 'both' // Which observer classifiers are gated on (ant-only; for BQ cohort splits on open_code_cli_backseat_* events)
 }
 
 /**
@@ -607,10 +607,10 @@ const buildEnvContext = memoize(async (): Promise<EnvContext> => {
         : {}
       : {}),
     ...(getOpenCodeCliEnv('CONTAINER_ID') && {
-      claudeCodeContainerId: getOpenCodeCliEnv('CONTAINER_ID'),
+      openCodeCliContainerId: getOpenCodeCliEnv('CONTAINER_ID'),
     }),
     ...(getOpenCodeCliEnv('REMOTE_SESSION_ID') && {
-      claudeCodeRemoteSessionId: getOpenCodeCliEnv('REMOTE_SESSION_ID'),
+      openCodeCliRemoteSessionId: getOpenCodeCliEnv('REMOTE_SESSION_ID'),
     }),
     ...(getOpenCodeCliEnv('TAGS') && {
       tags: getOpenCodeCliEnv('TAGS'),
@@ -816,7 +816,7 @@ export function to1PEventFormat(
   // parallel type previously let #11318, #13924, #19448, and coworker_type all
   // ship fields that never reached BQ.
   // Adding a field? Update the monorepo proto first (go/cc-logging):
-  //   event_schemas/.../claude_code/v1/claude_code_internal_event.proto
+  //   event_schemas/.../open_code_cli/v1/open_code_cli_internal_event.proto
   // then run `bun run generate:proto` here.
   const env: EnvironmentMetadata = {
     platform: envContext.platform,
@@ -829,11 +829,11 @@ export function to1PEventFormat(
     is_running_with_bun: envContext.isRunningWithBun,
     is_ci: envContext.isCi,
     is_claubbit: envContext.isClaubbit,
-    is_claude_code_remote: envContext.isClaudeCodeRemote,
+    is_open_code_cli_remote: envContext.isClaudeCodeRemote,
     is_local_agent_mode: envContext.isLocalAgentMode,
     is_conductor: envContext.isConductor,
     is_github_action: envContext.isGithubAction,
-    is_claude_code_action: envContext.isClaudeCodeAction,
+    is_open_code_cli_action: envContext.isClaudeCodeAction,
     is_claude_ai_auth: envContext.isClaudeAiAuth,
     version: envContext.version,
     build_time: envContext.buildTime,
@@ -847,11 +847,11 @@ export function to1PEventFormat(
   if (feature('COWORKER_TYPE_TELEMETRY') && envContext.coworkerType) {
     env.coworker_type = envContext.coworkerType
   }
-  if (envContext.claudeCodeContainerId) {
-    env.claude_code_container_id = envContext.claudeCodeContainerId
+  if (envContext.openCodeCliContainerId) {
+    env.open_code_cli_container_id = envContext.openCodeCliContainerId
   }
-  if (envContext.claudeCodeRemoteSessionId) {
-    env.claude_code_remote_session_id = envContext.claudeCodeRemoteSessionId
+  if (envContext.openCodeCliRemoteSessionId) {
+    env.open_code_cli_remote_session_id = envContext.openCodeCliRemoteSessionId
   }
   if (envContext.tags) {
     env.tags = envContext.tags

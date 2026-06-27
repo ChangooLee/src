@@ -72,7 +72,7 @@ export async function checkHasGitRemote(): Promise<boolean> {
 /**
  * Checks if GitHub app is installed on a specific repository
  * @param owner The repository owner (e.g., "anthropics")
- * @param repo The repository name (e.g., "claude-cli-internal")
+ * @param repo The repository name (e.g., "open-code-cli-internal")
  * @returns true if GitHub app is installed, false otherwise
  */
 export async function checkGithubAppInstalled(
@@ -226,7 +226,7 @@ export async function checkRepoForRemoteAccess(
     return { hasAccess: true, method: 'github-app' }
   }
   if (
-    getFeatureValue_CACHED_MAY_BE_STALE('tengu_cobalt_lantern', false) &&
+    getFeatureValue_CACHED_MAY_BE_STALE('open_code_cli_cobalt_lantern', false) &&
     (await checkGithubTokenSynced())
   ) {
     return { hasAccess: true, method: 'token-sync' }

@@ -3,7 +3,7 @@ import { getOauthConfig } from '../../constants/oauth.js'
 import { getGlobalConfig, saveGlobalConfig } from '../../utils/config.js'
 import { getAuthHeaders } from '../../utils/http.js'
 import { logError } from '../../utils/log.js'
-import { getClaudeCodeUserAgent } from '../../utils/userAgent.js'
+import { getOpenCodeCliUserAgent } from '../../utils/userAgent.js'
 
 /**
  * Fetch the user's first Open Code CLI token date and store in config.
@@ -13,7 +13,7 @@ export async function fetchAndStoreClaudeCodeFirstTokenDate(): Promise<void> {
   try {
     const config = getGlobalConfig()
 
-    if (config.claudeCodeFirstTokenDate !== undefined) {
+    if (config.openCodeCliFirstTokenDate !== undefined) {
       return
     }
 
@@ -24,12 +24,12 @@ export async function fetchAndStoreClaudeCodeFirstTokenDate(): Promise<void> {
     }
 
     const oauthConfig = getOauthConfig()
-    const url = `${oauthConfig.BASE_API_URL}/api/organization/claude_code_first_token_date`
+    const url = `${oauthConfig.BASE_API_URL}/api/organization/open_code_cli_first_token_date`
 
     const response = await axios.get(url, {
       headers: {
         ...authHeaders.headers,
-        'User-Agent': getClaudeCodeUserAgent(),
+        'User-Agent': getOpenCodeCliUserAgent(),
       },
       timeout: 10000,
     })
@@ -52,7 +52,7 @@ export async function fetchAndStoreClaudeCodeFirstTokenDate(): Promise<void> {
 
     saveGlobalConfig(current => ({
       ...current,
-      claudeCodeFirstTokenDate: firstTokenDate,
+      openCodeCliFirstTokenDate: firstTokenDate,
     }))
   } catch (error) {
     logError(error)

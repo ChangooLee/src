@@ -442,7 +442,7 @@ const SAFE_ENV_VARS = new Set([
  * similarly controls which cluster kubectl talks to. These are convenience
  * strippings for internal power users who accept the risk.
  *
- * Based on analysis of 30 days of tengu_internal_bash_tool_use_permission_request events.
+ * Based on analysis of 30 days of open_code_cli_internal_bash_tool_use_permission_request events.
  */
 const ANT_ONLY_SAFE_ENV_VARS = new Set([
   // Kubernetes and container config (config file pointers, not execution)
@@ -1216,7 +1216,7 @@ export async function checkCommandAndSuggestRules(
   // validators (backslash-escaped operators, etc.) would only add FPs.
   if (
     !astParseSucceeded &&
-    !isEnvTruthy((process.env.OPEN_CODE_CLI_DISABLE_COMMAND_INJECTION_CHECK ?? process.env.CLAUDE_CODE_DISABLE_COMMAND_INJECTION_CHECK))
+    !isEnvTruthy(process.env.OPEN_CODE_CLI_DISABLE_COMMAND_INJECTION_CHECK)
   ) {
     const safetyResult = await bashCommandIsSafeAsync(input.command)
 
@@ -1676,12 +1676,12 @@ export async function bashToolHasPermission(
   // When tree-sitter WASM is unavailable OR the injection check is disabled
   // via env var, we fall back to the old path (legacy gate at ~1370 runs).
   const injectionCheckDisabled = isEnvTruthy(
-    (process.env.OPEN_CODE_CLI_DISABLE_COMMAND_INJECTION_CHECK ?? process.env.CLAUDE_CODE_DISABLE_COMMAND_INJECTION_CHECK),
+    process.env.OPEN_CODE_CLI_DISABLE_COMMAND_INJECTION_CHECK,
   )
   // GrowthBook killswitch for shadow mode — when off, skip the native parse
   // entirely. Computed once; feature() must stay inline in the ternary below.
   const shadowEnabled = feature('TREE_SITTER_BASH_SHADOW')
-    ? getFeatureValue_CACHED_MAY_BE_STALE('tengu_birch_trellis', true)
+    ? getFeatureValue_CACHED_MAY_BE_STALE('open_code_cli_birch_trellis', true)
     : false
   // Parse once here; the resulting AST feeds both parseForSecurityFromAst
   // and bashToolCheckCommandOperatorPermissions.
@@ -1703,7 +1703,7 @@ export async function bashToolHasPermission(
   // TREE_SITTER_BASH (not SHADOW) so legacy internals remain pure regex.
   // One event per bash call captures both divergence AND unavailability
   // reasons; module-load failures are separately covered by the
-  // session-scoped tengu_tree_sitter_load event.
+  // session-scoped open_code_cli_tree_sitter_load event.
   if (feature('TREE_SITTER_BASH_SHADOW')) {
     const available = astResult.kind !== 'parse-unavailable'
     let tooComplex = false
@@ -2039,9 +2039,9 @@ export async function bashToolHasPermission(
       // SECURITY: Compute compoundCommandHasCd from the full command, NOT
       // hardcode false. The pipe-handling path previously passed `false` here,
       // disabling the cd+redirect check at pathValidation.ts:821. Appending
-      // `| echo done` to `cd .claude && echo x > settings.json` routed through
+      // `| echo done` to `cd .open-code-cli && echo x > settings.json` routed through
       // this path with compoundCommandHasCd=false, letting the redirect write
-      // to .claude/settings.json without the cd+redirect block firing.
+      // to .open-code-cli/settings.json without the cd+redirect block firing.
       const pathResult = checkPathConstraints(
         input,
         getCwd(),
@@ -2084,7 +2084,7 @@ export async function bashToolHasPermission(
   // same question: "can splitCommand be trusted on this input?"
   if (
     astSubcommands === null &&
-    !isEnvTruthy((process.env.OPEN_CODE_CLI_DISABLE_COMMAND_INJECTION_CHECK ?? process.env.CLAUDE_CODE_DISABLE_COMMAND_INJECTION_CHECK))
+    !isEnvTruthy(process.env.OPEN_CODE_CLI_DISABLE_COMMAND_INJECTION_CHECK)
   ) {
     const originalCommandSafetyResult = await bashCommandIsSafeAsync(
       input.command,
@@ -2196,7 +2196,7 @@ export async function bashToolHasPermission(
   }
 
   // Track if compound command contains cd for security validation
-  // This prevents bypassing path checks via: cd .claude/ && mv test.txt settings.json
+  // This prevents bypassing path checks via: cd .open-code-cli/ && mv test.txt settings.json
   const compoundCommandHasCd = cdCommands.length > 0
 
   // SECURITY: Block compound commands that have both cd AND git
@@ -2343,7 +2343,7 @@ export async function bashToolHasPermission(
   let hasPossibleCommandInjection = false
   if (
     astSubcommands === null &&
-    !isEnvTruthy((process.env.OPEN_CODE_CLI_DISABLE_COMMAND_INJECTION_CHECK ?? process.env.CLAUDE_CODE_DISABLE_COMMAND_INJECTION_CHECK))
+    !isEnvTruthy(process.env.OPEN_CODE_CLI_DISABLE_COMMAND_INJECTION_CHECK)
   ) {
     // CC-643: Batch divergence telemetry into a single logEvent. The per-sub
     // logEvent was the hot-path syscall driver (each call → /proc/self/stat

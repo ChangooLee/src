@@ -96,7 +96,7 @@ let reinitializingPromise: Promise<unknown> | null = null
 // Listeners notified when GrowthBook feature values refresh (initial init or
 // periodic refresh). Use for systems that bake feature values into long-lived
 // objects at construction time (e.g. firstPartyEventLogger reads
-// tengu_1p_event_batch_config once and builds a LoggerProvider with it) and
+// open_code_cli_1p_event_batch_config once and builds a LoggerProvider with it) and
 // need to rebuild when config changes. Per-call readers like
 // getEventSamplingConfig / isSinkKilled don't need this — they're already
 // reactive.
@@ -239,7 +239,7 @@ export function getGrowthBookConfigOverrides(): Record<string, unknown> {
  * Set or clear a single config override. Pass undefined to clear.
  * Fires onGrowthBookRefresh listeners so systems that bake gate values into
  * long-lived objects (useMainLoopModel, useSkillsChange, etc.) rebuild —
- * otherwise overriding e.g. tengu_ant_model_override wouldn't actually
+ * otherwise overriding e.g. open_code_cli_ant_model_override wouldn't actually
  * change the model until the next periodic refresh.
  */
 export function setGrowthBookConfigOverride(
@@ -321,7 +321,7 @@ function logExposureForFeature(feature: string): void {
  *
  * Without this running on refresh, remoteEvalFeatureValues freezes at its
  * init-time snapshot and getDynamicConfig_BLOCKS_ON_INIT returns stale values
- * for the entire process lifetime — which broke the tengu_max_version_config
+ * for the entire process lifetime — which broke the open_code_cli_max_version_config
  * kill switch for long-running sessions.
  */
 async function processRemoteEvalPayload(
@@ -334,7 +334,7 @@ async function processRemoteEvalPayload(
   // Empty object is truthy — without the length check, `{features: {}}`
   // (transient server bug, truncated response) would pass, clear the maps
   // below, return true, and syncRemoteEvalToDisk would wholesale-write `{}`
-  // to disk: total flag blackout for every process sharing ~/.claude.json.
+  // to disk: total flag blackout for every process sharing ~/.open-code-cli.json.
   if (!payload?.features || Object.keys(payload.features).length === 0) {
     return false
   }
@@ -502,7 +502,7 @@ const getGrowthBookClient = memoize(
     }
     const baseUrl =
       process.env.USER_TYPE === 'ant'
-        ? (process.env.OPEN_CODE_CLI_GB_BASE_URL ?? process.env.CLAUDE_CODE_GB_BASE_URL) || 'https://api.anthropic.com/'
+        ? process.env.OPEN_CODE_CLI_GB_BASE_URL || 'https://api.anthropic.com/'
         : 'https://api.anthropic.com/'
 
     // Skip auth if trust hasn't been established yet

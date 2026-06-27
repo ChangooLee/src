@@ -271,7 +271,7 @@ function BashPermissionRequestInner({
     sandboxingEnabled: sandboxingEnabled_0,
     isSandboxed: isSandboxed_0
   } = useMemo(() => {
-    const destructiveWarning = getFeatureValue_CACHED_MAY_BE_STALE('tengu_destructive_command_warning', false) ? getDestructiveCommandWarning(command) : null;
+    const destructiveWarning = getFeatureValue_CACHED_MAY_BE_STALE('open_code_cli_destructive_command_warning', false) ? getDestructiveCommandWarning(command) : null;
     const sandboxingEnabled = SandboxManager.isSandboxingEnabled();
     const isSandboxed = sandboxingEnabled && shouldUseSandbox(toolUseConfirm.input);
     return {

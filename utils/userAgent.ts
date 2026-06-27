@@ -10,4 +10,4 @@ export function getOpenCodeCliUserAgent(): string {
 }
 
 // Compatibility export for existing imports; primary naming is Open Code CLI.
-export const getClaudeCodeUserAgent = getOpenCodeCliUserAgent
+export const getOpenCodeCliUserAgent = getOpenCodeCliUserAgent

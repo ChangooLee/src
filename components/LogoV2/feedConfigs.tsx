@@ -39,7 +39,7 @@ export function createWhatsNewFeed(releaseNotes: string[]): FeedConfig {
       text: note
     };
   });
-  const emptyMessage = "external" === 'ant' ? 'Unable to fetch latest claude-cli-internal commits' : 'Check the Open Code CLI changelog for updates';
+  const emptyMessage = "external" === 'ant' ? 'Unable to fetch latest open-code-cli-internal commits' : 'Check the Open Code CLI changelog for updates';
   return {
     title: "external" === 'ant' ? "What's new [ANT-ONLY: Latest CC commits]" : "What's new",
     lines,

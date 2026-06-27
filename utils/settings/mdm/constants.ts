@@ -9,7 +9,7 @@ import { homedir, userInfo } from 'os'
 import { join } from 'path'
 
 /** macOS preference domain for Open Code CLI MDM profiles. */
-export const MACOS_PREFERENCE_DOMAIN = 'com.anthropic.claudecode'
+export const MACOS_PREFERENCE_DOMAIN = 'com.anthropic.open-code-clicode'
 
 /**
  * Windows registry key paths for Open Code CLI MDM policies.

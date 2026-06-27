@@ -11,7 +11,7 @@ import {
 import { type ReleaseChannel, saveGlobalConfig } from './config.js'
 import { logForDebugging } from './debug.js'
 import { env } from './env.js'
-import { getClaudeConfigHomeDir } from './envUtils.js'
+import { getOpenCodeCliConfigHomeDir } from './envUtils.js'
 import { ClaudeError, getErrnoCode, isENOENT } from './errors.js'
 import { execFileNoThrowWithCwd } from './execFileNoThrow.js'
 import { getFsImplementation } from './fsOperations.js'
@@ -20,7 +20,7 @@ import { logError } from './log.js'
 import { gte, lt } from './semver.js'
 import { getInitialSettings } from './settings/settings.js'
 import {
-  filterClaudeAliases,
+  filterOpenCodeCliAliases,
   getShellConfigPaths,
   readFileLines,
   writeFileLines,
@@ -75,7 +75,7 @@ export async function assertMinVersion(): Promise<void> {
   try {
     const versionConfig = await getDynamicConfig_BLOCKS_ON_INIT<{
       minVersion: string
-    }>('tengu_version_config', { minVersion: '0.0.0' })
+    }>('open_code_cli_version_config', { minVersion: '0.0.0' })
 
     if (
       versionConfig.minVersion &&
@@ -128,7 +128,7 @@ export async function getMaxVersionMessage(): Promise<string | undefined> {
 async function getMaxVersionConfig(): Promise<MaxVersionConfig> {
   try {
     return await getDynamicConfig_BLOCKS_ON_INIT<MaxVersionConfig>(
-      'tengu_max_version_config',
+      'open_code_cli_max_version_config',
       {},
     )
   } catch (error) {
@@ -166,7 +166,7 @@ const LOCK_TIMEOUT_MS = 5 * 60 * 1000 // 5 minute timeout for locks
  * This is a function to ensure it's evaluated at runtime after test setup
  */
 export function getLockFilePath(): string {
-  return join(getClaudeConfigHomeDir(), '.update.lock')
+  return join(getOpenCodeCliConfigHomeDir(), '.update.lock')
 }
 
 /**
@@ -229,7 +229,7 @@ async function acquireLock(): Promise<boolean> {
         // fs.mkdir from getFsImplementation() is always recursive:true and
         // swallows EEXIST internally, so a dir-creation race cannot reach the
         // catch below — only writeFile's EEXIST (true lock contention) can.
-        await fs.mkdir(getClaudeConfigHomeDir())
+        await fs.mkdir(getOpenCodeCliConfigHomeDir())
         await writeFile(lockPath, `${process.pid}`, {
           encoding: 'utf8',
           flag: 'wx',
@@ -545,7 +545,7 @@ async function removeClaudeAliasesFromShellConfigs(): Promise<void> {
       const lines = await readFileLines(configFile)
       if (!lines) continue
 
-      const { filtered, hadAlias } = filterClaudeAliases(lines)
+      const { filtered, hadAlias } = filterOpenCodeCliAliases(lines)
 
       if (hadAlias) {
         await writeFileLines(configFile, filtered)

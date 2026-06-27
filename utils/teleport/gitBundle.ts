@@ -22,7 +22,7 @@ import { execFileNoThrowWithCwd } from '../execFileNoThrow.js'
 import { findGitRoot, gitExe } from '../git.js'
 import { generateTempFilePath } from '../tempfile.js'
 
-// Tunable via tengu_ccr_bundle_max_bytes.
+// Tunable via open_code_cli_ccr_bundle_max_bytes.
 const DEFAULT_BUNDLE_MAX_BYTES = 100 * 1024 * 1024
 
 type BundleScope = 'all' | 'head' | 'squashed'
@@ -218,7 +218,7 @@ export async function createAndUploadGitBundle(
   try {
     const maxBytes =
       getFeatureValue_CACHED_MAY_BE_STALE<number | null>(
-        'tengu_ccr_bundle_max_bytes',
+        'open_code_cli_ccr_bundle_max_bytes',
         null,
       ) ?? DEFAULT_BUNDLE_MAX_BYTES
 

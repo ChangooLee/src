@@ -90,7 +90,7 @@ export async function setup(
     // Start UDS messaging server (Mac/Linux only).
     // Enabled by default for ants — creates a socket in tmpdir if no
     // --messaging-socket-path is passed. Awaited so the server is bound
-    // and $CLAUDE_CODE_MESSAGING_SOCKET is exported before any hook
+    // and $OPEN_CODE_CLI_MESSAGING_SOCKET is exported before any hook
     // (SessionStart in particular) can spawn and snapshot process.env.
     if (feature('UDS_INBOX')) {
       const m = await import('./utils/udsMessaging.js')
@@ -280,7 +280,7 @@ export async function setup(
     clearMemoryFileCaches()
     // Settings cache was populated in init() (via applySafeConfigEnvironmentVariables)
     // and again at captureHooksConfigSnapshot() above, both from the original dir's
-    // .claude/settings.json. Re-read from the worktree and re-capture hooks.
+    // .open-code-cli/settings.json. Re-read from the worktree and re-capture hooks.
     updateHooksConfigSnapshot()
   }
 
@@ -306,7 +306,7 @@ export async function setup(
   profileCheckpoint('setup_before_prefetch')
   // Pre-fetch promises - only items needed before render
   logForDiagnosticsNoPII('info', 'setup_prefetch_starting')
-  // When CLAUDE_CODE_SYNC_PLUGIN_INSTALL is set, skip all plugin prefetch.
+  // When OPEN_CODE_CLI_SYNC_PLUGIN_INSTALL is set, skip all plugin prefetch.
   // The sync install path in print.ts calls refreshPluginState() after
   // installing, which reloads commands, hooks, and agents. Prefetching here
   // races with the install (concurrent copyPluginToVersionedCache / cachePlugin
@@ -314,7 +314,7 @@ export async function setup(
   // mid-install when policySettings arrives.
   const skipPluginPrefetch =
     (getIsNonInteractiveSession() &&
-      isEnvTruthy((process.env.OPEN_CODE_CLI_SYNC_PLUGIN_INSTALL ?? process.env.CLAUDE_CODE_SYNC_PLUGIN_INSTALL))) ||
+      isEnvTruthy(process.env.OPEN_CODE_CLI_SYNC_PLUGIN_INSTALL)) ||
     // --bare: loadPluginHooks → loadAllPlugins is filesystem work that's
     // wasted when executeHooks early-returns under --bare anyway.
     isBareMode()
@@ -332,7 +332,7 @@ export async function setup(
   // bookkeeping for commit attribution + usage metrics — scripted calls don't
   // commit code, and the 49ms attribution hook stat check (measured) is pure
   // overhead. NOT an early-return: the --dangerously-skip-permissions safety
-  // gate, tengu_started beacon, and apiKeyHelper prefetch below must still run.
+  // gate, open_code_cli_started beacon, and apiKeyHelper prefetch below must still run.
   if (!isBareMode()) {
     if (process.env.USER_TYPE === 'ant') {
       // Prime repo classification cache for auto-undercover mode. Default is
@@ -404,7 +404,7 @@ export async function setup(
       typeof process.getuid === 'function' &&
       process.getuid() === 0 &&
       process.env.IS_SANDBOX !== '1' &&
-      !isEnvTruthy((process.env.OPEN_CODE_CLI_BUBBLEWRAP ?? process.env.CLAUDE_CODE_BUBBLEWRAP))
+      !isEnvTruthy(process.env.OPEN_CODE_CLI_BUBBLEWRAP)
     ) {
       // biome-ignore lint/suspicious/noConsole:: intentional console output
       console.error(
@@ -445,7 +445,7 @@ export async function setup(
     return
   }
 
-  // Log tengu_exit event from the last session?
+  // Log open_code_cli_exit event from the last session?
   const projectConfig = getCurrentProjectConfig()
   if (
     projectConfig.lastCost !== undefined &&

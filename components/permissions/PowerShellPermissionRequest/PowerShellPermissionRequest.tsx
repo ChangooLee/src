@@ -57,7 +57,7 @@ export function PowerShellPermissionRequest(props: PermissionRequestProps): Reac
     onReject,
     explainerVisible: explainerState.visible
   });
-  const destructiveWarning = getFeatureValue_CACHED_MAY_BE_STALE('tengu_destructive_command_warning', false) ? getDestructiveCommandWarning(command) : null;
+  const destructiveWarning = getFeatureValue_CACHED_MAY_BE_STALE('open_code_cli_destructive_command_warning', false) ? getDestructiveCommandWarning(command) : null;
   const [showPermissionDebug, setShowPermissionDebug] = useState(false);
 
   // Editable prefix — compute static prefix locally (no LLM call).

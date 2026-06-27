@@ -18,10 +18,10 @@ on:
 jobs:
   open-code-cli:
     if: |
-      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
-      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
-      (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude')) ||
-      (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')))
+      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@open-code-cli')) ||
+      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@open-code-cli')) ||
+      (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@open-code-cli')) ||
+      (github.event_name == 'issues' && (contains(github.event.issue.body, '@open-code-cli') || contains(github.event.issue.title, '@open-code-cli')))
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -48,10 +48,10 @@ jobs:
           # Optional: Give a custom prompt to Open Code CLI. If this is not specified, Open Code CLI will perform the instructions specified in the comment that tagged it.
           # prompt: 'Update the pull request description to include a summary of changes.'
 
-          # Optional: Add claude_args to customize Open Code CLI behavior and configuration
+          # Optional: Add open_code_cli_args to customize Open Code CLI behavior and configuration
           # See https://github.com/anthropics/open-code-cli-action/blob/main/docs/usage.md
           # or https://open-code-cli.dev/docs/cli-reference for available options
-          # claude_args: '--allowed-tools Bash(gh pr:*)'
+          # open_code_cli_args: '--allowed-tools Bash(gh pr:*)'
 
 `
 
@@ -71,14 +71,14 @@ This PR adds a GitHub Actions workflow that enables Open Code CLI integration in
 
 ### How it works
 
-Once this PR is merged, we'll be able to interact with Open Code CLI by mentioning @claude (legacy GitHub App trigger) in a pull request or issue comment.
+Once this PR is merged, we'll be able to interact with Open Code CLI by mentioning @open-code-cli (legacy GitHub App trigger) in a pull request or issue comment.
 Once the workflow is triggered, Open Code CLI will analyze the comment and surrounding context, and execute on the request in a GitHub action.
 
 ### Important Notes
 
 - **This workflow won't take effect until this PR is merged**
-- **@claude mentions won't work until after the merge is complete**
-- The workflow runs automatically whenever the legacy @claude GitHub App trigger is mentioned in PR or issue comments
+- **@open-code-cli mentions won't work until after the merge is complete**
+- The workflow runs automatically whenever the @open-code-cli GitHub App trigger is mentioned in PR or issue comments
 - Open Code CLI gets access to the entire PR or issue context including files, diffs, and previous comments
 
 ### Security
@@ -95,7 +95,7 @@ allowed_tools: Bash(npm install),Bash(npm run build),Bash(npm run lint),Bash(npm
 
 There's more information in the [Open Code CLI action repo](https://github.com/anthropics/open-code-cli-action).
 
-After merging this PR, let's try mentioning @claude (legacy GitHub App trigger) in a comment on any PR to get started!`
+After merging this PR, let's try mentioning @open-code-cli (legacy GitHub App trigger) in a comment on any PR to get started!`
 
 export const CODE_REVIEW_PLUGIN_WORKFLOW_CONTENT = `name: Open Code CLI Review
 

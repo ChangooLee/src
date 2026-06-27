@@ -550,7 +550,7 @@ async function* queryLoop(
 
     const assistantMessages: AssistantMessage[] = []
     const toolResults: (UserMessage | AttachmentMessage)[] = []
-    // @see https://docs.claude.com/en/docs/build-with-claude/tool-use
+    // @see https://docs.open-code-cli.com/en/docs/build-with-claude/tool-use
     // Note: stop_reason === 'tool_use' is unreliable -- it's not always set correctly.
     // Set during streaming whenever a tool_use block arrives — the sole
     // loop-exit signal. If false after streaming, we're done (modulo stop-hook retry).
@@ -1193,13 +1193,13 @@ async function* queryLoop(
         // 64k also hits the cap.
         // 3P default: false (not validated on Bedrock/Vertex)
         const capEnabled = getFeatureValue_CACHED_MAY_BE_STALE(
-          'tengu_otk_slot_v1',
+          'open_code_cli_otk_slot_v1',
           false,
         )
         if (
           capEnabled &&
           maxOutputTokensOverride === undefined &&
-          !(process.env.OPEN_CODE_CLI_MAX_OUTPUT_TOKENS ?? process.env.CLAUDE_CODE_MAX_OUTPUT_TOKENS)
+          !process.env.OPEN_CODE_CLI_MAX_OUTPUT_TOKENS
         ) {
           logEvent('open_code_cli_max_tokens_escalate', {
             escalatedTo: ESCALATED_MAX_TOKENS,
@@ -1678,7 +1678,7 @@ async function* queryLoop(
     // Each time we have tool results and are about to recurse, that's a turn
     const nextTurnCount = turnCount + 1
 
-    // Periodic task summary for `claude ps` — fires mid-turn so a
+    // Periodic task summary for `open-code-cli ps` — fires mid-turn so a
     // long-running agent still refreshes what it's working on. Gated
     // only on !agentId so every top-level conversation (REPL, SDK, HFI,
     // remote) generates summaries; subagents/forks don't.

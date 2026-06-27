@@ -113,12 +113,12 @@ type State = {
   // Last API request for bug reports
   lastAPIRequest: Omit<BetaMessageStreamParams, 'messages'> | null
   // Messages from the last API request (ant-only; reference, not clone).
-  // Captures the exact post-compaction, CLAUDE.md-injected message set sent
+  // Captures the exact post-compaction, OPEN_CODE.md-injected message set sent
   // to the API so /share's serialized_conversation.json reflects reality.
   lastAPIRequestMessages: BetaMessageStreamParams['messages'] | null
   // Last auto-mode classifier request(s) for /share transcript
   lastClassifierRequests: unknown[] | null
-  // CLAUDE.md content cached by context.ts for the auto-mode classifier.
+  // OPEN_CODE.md content cached by context.ts for the auto-mode classifier.
   // Breaks the yoloClassifier → claudemd → filesystem → permissions cycle.
   cachedClaudeMdContent: string | null
   // In-memory error log for recent errors
@@ -131,13 +131,13 @@ type State = {
   useCoworkPlugins: boolean
   // Session-only bypass permissions mode flag (not persisted)
   sessionBypassPermissionsMode: boolean
-  // Session-only flag gating the .claude/scheduled_tasks.json watcher
+  // Session-only flag gating the .open-code-cli/scheduled_tasks.json watcher
   // (useScheduledTasks). Set by cronScheduler.start() when the JSON has
   // entries, or by CronCreateTool. Not persisted.
   scheduledTasksEnabled: boolean
   // Session-only cron tasks created via CronCreate with durable: false.
   // Fire on schedule like file-backed tasks but are never written to
-  // .claude/scheduled_tasks.json — they die with the process. Typed via
+  // .open-code-cli/scheduled_tasks.json — they die with the process. Typed via
   // SessionCronTask below (not importing from cronTasks.ts keeps
   // bootstrap a leaf of the import DAG).
   sessionCronTasks: SessionCronTask[]
@@ -203,7 +203,7 @@ type State = {
   systemPromptSectionCache: Map<string, string | null>
   // Last date emitted to the model (for detecting midnight date changes)
   lastEmittedDate: string | null
-  // Additional directories from --add-dir flag (for CLAUDE.md loading)
+  // Additional directories from --add-dir flag (for OPEN_CODE.md loading)
   additionalDirectoriesForClaudeMd: string[]
   // Channel server allowlist from --channels flag (servers whose channel
   // notifications should register this session). Parsed once in main.tsx —
@@ -247,7 +247,7 @@ type State = {
   // Read at shutdown to send cache eviction hints to inference.
   lastMainRequestId: string | undefined
   // Timestamp (Date.now()) of the last successful API call completion.
-  // Used to compute timeSinceLastApiCallMs in tengu_api_success for
+  // Used to compute timeSinceLastApiCallMs in open_code_cli_api_success for
   // correlating cache misses with idle time (cache TTL is ~5min).
   lastApiCompletionTimestamp: number | null
   // Set to true after compaction (auto or manual /compact). Consumed by
@@ -399,7 +399,7 @@ function getInitialState(): State {
     systemPromptSectionCache: new Map(),
     // Last date emitted to the model
     lastEmittedDate: null,
-    // Additional directories from --add-dir flag (for CLAUDE.md loading)
+    // Additional directories from --add-dir flag (for OPEN_CODE.md loading)
     additionalDirectoriesForClaudeMd: [],
     // Channel server allowlist from --channels flag
     allowedChannels: [],

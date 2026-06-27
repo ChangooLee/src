@@ -9,7 +9,7 @@ const web = {
     'Setup Open Code CLI on the web (requires connecting your GitHub account)',
   availability: ['claude-ai'],
   isEnabled: () =>
-    getFeatureValue_CACHED_MAY_BE_STALE('tengu_cobalt_lantern', false) &&
+    getFeatureValue_CACHED_MAY_BE_STALE('open_code_cli_cobalt_lantern', false) &&
     isPolicyAllowed('allow_remote_sessions'),
   get isHidden() {
     return !isPolicyAllowed('allow_remote_sessions')

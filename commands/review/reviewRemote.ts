@@ -177,7 +177,7 @@ export async function launchRemoteReview(
   const raw = getFeatureValue_CACHED_MAY_BE_STALE<Record<
     string,
     unknown
-  > | null>('tengu_review_bughunter_config', null)
+  > | null>('open_code_cli_review_bughunter_config', null)
   const posInt = (v: unknown, fallback: number, max?: number): number => {
     if (typeof v !== 'number' || !Number.isFinite(v)) return fallback
     const n = Math.floor(v)

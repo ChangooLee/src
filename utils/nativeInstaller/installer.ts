@@ -49,7 +49,7 @@ import * as lockfile from '../lockfile.js'
 import { logError } from '../log.js'
 import { gt, gte } from '../semver.js'
 import {
-  filterClaudeAliases,
+  filterOpenCodeCliAliases,
   getShellConfigPaths,
   readFileLines,
   writeFileLines,
@@ -334,7 +334,7 @@ async function installVersionFromPackage(
     const nodeModulesDir = join(stagingPath, 'node_modules', '@anthropic-ai')
     const entries = await readdir(nodeModulesDir)
     const nativePackage = entries.find((entry: string) =>
-      entry.startsWith('claude-cli-native-'),
+      entry.startsWith('open-code-cli-native-'),
     )
 
     if (!nativePackage) {
@@ -1195,7 +1195,7 @@ export async function cleanupOldVersions(): Promise<void> {
       const files = await readdir(executableDir)
       let cleanedCount = 0
       for (const file of files) {
-        if (!/^(open-code-cli|claude)\.exe\.old\.\d+$/.test(file)) continue
+        if (!/^open-code-cli\.exe\.old\.\d+$/.test(file)) continue
         try {
           await unlink(join(executableDir, file))
           cleanedCount++
@@ -1486,7 +1486,7 @@ export async function removeInstalledSymlink(): Promise<void> {
 }
 
 /**
- * Clean up old claude aliases from shell configuration files
+ * Clean up old Open Code CLI aliases from shell configuration files
  * Only handles alias removal, not PATH setup
  */
 export async function cleanupShellAliases(): Promise<SetupMessage[]> {
@@ -1498,16 +1498,16 @@ export async function cleanupShellAliases(): Promise<SetupMessage[]> {
       const lines = await readFileLines(configFile)
       if (!lines) continue
 
-      const { filtered, hadAlias } = filterClaudeAliases(lines)
+      const { filtered, hadAlias } = filterOpenCodeCliAliases(lines)
 
       if (hadAlias) {
         await writeFileLines(configFile, filtered)
         messages.push({
-          message: `Removed legacy claude alias from ${configFile}. Run: unalias claude, then use open-code-cli`,
+          message: `Removed legacy Open Code CLI alias from ${configFile}. Run: unalias open-code-cli, then use open-code-cli`,
           userActionRequired: true,
           type: 'alias',
         })
-        logForDebugging(`Cleaned up claude alias from ${shellType} config`)
+        logForDebugging(`Cleaned up Open Code CLI alias from ${shellType} config`)
       }
     } catch (error) {
       logError(error)
@@ -1558,8 +1558,8 @@ async function manualRemoveNpmPackage(
 
     const binNames =
       packageName.includes('open-code-cli')
-        ? ['open-code-cli', 'claude']
-        : ['claude']
+        ? ['open-code-cli']
+        : ['open-code-cli']
 
     if (getPlatform().startsWith('win32')) {
       // Windows - only remove executables, not the package directory.
@@ -1696,10 +1696,10 @@ export async function cleanupNpmInstallations(): Promise<{
     }
   }
 
-  // Check for local installations. The ~/.claude path is legacy cleanup only.
+  // Check for local installations. The ~/.open-code-cli path is legacy cleanup only.
   for (const localInstallDir of [
     join(homedir(), '.open-code-cli', 'local'),
-    join(homedir(), '.claude', 'local'),
+    join(homedir(), '.open-code-cli', 'local'),
   ]) {
     try {
       await rm(localInstallDir, { recursive: true })

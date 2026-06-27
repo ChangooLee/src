@@ -304,7 +304,7 @@ export function getExtraBodyParams(betaHeaders?: string[]): JsonObject {
       ? getOpenCodeCliEnv('ENTRYPOINT') === 'cli' &&
         shouldIncludeFirstPartyOnlyBetas() &&
         getFeatureValue_CACHED_MAY_BE_STALE(
-          'tengu_anti_distill_fake_tool_injection',
+          'open_code_cli_anti_distill_fake_tool_injection',
           false,
         )
       : false
@@ -418,7 +418,7 @@ function should1hCacheTTL(querySource?: QuerySource): boolean {
   if (allowlist === null) {
     const config = getFeatureValue_CACHED_MAY_BE_STALE<{
       allowlist?: string[]
-    }>('tengu_prompt_cache_1h_config', {})
+    }>('open_code_cli_prompt_cache_1h_config', {})
     allowlist = config.allowlist ?? []
     setPromptCache1hAllowlist(allowlist)
   }
@@ -503,14 +503,14 @@ export function configureTaskBudgetParams(
 export function getAPIMetadata() {
   // https://docs.google.com/document/d/1dURO9ycXXQCBS0V4Vhl4poDBRgkelFc5t2BNPoEgH5Q/edit?tab=t.0#heading=h.5g7nec5b09w5
   let extra: JsonObject = {}
-  const extraStr = (process.env.OPEN_CODE_CLI_EXTRA_METADATA ?? process.env.CLAUDE_CODE_EXTRA_METADATA)
+  const extraStr = process.env.OPEN_CODE_CLI_EXTRA_METADATA
   if (extraStr) {
     const parsed = safeParseJSON(extraStr, false)
     if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
       extra = parsed as JsonObject
     } else {
       logForDebugging(
-        `CLAUDE_CODE_EXTRA_METADATA env var must be a JSON object, but was given ${extraStr}`,
+        `OPEN_CODE_CLI_EXTRA_METADATA env var must be a JSON object, but was given ${extraStr}`,
         { level: 'error' },
       )
     }
@@ -835,7 +835,7 @@ export async function* executeNonStreamingRequest(
   captureRequest: (params: BetaMessageStreamParams) => void,
   /**
    * Request ID of the failed streaming attempt this fallback is recovering
-   * from. Emitted in tengu_nonstreaming_fallback_error for funnel correlation.
+   * from. Emitted in open_code_cli_nonstreaming_fallback_error for funnel correlation.
    */
   originatingRequestId?: string | null,
 ): AsyncGenerator<SystemAPIErrorMessage, BetaMessage> {
@@ -1033,7 +1033,7 @@ async function* queryModel(
     isNonCustomOpusModel(options.model) &&
     (
       await getDynamicConfig_BLOCKS_ON_INIT<{ activated: boolean }>(
-        'tengu-off-switch',
+        'open-code-cli-off-switch',
         {
           activated: false,
         },
@@ -1603,7 +1603,7 @@ async function* queryModel(
     // setting that can greatly affect model quality and bashing.
     if (hasThinking && modelSupportsThinking(options.model)) {
       if (
-        !isEnvTruthy((process.env.OPEN_CODE_CLI_DISABLE_ADAPTIVE_THINKING ?? process.env.CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING)) &&
+        !isEnvTruthy(process.env.OPEN_CODE_CLI_DISABLE_ADAPTIVE_THINKING) &&
         modelSupportsAdaptiveThinking(options.model)
       ) {
         // For models that support adaptive thinking, always use adaptive
@@ -2467,9 +2467,9 @@ async function* queryModel(
       // starts a tool, then the non-streaming retry produces the same tool_use
       // and runs it again. See inc-4258.
       const disableFallback =
-        isEnvTruthy((process.env.OPEN_CODE_CLI_DISABLE_NONSTREAMING_FALLBACK ?? process.env.CLAUDE_CODE_DISABLE_NONSTREAMING_FALLBACK)) ||
+        isEnvTruthy(process.env.OPEN_CODE_CLI_DISABLE_NONSTREAMING_FALLBACK) ||
         getFeatureValue_CACHED_MAY_BE_STALE(
-          'tengu_disable_streaming_to_non_streaming_fallback',
+          'open_code_cli_disable_streaming_to_non_streaming_fallback',
           false,
         )
 
@@ -3348,7 +3348,7 @@ export async function queryWithModel({
 }
 
 // Non-streaming requests have a 10min max per the docs:
-// https://platform.claude.com/docs/en/api/errors#long-requests
+// https://platform.open-code-cli.com/docs/en/api/errors#long-requests
 // The SDK's 21333-token cap is derived from 10min × 128k tokens/hour, but we
 // bypass it by setting a client-level timeout, so we can cap higher.
 export const MAX_NON_STREAMING_TOKENS = 64_000
@@ -3393,7 +3393,7 @@ export function adjustParamsForNonStreaming<
 
 function isMaxTokensCapEnabled(): boolean {
   // 3P default: false (not validated on Bedrock/Vertex)
-  return getFeatureValue_CACHED_MAY_BE_STALE('tengu_otk_slot_v1', false)
+  return getFeatureValue_CACHED_MAY_BE_STALE('open_code_cli_otk_slot_v1', false)
 }
 
 export function getMaxOutputTokensForModel(model: string): number {
@@ -3404,14 +3404,14 @@ export function getMaxOutputTokensForModel(model: string): number {
   // Requests hitting the cap get one clean retry at 64k (query.ts
   // max_output_tokens_escalate). Math.min keeps models with lower native
   // defaults (e.g. claude-3-opus at 4k) at their native value. Applied
-  // before the env-var override so CLAUDE_CODE_MAX_OUTPUT_TOKENS still wins.
+  // before the env-var override so OPEN_CODE_CLI_MAX_OUTPUT_TOKENS still wins.
   const defaultTokens = isMaxTokensCapEnabled()
     ? Math.min(maxOutputTokens.default, CAPPED_DEFAULT_MAX_TOKENS)
     : maxOutputTokens.default
 
   const result = validateBoundedIntEnvVar(
-    'CLAUDE_CODE_MAX_OUTPUT_TOKENS',
-    (process.env.OPEN_CODE_CLI_MAX_OUTPUT_TOKENS ?? process.env.CLAUDE_CODE_MAX_OUTPUT_TOKENS),
+    'OPEN_CODE_CLI_MAX_OUTPUT_TOKENS',
+    process.env.OPEN_CODE_CLI_MAX_OUTPUT_TOKENS,
     defaultTokens,
     maxOutputTokens.upperLimit,
   )

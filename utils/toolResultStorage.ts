@@ -40,7 +40,7 @@ export const TOOL_RESULT_CLEARED_MESSAGE = '[Old tool result content cleared]'
  * Tools absent from the map use the hardcoded fallback.
  * Flag default is {} (no overrides == behavior unchanged).
  */
-const PERSIST_THRESHOLD_OVERRIDE_FLAG = 'tengu_satin_quoll'
+const PERSIST_THRESHOLD_OVERRIDE_FLAG = 'open_code_cli_satin_quoll'
 
 /**
  * Resolve the effective persistence threshold for a tool.
@@ -58,7 +58,7 @@ export function getPersistenceThreshold(
 ): number {
   // Infinity = hard opt-out. Read self-bounds via maxTokens; persisting its
   // output to a file the model reads back with Read is circular. Checked
-  // before the GB override so tengu_satin_quoll can't force it back on.
+  // before the GB override so open_code_cli_satin_quoll can't force it back on.
   if (!Number.isFinite(declaredMaxResultSizeChars)) {
     return declaredMaxResultSizeChars
   }
@@ -413,14 +413,14 @@ export function cloneContentReplacementState(
 
 /**
  * Resolve the per-message aggregate budget limit. GrowthBook override
- * (tengu_hawthorn_window) wins when present and a finite positive number;
+ * (open_code_cli_hawthorn_window) wins when present and a finite positive number;
  * otherwise falls back to the hardcoded constant. Defensive typeof/finite
  * check: GrowthBook's cache returns `cached !== undefined ? cached : default`,
  * so a flag served as null/string/NaN leaks through.
  */
 export function getPerMessageBudgetLimit(): number {
   const override = getFeatureValue_CACHED_MAY_BE_STALE<number | null>(
-    'tengu_hawthorn_window',
+    'open_code_cli_hawthorn_window',
     null,
   )
   if (
@@ -449,7 +449,7 @@ export function provisionContentReplacementState(
   initialContentReplacements?: ContentReplacementRecord[],
 ): ContentReplacementState | undefined {
   const enabled = getFeatureValue_CACHED_MAY_BE_STALE(
-    'tengu_hawthorn_steeple',
+    'open_code_cli_hawthorn_steeple',
     false,
   )
   if (!enabled) return undefined

@@ -165,7 +165,7 @@ export type BridgeCoreParams = {
   getPollIntervalConfig?: () => PollIntervalConfig
   /**
    * Max initial messages to replay on connect. REPL wrapper reads from the
-   * tengu_bridge_initial_history_cap GrowthBook flag. Daemon passes no
+   * open_code_cli_bridge_initial_history_cap GrowthBook flag. Daemon passes no
    * initialMessages so this is never read. Default 200 matches the flag
    * default.
    */
@@ -186,7 +186,7 @@ export type BridgeCoreParams = {
    * isBypassPermissionsModeAvailable) BEFORE calling transitionPermissionMode —
    * that function's internal auto-gate check is a defensive throw, not a
    * graceful guard, and its side-effect order is setAutoModeActive(true) then
-   * throw, which corrupts the 3-way invariant documented in src/CLAUDE.md if
+   * throw, which corrupts the 3-way invariant documented in src/OPEN_CODE.md if
    * the callback lets the throw escape here.
    */
   onSetPermissionMode?: (
@@ -1132,7 +1132,7 @@ export async function initBridgeCore(
       // override for forcing v2 before the server flag is on for your user —
       // requires ccr_v2_compat_enabled server-side or registerWorker 404s.
       //
-      // Kept separate from CLAUDE_CODE_USE_CCR_V2 (the child-SDK transport
+      // Kept separate from OPEN_CODE_CLI_USE_CCR_V2 (the child-SDK transport
       // selector set by sessionRunner/environment-manager) to avoid the
       // inheritance hazard in spawn mode where the parent's orchestrator
       // var would leak into a v1 child.
@@ -1529,7 +1529,7 @@ export async function initBridgeCore(
   // and the session-ingress layer don't GC an otherwise-idle remote control
   // session. The keep_alive type is filtered before reaching any client UI
   // (Query.ts drops it; web/iOS/Android never see it in their message loop).
-  // Interval comes from GrowthBook (tengu_bridge_poll_interval_config
+  // Interval comes from GrowthBook (open_code_cli_bridge_poll_interval_config
   // session_keepalive_interval_v2_ms, default 120s); 0 = disabled.
   const keepAliveIntervalMs =
     getPollIntervalConfig().session_keepalive_interval_v2_ms

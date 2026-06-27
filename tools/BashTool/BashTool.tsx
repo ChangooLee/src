@@ -339,7 +339,7 @@ export function detectBlockedSleepPattern(command: string): string | null {
 /**
  * Checks if a command contains tools that shouldn't run in sandbox
  * This includes:
- * - Dynamic config-based disabled commands and substrings (tengu_sandbox_disabled_commands)
+ * - Dynamic config-based disabled commands and substrings (open_code_cli_sandbox_disabled_commands)
  * - User-configured commands from settings.json (sandbox.excludedCommands)
  *
  * User-configured commands support the same pattern syntax as permission rules:
@@ -499,7 +499,7 @@ export const BashTool = buildTool({
     // `new RegExp` per call. userFacingName runs per-render for every bash
     // message in history; with ~50 msgs + one slow-to-tokenize command, this
     // exceeds the shimmer tick → transition abort → infinite retry (#21605).
-    return isEnvTruthy((process.env.OPEN_CODE_CLI_BASH_SANDBOX_SHOW_INDICATOR ?? process.env.CLAUDE_CODE_BASH_SANDBOX_SHOW_INDICATOR)) && shouldUseSandbox(input) ? 'SandboxedBash' : 'Bash';
+    return isEnvTruthy(process.env.OPEN_CODE_CLI_BASH_SANDBOX_SHOW_INDICATOR) && shouldUseSandbox(input) ? 'SandboxedBash' : 'Bash';
   },
   getToolUseSummary(input) {
     if (!input?.command) {
@@ -966,7 +966,7 @@ async function* runShellCommand({
   // Only background commands that are allowed to be auto-backgrounded (not sleep, etc.)
   if (shellCommand.onTimeout && shouldAutoBackground) {
     shellCommand.onTimeout(backgroundFn => {
-      startBackgrounding('tengu_bash_command_timeout_backgrounded', backgroundFn);
+      startBackgrounding('open_code_cli_bash_command_timeout_backgrounded', backgroundFn);
     });
   }
 
@@ -977,7 +977,7 @@ async function* runShellCommand({
     setTimeout(() => {
       if (shellCommand.status === 'running' && backgroundShellId === undefined) {
         assistantAutoBackgrounded = true;
-        startBackgrounding('tengu_bash_command_assistant_auto_backgrounded');
+        startBackgrounding('open_code_cli_bash_command_assistant_auto_backgrounded');
       }
     }, ASSISTANT_BLOCKING_BUDGET_MS).unref();
   }

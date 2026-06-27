@@ -1,6 +1,6 @@
 /**
  * Extracts durable memories from the current session transcript
- * and writes them to the auto-memory directory (~/.claude/projects/<path>/memory/).
+ * and writes them to the auto-memory directory (~/.open-code-cli/projects/<path>/memory/).
  *
  * It runs once at the end of each complete query loop (when the model produces
  * a final response with no tool calls) via handleStopHooks in stopHooks.ts.
@@ -364,21 +364,21 @@ export function initExtractMemories(): void {
       : false
 
     const skipIndex = getFeatureValue_CACHED_MAY_BE_STALE(
-      'tengu_moth_copse',
+      'open_code_cli_moth_copse',
       false,
     )
 
     const canUseTool = createAutoMemCanUseTool(memoryDir)
     const cacheSafeParams = createCacheSafeParams(context)
 
-    // Only run extraction every N eligible turns (tengu_bramble_lintel, default 1).
+    // Only run extraction every N eligible turns (open_code_cli_bramble_lintel, default 1).
     // Trailing extractions (from stashed contexts) skip this check since they
     // process already-committed work that should not be throttled.
     if (!isTrailingRun) {
       turnsSinceLastExtraction++
       if (
         turnsSinceLastExtraction <
-        (getFeatureValue_CACHED_MAY_BE_STALE('tengu_bramble_lintel', null) ?? 1)
+        (getFeatureValue_CACHED_MAY_BE_STALE('open_code_cli_bramble_lintel', null) ?? 1)
       ) {
         return
       }
@@ -533,7 +533,7 @@ export function initExtractMemories(): void {
       return
     }
 
-    if (!getFeatureValue_CACHED_MAY_BE_STALE('tengu_passport_quail', false)) {
+    if (!getFeatureValue_CACHED_MAY_BE_STALE('open_code_cli_passport_quail', false)) {
       if (process.env.USER_TYPE === 'ant' && !hasLoggedGateFailure) {
         hasLoggedGateFailure = true
         logEvent('open_code_cli_extract_memories_gate_disabled', {})

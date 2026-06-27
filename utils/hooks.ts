@@ -175,7 +175,7 @@ const TOOL_HOOK_EXECUTION_TIMEOUT_MS = 10 * 60 * 1000
  */
 const SESSION_END_HOOK_TIMEOUT_MS_DEFAULT = 1500
 export function getSessionEndHookTimeoutMs(): number {
-  const raw = (process.env.OPEN_CODE_CLI_SESSIONEND_HOOKS_TIMEOUT_MS ?? process.env.CLAUDE_CODE_SESSIONEND_HOOKS_TIMEOUT_MS)
+  const raw = process.env.OPEN_CODE_CLI_SESSIONEND_HOOKS_TIMEOUT_MS
   const parsed = raw ? parseInt(raw, 10) : NaN
   return Number.isFinite(parsed) && parsed > 0
     ? parsed
@@ -269,7 +269,7 @@ function executeInBackground({
  * Checks if a hook should be skipped due to lack of workspace trust.
  *
  * ALL hooks require workspace trust because they execute arbitrary commands from
- * .claude/settings.json. This is a defense-in-depth security measure.
+ * .open-code-cli/settings.json. This is a defense-in-depth security measure.
  *
  * Context: Hooks are captured via captureHooksConfigSnapshot() before the trust
  * dialog is shown. While most hooks won't execute until after trust is established
@@ -742,7 +742,7 @@ function processHookJSONOutput({
  *
  * Shell resolution: hook.shell → 'bash'. PowerShell hooks spawn pwsh
  * with -NoProfile -NonInteractive -Command and skip bash-specific prep
- * (POSIX path conversion, .sh auto-prepend, CLAUDE_CODE_SHELL_PREFIX).
+ * (POSIX path conversion, .sh auto-prepend, OPEN_CODE_CLI_SHELL_PREFIX).
  * See docs/design/ps-shell-selection.md §5.1.
  */
 async function execCommandHook(
@@ -866,13 +866,13 @@ async function execCommandHook(
     }
   }
 
-  // CLAUDE_CODE_SHELL_PREFIX wraps the command via POSIX quoting
+  // OPEN_CODE_CLI_SHELL_PREFIX wraps the command via POSIX quoting
   // (formatShellPrefixCommand uses shell-quote). This makes no sense for
   // PowerShell — see design §8.1. For now PS hooks ignore the prefix;
-  // a CLAUDE_CODE_PS_SHELL_PREFIX (or shell-aware prefix) is a follow-up.
+  // a OPEN_CODE_CLI_PS_SHELL_PREFIX (or shell-aware prefix) is a follow-up.
   const finalCommand =
-    !isPowerShell && (process.env.OPEN_CODE_CLI_SHELL_PREFIX ?? process.env.CLAUDE_CODE_SHELL_PREFIX)
-      ? formatShellPrefixCommand((process.env.OPEN_CODE_CLI_SHELL_PREFIX ?? process.env.CLAUDE_CODE_SHELL_PREFIX), command)
+    !isPowerShell && process.env.OPEN_CODE_CLI_SHELL_PREFIX
+      ? formatShellPrefixCommand(process.env.OPEN_CODE_CLI_SHELL_PREFIX, command)
       : command
 
   const hookTimeoutMs = hook.timeout
@@ -4321,15 +4321,15 @@ export function hasInstructionsLoadedHook(): boolean {
 }
 
 /**
- * Execute InstructionsLoaded hooks when an instruction file (CLAUDE.md or
- * .claude/rules/*.md) is loaded into context. Fire-and-forget — this hook is
+ * Execute InstructionsLoaded hooks when an instruction file (OPEN_CODE.md or
+ * .open-code-cli/rules/*.md) is loaded into context. Fire-and-forget — this hook is
  * for observability/audit only and does not support blocking.
  *
  * Dispatch sites:
  * - Eager load at session start (getMemoryFiles in claudemd.ts)
  * - Eager reload after compaction (getMemoryFiles cache cleared by
  *   runPostCompactCleanup; next call reports load_reason: 'compact')
- * - Lazy load when Claude touches a file that triggers nested CLAUDE.md or
+ * - Lazy load when Claude touches a file that triggers nested OPEN_CODE.md or
  *   conditional rules with paths: frontmatter (memoryFilesToAttachments in
  *   attachments.ts)
  */

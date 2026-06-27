@@ -273,7 +273,7 @@ function StatusLineInner({
       }
       // executeStatusLineCommand (hooks.ts) returns undefined when trust is
       // blocked — statusLineText stays undefined forever, user sees nothing,
-      // and tengu_status_line_mount above fires anyway so telemetry looks fine.
+      // and open_code_cli_status_line_mount above fires anyway so telemetry looks fine.
       if (!checkHasTrustDialogAccepted()) {
         addNotification({
           key: 'statusline-trust-blocked',

@@ -84,7 +84,7 @@ const SPAWN_SESSIONS_DEFAULT = 32
 
 /**
  * GrowthBook gate for multi-session spawn modes (--spawn / --capacity / --create-session-in-dir).
- * Sibling of tengu_ccr_bridge_multi_environment (multiple envs per host:dir) —
+ * Sibling of open_code_cli_ccr_bridge_multi_environment (multiple envs per host:dir) —
  * this one enables multiple sessions per environment.
  * Rollout staged via targeting rules: ants first, then gradual external.
  *
@@ -94,7 +94,7 @@ const SPAWN_SESSIONS_DEFAULT = 32
  * disk cache for next time.
  */
 async function isMultiSessionSpawnEnabled(): Promise<boolean> {
-  return checkGate_CACHED_OR_BLOCKING('tengu_ccr_bridge_multi_session')
+  return checkGate_CACHED_OR_BLOCKING('open_code_cli_ccr_bridge_multi_session')
 }
 
 /**
@@ -165,7 +165,7 @@ export async function runBridgeLoop(
   const sessionWorkIds = new Map<string, string>()
   // Compat-surface ID (session_*) computed once at spawn and cached so
   // cleanup and status-update ticks use the same key regardless of whether
-  // the tengu_bridge_repl_v2_cse_shim_enabled gate flips mid-session.
+  // the open_code_cli_bridge_repl_v2_cse_shim_enabled gate flips mid-session.
   const sessionCompatIds = new Map<string, string>()
   // Session ingress JWTs for heartbeat auth, keyed by sessionId.
   // Stored separately from handle.accessToken because the token refresh
@@ -2054,7 +2054,7 @@ export async function bridgeMain(args: string[]): Promise<void> {
   // initSinks() so the denial event can be enqueued.
   const multiSessionEnabled = await isMultiSessionSpawnEnabled()
   if (usedMultiSessionFeature && !multiSessionEnabled) {
-    await logEventAsync('tengu_bridge_multi_session_denied', {
+    await logEventAsync('open_code_cli_bridge_multi_session_denied', {
       used_spawn: parsedSpawnMode !== undefined,
       used_capacity: parsedCapacity !== undefined,
       used_create_session_in_dir: parsedCreateSessionInDir !== undefined,
@@ -2425,7 +2425,7 @@ export async function bridgeMain(args: string[]): Promise<void> {
     verbose,
     sandbox,
     bridgeId,
-    workerType: 'claude_code',
+    workerType: 'open_code_cli',
     environmentId: randomUUID(),
     reuseEnvironmentId,
     apiBaseUrl: baseUrl,
@@ -2886,7 +2886,7 @@ export async function runBridgeHeadless(
     verbose: false,
     sandbox: opts.sandbox,
     bridgeId,
-    workerType: 'claude_code',
+    workerType: 'open_code_cli',
     environmentId: randomUUID(),
     apiBaseUrl: baseUrl,
     sessionIngressUrl,

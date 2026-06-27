@@ -71,7 +71,7 @@ export function Passes({
         setReferrerReward(eligibilityData.referrer_reward);
 
         // Use the campaign returned from eligibility for redemptions
-        const campaign = eligibilityData.referral_code_details?.campaign ?? 'claude_code_guest_pass';
+        const campaign = eligibilityData.referral_code_details?.campaign ?? 'open_code_cli_guest_pass';
 
         // Fetch redemptions data
         let redemptionsData: ReferralRedemptionsResponse;
@@ -167,7 +167,7 @@ export function Passes({
         <Box flexDirection="column" marginLeft={2}>
           <Text dimColor>
             {referrerReward ? `Share a free week of Open Code CLI with friends. If they love it and subscribe, you'll get ${formatCreditAmount(referrerReward)} of extra usage to keep building. ` : 'Share a free week of Open Code CLI with friends. '}
-            <Link url={referrerReward ? 'https://support.claude.com/en/articles/13456702-open-code-cli-guest-passes' : 'https://support.claude.com/en/articles/12875061-open-code-cli-guest-passes'}>
+            <Link url={referrerReward ? 'https://support.open-code-cli.com/en/articles/13456702-open-code-cli-guest-passes' : 'https://support.open-code-cli.com/en/articles/12875061-open-code-cli-guest-passes'}>
               Terms apply.
             </Link>
           </Text>

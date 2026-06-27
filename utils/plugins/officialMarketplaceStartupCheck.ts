@@ -46,7 +46,7 @@ export type OfficialMarketplaceSkipReason =
  */
 export function isOfficialMarketplaceAutoInstallDisabled(): boolean {
   return isEnvTruthy(
-    (process.env.OPEN_CODE_CLI_DISABLE_OFFICIAL_MARKETPLACE_AUTOINSTALL ?? process.env.CLAUDE_CODE_DISABLE_OFFICIAL_MARKETPLACE_AUTOINSTALL),
+    process.env.OPEN_CODE_CLI_DISABLE_OFFICIAL_MARKETPLACE_AUTOINSTALL,
   )
 }
 
@@ -253,7 +253,7 @@ export async function checkAndInstallOfficialMarketplace(): Promise<OfficialMark
     // ONLY if the kill-switch allows — same gate as refreshMarketplace().
     if (
       !getFeatureValue_CACHED_MAY_BE_STALE(
-        'tengu_plugin_official_mkt_git_fallback',
+        'open_code_cli_plugin_official_mkt_git_fallback',
         true,
       )
     ) {

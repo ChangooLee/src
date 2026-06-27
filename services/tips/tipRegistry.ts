@@ -243,7 +243,7 @@ const externalTips: Tip[] = [
     cooldownSessions: 10,
     isRelevant: async () =>
       getPlatform() === 'windows' &&
-      (process.env.OPEN_CODE_CLI_USE_POWERSHELL_TOOL ?? process.env.CLAUDE_CODE_USE_POWERSHELL_TOOL) === undefined,
+      process.env.OPEN_CODE_CLI_USE_POWERSHELL_TOOL === undefined,
   },
   {
     id: 'status-line',
@@ -325,7 +325,7 @@ const externalTips: Tip[] = [
   {
     id: 'install-github-app',
     content: async () =>
-      'Run /install-github-app to tag @claude right from your Github issues and PRs',
+      'Run /install-github-app to tag @open-code-cli right from your Github issues and PRs',
     cooldownSessions: 10,
     isRelevant: async () => !getGlobalConfig().githubActionSetupCount,
   },
@@ -391,7 +391,7 @@ const externalTips: Tip[] = [
   {
     id: 'custom-commands',
     content: async () =>
-      'Create skills by adding .md files to .claude/skills/ in your project or ~/.claude/skills/ for skills that work in any project',
+      'Create skills by adding .md files to .open-code-cli/skills/ in your project or ~/.open-code-cli/skills/ for skills that work in any project',
     cooldownSessions: 15,
     async isRelevant() {
       const config = getGlobalConfig()
@@ -519,7 +519,7 @@ const externalTips: Tip[] = [
       const cmd = blue('/effort high')
       const variant = getFeatureValue_CACHED_MAY_BE_STALE<
         'off' | 'copy_a' | 'copy_b'
-      >('tengu_tide_elm', 'off')
+      >('open_code_cli_tide_elm', 'off')
       return variant === 'copy_b'
         ? `Use ${cmd} for better one-shot answers. Claude thinks it through first.`
         : `Working on something tricky? ${cmd} gives better first answers`
@@ -536,7 +536,7 @@ const externalTips: Tip[] = [
       if (persisted === 'high' || persisted === 'max') return false
       return (
         getFeatureValue_CACHED_MAY_BE_STALE<'off' | 'copy_a' | 'copy_b'>(
-          'tengu_tide_elm',
+          'open_code_cli_tide_elm',
           'off',
         ) !== 'off'
       )
@@ -548,7 +548,7 @@ const externalTips: Tip[] = [
       const blue = color('suggestion', ctx.theme)
       const variant = getFeatureValue_CACHED_MAY_BE_STALE<
         'off' | 'copy_a' | 'copy_b'
-      >('tengu_tern_alloy', 'off')
+      >('open_code_cli_tern_alloy', 'off')
       return variant === 'copy_b'
         ? `For big tasks, tell Open Code CLI to ${blue('use subagents')}. They work in parallel and keep your main thread clean.`
         : `Say ${blue('"fan out subagents"')} and Open Code CLI sends a team. Each one digs deep so nothing gets missed.`
@@ -558,7 +558,7 @@ const externalTips: Tip[] = [
       if (!is1PApiCustomer()) return false
       return (
         getFeatureValue_CACHED_MAY_BE_STALE<'off' | 'copy_a' | 'copy_b'>(
-          'tengu_tern_alloy',
+          'open_code_cli_tern_alloy',
           'off',
         ) !== 'off'
       )
@@ -570,7 +570,7 @@ const externalTips: Tip[] = [
       const blue = color('suggestion', ctx.theme)
       const variant = getFeatureValue_CACHED_MAY_BE_STALE<
         'off' | 'copy_a' | 'copy_b'
-      >('tengu_timber_lark', 'off')
+      >('open_code_cli_timber_lark', 'off')
       return variant === 'copy_b'
         ? `Use ${blue('/loop 5m check the deploy')} to run any prompt on a schedule. Set it and forget it.`
         : `${blue('/loop')} runs any prompt on a recurring schedule. Great for monitoring deploys, babysitting PRs, or polling status.`
@@ -581,7 +581,7 @@ const externalTips: Tip[] = [
       if (!isKairosCronEnabled()) return false
       return (
         getFeatureValue_CACHED_MAY_BE_STALE<'off' | 'copy_a' | 'copy_b'>(
-          'tengu_timber_lark',
+          'open_code_cli_timber_lark',
           'off',
         ) !== 'off'
       )
@@ -638,7 +638,7 @@ const internalOnlyTips: Tip[] =
         {
           id: 'important-claudemd',
           content: async () =>
-            '[ANT-ONLY] Use "IMPORTANT:" prefix for must-follow CLAUDE.md rules',
+            '[ANT-ONLY] Use "IMPORTANT:" prefix for must-follow OPEN_CODE.md rules',
           cooldownSessions: 30,
           isRelevant: async () => true,
         },

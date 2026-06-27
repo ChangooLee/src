@@ -17,10 +17,10 @@ type Props = {
   defaultSelections: Workflow[];
 };
 const WORKFLOWS: WorkflowOption[] = [{
-  value: 'claude' as const,
-  label: '@Open Code CLI - Tag @claude in issues and PR comments'
+  value: 'open-code-cli' as const,
+  label: '@Open Code CLI - Tag @open-code-cli in issues and PR comments'
 }, {
-  value: 'claude-review' as const,
+  value: 'open-code-cli-review' as const,
   label: 'Open Code CLI Review - Automated code review on new PRs'
 }];
 function renderInputGuide(exitState: ExitState): React.ReactNode {

@@ -12,7 +12,7 @@ import { getRemoteManagedSettingsSyncFromCache } from '../../services/remoteMana
 import { uniq } from '../array.js'
 import { logForDebugging } from '../debug.js'
 import { logForDiagnosticsNoPII } from '../diagLogs.js'
-import { getClaudeConfigHomeDir, isEnvTruthy } from '../envUtils.js'
+import { getOpenCodeCliConfigHomeDir, isEnvTruthy } from '../envUtils.js'
 import { getErrnoCode, isENOENT } from '../errors.js'
 import { writeFileSyncAndFlush_DEPRECATED } from '../file.js'
 import { readFileSync } from '../fileRead.js'
@@ -232,14 +232,14 @@ function parseSettingsFileUncached(path: string): {
 
 /**
  * Get the absolute path to the associated file root for a given settings source
- * (e.g. for $PROJ_DIR/.claude/settings.json, returns $PROJ_DIR)
+ * (e.g. for $PROJ_DIR/.open-code-cli/settings.json, returns $PROJ_DIR)
  * @param source The source of the settings
  * @returns The root path of the settings file
  */
 export function getSettingsRootPathForSource(source: SettingSource): string {
   switch (source) {
     case 'userSettings':
-      return resolve(getClaudeConfigHomeDir())
+      return resolve(getOpenCodeCliConfigHomeDir())
     case 'policySettings':
     case 'projectSettings':
     case 'localSettings': {
@@ -258,13 +258,13 @@ export function getSettingsRootPathForSource(source: SettingSource): string {
  *
  * Priority:
  * 1. Session state (set by CLI flag --cowork)
- * 2. Environment variable CLAUDE_CODE_USE_COWORK_PLUGINS
+ * 2. Environment variable OPEN_CODE_CLI_USE_COWORK_PLUGINS
  * 3. Default: 'settings.json'
  */
 function getUserSettingsFilePath(): string {
   if (
     getUseCoworkPlugins() ||
-    isEnvTruthy((process.env.OPEN_CODE_CLI_USE_COWORK_PLUGINS ?? process.env.CLAUDE_CODE_USE_COWORK_PLUGINS))
+    isEnvTruthy(process.env.OPEN_CODE_CLI_USE_COWORK_PLUGINS)
   ) {
     return 'cowork_settings.json'
   }
@@ -300,9 +300,9 @@ export function getRelativeSettingsFilePathForSource(
 ): string {
   switch (source) {
     case 'projectSettings':
-      return join('.claude', 'settings.json')
+      return join('.open-code-cli', 'settings.json')
     case 'localSettings':
-      return join('.claude', 'settings.local.json')
+      return join('.open-code-cli', 'settings.local.json')
   }
 }
 

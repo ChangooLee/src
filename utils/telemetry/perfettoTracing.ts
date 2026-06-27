@@ -13,11 +13,11 @@
  * - User input waiting time
  *
  * Usage:
- * 1. Enable via CLAUDE_CODE_PERFETTO_TRACE=1 or CLAUDE_CODE_PERFETTO_TRACE=<path>
- * 2. Optionally set CLAUDE_CODE_PERFETTO_WRITE_INTERVAL_S=<positive integer> to write the
+ * 1. Enable via OPEN_CODE_CLI_PERFETTO_TRACE=1 or OPEN_CODE_CLI_PERFETTO_TRACE=<path>
+ * 2. Optionally set OPEN_CODE_CLI_PERFETTO_WRITE_INTERVAL_S=<positive integer> to write the
  *    trace file periodically (default: write only on exit).
  * 3. Run Open Code CLI normally
- * 4. Trace file is written to ~/.claude/traces/trace-<session-id>.json
+ * 4. Trace file is written to ~/.open-code-cli/traces/trace-<session-id>.json
  *    or to the specified path
  * 5. Open in ui.perfetto.dev to visualize
  */
@@ -30,7 +30,7 @@ import { getSessionId } from '../../bootstrap/state.js'
 import { registerCleanup } from '../cleanupRegistry.js'
 import { logForDebugging } from '../debug.js'
 import {
-  getClaudeConfigHomeDir,
+  getOpenCodeCliConfigHomeDir,
   isEnvDefinedFalsy,
   isEnvTruthy,
 } from '../envUtils.js'
@@ -251,7 +251,7 @@ function evictOldestEvents(): void {
  * Call this early in the application lifecycle
  */
 export function initializePerfettoTracing(): void {
-  const envValue = (process.env.OPEN_CODE_CLI_PERFETTO_TRACE ?? process.env.CLAUDE_CODE_PERFETTO_TRACE)
+  const envValue = process.env.OPEN_CODE_CLI_PERFETTO_TRACE
   logForDebugging(
     `[Perfetto] initializePerfettoTracing called, env value: ${envValue}`,
   )
@@ -270,7 +270,7 @@ export function initializePerfettoTracing(): void {
 
     // Determine trace file path
     if (isEnvTruthy(envValue)) {
-      const tracesDir = join(getClaudeConfigHomeDir(), 'traces')
+      const tracesDir = join(getOpenCodeCliConfigHomeDir(), 'traces')
       tracePath = join(tracesDir, `trace-${getSessionId()}.json`)
     } else {
       // Use the provided path
@@ -281,9 +281,9 @@ export function initializePerfettoTracing(): void {
       `[Perfetto] Tracing enabled, will write to: ${tracePath}, isEnabled=${isEnabled}`,
     )
 
-    // Start periodic full-trace write if CLAUDE_CODE_PERFETTO_WRITE_INTERVAL_S is a positive integer
+    // Start periodic full-trace write if OPEN_CODE_CLI_PERFETTO_WRITE_INTERVAL_S is a positive integer
     const intervalSec = parseInt(
-      (process.env.OPEN_CODE_CLI_PERFETTO_WRITE_INTERVAL_S ?? process.env.CLAUDE_CODE_PERFETTO_WRITE_INTERVAL_S) ?? '',
+      process.env.OPEN_CODE_CLI_PERFETTO_WRITE_INTERVAL_S ?? '',
       10,
     )
     if (intervalSec > 0) {

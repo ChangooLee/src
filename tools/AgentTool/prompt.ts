@@ -55,13 +55,13 @@ export function formatAgentLine(agent: AgentDefinition): string {
  * connect, /reload-plugins, or permission-mode changes mutate the list →
  * description changes → full tool-schema cache bust.
  *
- * Override with CLAUDE_CODE_AGENT_LIST_IN_MESSAGES=true/false for testing.
+ * Override with OPEN_CODE_CLI_AGENT_LIST_IN_MESSAGES=true/false for testing.
  */
 export function shouldInjectAgentListInMessages(): boolean {
-  if (isEnvTruthy((process.env.OPEN_CODE_CLI_AGENT_LIST_IN_MESSAGES ?? process.env.CLAUDE_CODE_AGENT_LIST_IN_MESSAGES))) return true
-  if (isEnvDefinedFalsy((process.env.OPEN_CODE_CLI_AGENT_LIST_IN_MESSAGES ?? process.env.CLAUDE_CODE_AGENT_LIST_IN_MESSAGES)))
+  if (isEnvTruthy(process.env.OPEN_CODE_CLI_AGENT_LIST_IN_MESSAGES)) return true
+  if (isEnvDefinedFalsy(process.env.OPEN_CODE_CLI_AGENT_LIST_IN_MESSAGES))
     return false
-  return getFeatureValue_CACHED_MAY_BE_STALE('tengu_agent_list_attach', false)
+  return getFeatureValue_CACHED_MAY_BE_STALE('open_code_cli_agent_list_attach', false)
 }
 
 export async function getPrompt(

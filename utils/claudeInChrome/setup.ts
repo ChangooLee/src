@@ -14,7 +14,7 @@ import { isInBundledMode } from '../bundledMode.js'
 import { getGlobalConfig, saveGlobalConfig } from '../config.js'
 import { logForDebugging } from '../debug.js'
 import {
-  getClaudeConfigHomeDir,
+  getOpenCodeCliConfigHomeDir,
   isEnvDefinedFalsy,
   isEnvTruthy,
 } from '../envUtils.js'
@@ -33,7 +33,7 @@ import { isChromeExtensionInstalledPortable } from './setupPortable.js'
 
 const CHROME_EXTENSION_RECONNECT_URL = 'https://clau.de/chrome/reconnect'
 
-const NATIVE_HOST_IDENTIFIER = 'com.anthropic.claude_code_browser_extension'
+const NATIVE_HOST_IDENTIFIER = 'com.anthropic.open_code_cli_browser_extension'
 const NATIVE_HOST_MANIFEST_NAME = `${NATIVE_HOST_IDENTIFIER}.json`
 
 export function shouldEnableClaudeInChrome(chromeFlag?: boolean): boolean {
@@ -51,17 +51,17 @@ export function shouldEnableClaudeInChrome(chromeFlag?: boolean): boolean {
   }
 
   // Check environment variables
-  if (isEnvTruthy((process.env.OPEN_CODE_CLI_ENABLE_CFC ?? process.env.CLAUDE_CODE_ENABLE_CFC))) {
+  if (isEnvTruthy(process.env.OPEN_CODE_CLI_ENABLE_CFC)) {
     return true
   }
-  if (isEnvDefinedFalsy((process.env.OPEN_CODE_CLI_ENABLE_CFC ?? process.env.CLAUDE_CODE_ENABLE_CFC))) {
+  if (isEnvDefinedFalsy(process.env.OPEN_CODE_CLI_ENABLE_CFC)) {
     return false
   }
 
   // Check default config settings
   const config = getGlobalConfig()
-  if (config.claudeInChromeDefaultEnabled !== undefined) {
-    return config.claudeInChromeDefaultEnabled
+  if (config.open-code-cliInChromeDefaultEnabled !== undefined) {
+    return config.open-code-cliInChromeDefaultEnabled
   }
 
   return false
@@ -78,7 +78,7 @@ export function shouldAutoEnableClaudeInChrome(): boolean {
     getIsInteractive() &&
     isChromeExtensionInstalled_CACHED_MAY_BE_STALE() &&
     (process.env.USER_TYPE === 'ant' ||
-      getFeatureValue_CACHED_MAY_BE_STALE('tengu_chrome_auto_enable', false))
+      getFeatureValue_CACHED_MAY_BE_STALE('open_code_cli_chrome_auto_enable', false))
 
   return shouldAutoEnable
 }
@@ -299,7 +299,7 @@ function registerWindowsNativeHosts(manifestPath: string): void {
 }
 
 /**
- * Create a wrapper script in ~/.claude/chrome/ that invokes the given command. This is
+ * Create a wrapper script in ~/.open-code-cli/chrome/ that invokes the given command. This is
  * necessary because Chrome's native host manifest "path" field cannot contain arguments.
  *
  * @param command - The full command to execute (e.g., "/path/to/claude --chrome-native-host")
@@ -307,7 +307,7 @@ function registerWindowsNativeHosts(manifestPath: string): void {
  */
 async function createWrapperScript(command: string): Promise<string> {
   const platform = getPlatform()
-  const chromeDir = join(getClaudeConfigHomeDir(), 'chrome')
+  const chromeDir = join(getOpenCodeCliConfigHomeDir(), 'chrome')
   const wrapperPath =
     platform === 'windows'
       ? join(chromeDir, 'chrome-native-host.bat')
@@ -355,7 +355,7 @@ exec ${command}
  *
  * Only positive detections are persisted. A negative result from the
  * filesystem scan is not cached, because it may come from a machine that
- * shares ~/.claude.json but has no local Chrome (e.g. a remote dev
+ * shares ~/.open-code-cli.json but has no local Chrome (e.g. a remote dev
  * environment using the bridge), and caching it would permanently poison
  * auto-enable for every session on every machine that reads that config.
  */

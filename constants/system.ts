@@ -8,12 +8,12 @@ import { getAPIProvider } from '../utils/model/providers.js'
 import { getWorkload } from '../utils/workloadContext.js'
 
 const DEFAULT_PREFIX = `You are an interactive code agent.`
-const AGENT_SDK_CLAUDE_CODE_PRESET_PREFIX = `You are an interactive code agent running within the Claude Agent SDK.`
+const AGENT_SDK_OPEN_CODE_CLI_PRESET_PREFIX = `You are an interactive code agent running within the Claude Agent SDK.`
 const AGENT_SDK_PREFIX = `You are a Claude agent, built on Anthropic's Claude Agent SDK.`
 
 const CLI_SYSPROMPT_PREFIX_VALUES = [
   DEFAULT_PREFIX,
-  AGENT_SDK_CLAUDE_CODE_PRESET_PREFIX,
+  AGENT_SDK_OPEN_CODE_CLI_PRESET_PREFIX,
   AGENT_SDK_PREFIX,
 ] as const
 
@@ -38,7 +38,7 @@ export function getCLISyspromptPrefix(options?: {
 
   if (options?.isNonInteractive) {
     if (options.hasAppendSystemPrompt) {
-      return AGENT_SDK_CLAUDE_CODE_PRESET_PREFIX
+      return AGENT_SDK_OPEN_CODE_CLI_PRESET_PREFIX
     }
     return AGENT_SDK_PREFIX
   }
@@ -53,7 +53,7 @@ function isAttributionHeaderEnabled(): boolean {
   if (isEnvDefinedFalsy(getOpenCodeCliEnv('ATTRIBUTION_HEADER'))) {
     return false
   }
-  return getFeatureValue_CACHED_MAY_BE_STALE('tengu_attribution_header', true)
+  return getFeatureValue_CACHED_MAY_BE_STALE('open_code_cli_attribution_header', true)
 }
 
 /**

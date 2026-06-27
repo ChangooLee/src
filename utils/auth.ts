@@ -49,7 +49,7 @@ import {
 } from './config.js'
 import { logAntError, logForDebugging } from './debug.js'
 import {
-  getClaudeConfigHomeDir,
+  getOpenCodeCliConfigHomeDir,
   isBareMode,
   isEnvTruthy,
   isRunningOnHomespace,
@@ -83,7 +83,7 @@ const DEFAULT_API_KEY_HELPER_TTL = 5 * 60 * 1000
 
 /**
  * CCR and Claude Desktop spawn the CLI with OAuth and should never fall back
- * to the user's ~/.claude/settings.json API-key config (apiKeyHelper,
+ * to the user's ~/.open-code-cli/settings.json API-key config (apiKeyHelper,
  * env.ANTHROPIC_API_KEY, env.ANTHROPIC_AUTH_TOKEN). Those settings exist for
  * the user's terminal CLI, not managed sessions. Without this guard, a user
  * who runs `claude` in their terminal with an API key sees every CCD session
@@ -103,20 +103,20 @@ export function isAnthropicAuthEnabled(): boolean {
   if (isBareMode()) return false
 
   // `open-code-cli ssh` remote: ANTHROPIC_UNIX_SOCKET tunnels API calls through a
-  // local auth-injecting proxy. The launcher sets CLAUDE_CODE_OAUTH_TOKEN as a
+  // local auth-injecting proxy. The launcher sets OPEN_CODE_CLI_OAUTH_TOKEN as a
   // placeholder iff the local side is a subscriber (so the remote includes the
   // oauth-2025 beta header to match what the proxy will inject). The remote's
-  // ~/.claude settings (apiKeyHelper, settings.env.ANTHROPIC_API_KEY) MUST NOT
+  // ~/.open-code-cli settings (apiKeyHelper, settings.env.ANTHROPIC_API_KEY) MUST NOT
   // flip this — they'd cause a header mismatch with the proxy and a bogus
   // "invalid x-api-key" from the API. See src/ssh/sshAuthProxy.ts.
   if (process.env.ANTHROPIC_UNIX_SOCKET) {
-    return !!(process.env.OPEN_CODE_CLI_OAUTH_TOKEN ?? process.env.CLAUDE_CODE_OAUTH_TOKEN)
+    return !!process.env.OPEN_CODE_CLI_OAUTH_TOKEN
   }
 
   const is3P =
-    isEnvTruthy((process.env.OPEN_CODE_CLI_USE_BEDROCK ?? process.env.CLAUDE_CODE_USE_BEDROCK)) ||
-    isEnvTruthy((process.env.OPEN_CODE_CLI_USE_VERTEX ?? process.env.CLAUDE_CODE_USE_VERTEX)) ||
-    isEnvTruthy((process.env.OPEN_CODE_CLI_USE_FOUNDRY ?? process.env.CLAUDE_CODE_USE_FOUNDRY))
+    isEnvTruthy(process.env.OPEN_CODE_CLI_USE_BEDROCK) ||
+    isEnvTruthy(process.env.OPEN_CODE_CLI_USE_VERTEX) ||
+    isEnvTruthy(process.env.OPEN_CODE_CLI_USE_FOUNDRY)
 
   // Check if user has configured an external API key source
   // This allows externally-provided API keys to work (without requiring proxy configuration)
@@ -125,7 +125,7 @@ export function isAnthropicAuthEnabled(): boolean {
   const hasExternalAuthToken =
     process.env.ANTHROPIC_AUTH_TOKEN ||
     apiKeyHelper ||
-    (process.env.OPEN_CODE_CLI_API_KEY_FILE_DESCRIPTOR ?? process.env.CLAUDE_CODE_API_KEY_FILE_DESCRIPTOR)
+    process.env.OPEN_CODE_CLI_API_KEY_FILE_DESCRIPTOR
 
   // Check if API key is from an external source (not managed by /login)
   const { source: apiKeySource } = getAnthropicApiKeyWithSource({
@@ -166,8 +166,8 @@ export function getAuthTokenSource() {
     return { source: 'ANTHROPIC_AUTH_TOKEN' as const, hasToken: true }
   }
 
-  if ((process.env.OPEN_CODE_CLI_OAUTH_TOKEN ?? process.env.CLAUDE_CODE_OAUTH_TOKEN)) {
-    return { source: 'CLAUDE_CODE_OAUTH_TOKEN' as const, hasToken: true }
+  if (process.env.OPEN_CODE_CLI_OAUTH_TOKEN) {
+    return { source: 'OPEN_CODE_CLI_OAUTH_TOKEN' as const, hasToken: true }
   }
 
   // Check for OAuth token from file descriptor (or its CCR disk fallback)
@@ -179,9 +179,9 @@ export function getAuthTokenSource() {
     // doesn't exist. Call sites fall through correctly — the new source is
     // !== 'none' (cli/handlers/auth.ts → oauth_token) and not in the
     // isEnvVarToken set (auth.ts:1844 → generic re-login message).
-    if ((process.env.OPEN_CODE_CLI_OAUTH_TOKEN_FILE_DESCRIPTOR ?? process.env.CLAUDE_CODE_OAUTH_TOKEN_FILE_DESCRIPTOR)) {
+    if (process.env.OPEN_CODE_CLI_OAUTH_TOKEN_FILE_DESCRIPTOR) {
       return {
-        source: 'CLAUDE_CODE_OAUTH_TOKEN_FILE_DESCRIPTOR' as const,
+        source: 'OPEN_CODE_CLI_OAUTH_TOKEN_FILE_DESCRIPTOR' as const,
         hasToken: true,
       }
     }
@@ -254,7 +254,7 @@ export function getAnthropicApiKeyWithSource(
     ? undefined
     : process.env.ANTHROPIC_API_KEY
 
-  // Always check for direct environment variable when the user ran claude --print.
+  // Always check for direct environment variable when the user ran open-code-cli --print.
   // This is useful for CI, etc.
   if (preferThirdPartyAuthentication() && apiKeyEnv) {
     return {
@@ -275,8 +275,8 @@ export function getAnthropicApiKeyWithSource(
 
     if (
       !apiKeyEnv &&
-      !(process.env.OPEN_CODE_CLI_OAUTH_TOKEN ?? process.env.CLAUDE_CODE_OAUTH_TOKEN) &&
-      !(process.env.OPEN_CODE_CLI_OAUTH_TOKEN_FILE_DESCRIPTOR ?? process.env.CLAUDE_CODE_OAUTH_TOKEN_FILE_DESCRIPTOR)
+      !process.env.OPEN_CODE_CLI_OAUTH_TOKEN &&
+      !process.env.OPEN_CODE_CLI_OAUTH_TOKEN_FILE_DESCRIPTOR
     ) {
       throw new Error(
         'ANTHROPIC_API_KEY or OPEN_CODE_CLI_OAUTH_TOKEN env var is required',
@@ -351,7 +351,7 @@ export function getAnthropicApiKeyWithSource(
 /**
  * Get the configured apiKeyHelper from settings.
  * In bare mode, only the --settings flag source is consulted — apiKeyHelper
- * from ~/.claude/settings.json or project settings is ignored.
+ * from ~/.open-code-cli/settings.json or project settings is ignored.
  */
 export function getConfiguredApiKeyHelper(): string | undefined {
   if (isBareMode()) {
@@ -430,11 +430,11 @@ export function isAwsCredentialExportFromProjectSettings(): boolean {
 
 /**
  * Calculate TTL in milliseconds for the API key helper cache
- * Uses CLAUDE_CODE_API_KEY_HELPER_TTL_MS env var if set and valid,
+ * Uses OPEN_CODE_CLI_API_KEY_HELPER_TTL_MS env var if set and valid,
  * otherwise defaults to 5 minutes
  */
 export function calculateApiKeyHelperTTL(): number {
-  const envTtl = (process.env.OPEN_CODE_CLI_API_KEY_HELPER_TTL_MS ?? process.env.CLAUDE_CODE_API_KEY_HELPER_TTL_MS)
+  const envTtl = process.env.OPEN_CODE_CLI_API_KEY_HELPER_TTL_MS
 
   if (envTtl) {
     const parsed = parseInt(envTtl, 10)
@@ -442,7 +442,7 @@ export function calculateApiKeyHelperTTL(): number {
       return parsed
     }
     logForDebugging(
-      `Found CLAUDE_CODE_API_KEY_HELPER_TTL_MS env var, but it was not a valid number. Got ${envTtl}`,
+      `Found OPEN_CODE_CLI_API_KEY_HELPER_TTL_MS env var, but it was not a valid number. Got ${envTtl}`,
       { level: 'error' },
     )
   }
@@ -688,7 +688,7 @@ export function refreshAwsAuth(awsAuthRefresh: string): Promise<boolean> {
               'AWS auth refresh timed out after 3 minutes. Run your auth command manually in a separate terminal.',
             )
           : chalk.red(
-              'Error running awsAuthRefresh (in settings or ~/.claude.json):',
+              'Error running awsAuthRefresh (in settings or ~/.open-code-cli.json):',
             )
         // biome-ignore lint/suspicious/noConsole:: intentional console output
         console.error(message)
@@ -766,7 +766,7 @@ async function getAwsCredsFromCredentialExport(): Promise<{
       }
     } catch (e) {
       const message = chalk.red(
-        'Error getting AWS credentials from awsCredentialExport (in settings or ~/.claude.json):',
+        'Error getting AWS credentials from awsCredentialExport (in settings or ~/.open-code-cli.json):',
       )
       if (e instanceof Error) {
         // biome-ignore lint/suspicious/noConsole:: intentional console output
@@ -956,7 +956,7 @@ export function refreshGcpAuth(gcpAuthRefresh: string): Promise<boolean> {
               'GCP auth refresh timed out after 3 minutes. Run your auth command manually in a separate terminal.',
             )
           : chalk.red(
-              'Error running gcpAuthRefresh (in settings or ~/.claude.json):',
+              'Error running gcpAuthRefresh (in settings or ~/.open-code-cli.json):',
             )
         // biome-ignore lint/suspicious/noConsole:: intentional console output
         console.error(message)
@@ -1213,9 +1213,9 @@ export function saveOAuthTokensIfNeeded(tokens: OAuthTokens): {
 
   try {
     const storageData = secureStorage.read() || {}
-    const existingOauth = storageData.claudeAiOauth
+    const existingOauth = storageData.open-code-cliAiOauth
 
-    storageData.claudeAiOauth = {
+    storageData.open-code-cliAiOauth = {
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
       expiresAt: tokens.expiresAt,
@@ -1258,10 +1258,10 @@ export const getClaudeAIOAuthTokens = memoize((): OAuthTokens | null => {
   if (isBareMode()) return null
 
   // Check for force-set OAuth token from environment variable
-  if ((process.env.OPEN_CODE_CLI_OAUTH_TOKEN ?? process.env.CLAUDE_CODE_OAUTH_TOKEN)) {
+  if (process.env.OPEN_CODE_CLI_OAUTH_TOKEN) {
     // Return an inference-only token (unknown refresh and expiry)
     return {
-      accessToken: (process.env.OPEN_CODE_CLI_OAUTH_TOKEN ?? process.env.CLAUDE_CODE_OAUTH_TOKEN),
+      accessToken: process.env.OPEN_CODE_CLI_OAUTH_TOKEN,
       refreshToken: null,
       expiresAt: null,
       scopes: ['user:inference'],
@@ -1287,7 +1287,7 @@ export const getClaudeAIOAuthTokens = memoize((): OAuthTokens | null => {
   try {
     const secureStorage = getSecureStorage()
     const storageData = secureStorage.read()
-    const oauthData = storageData?.claudeAiOauth
+    const oauthData = storageData?.open-code-cliAiOauth
 
     if (!oauthData?.accessToken) {
       return null
@@ -1321,7 +1321,7 @@ let lastCredentialsMtimeMs = 0
 async function invalidateOAuthCacheIfDiskChanged(): Promise<void> {
   try {
     const { mtimeMs } = await stat(
-      join(getClaudeConfigHomeDir(), '.credentials.json'),
+      join(getOpenCodeCliConfigHomeDir(), '.credentials.json'),
     )
     if (mtimeMs !== lastCredentialsMtimeMs) {
       lastCredentialsMtimeMs = mtimeMs
@@ -1402,7 +1402,7 @@ export async function getClaudeAIOAuthTokensAsync(): Promise<OAuthTokens | null>
 
   // Env var and FD tokens are sync and don't hit the keychain
   if (
-    (process.env.OPEN_CODE_CLI_OAUTH_TOKEN ?? process.env.CLAUDE_CODE_OAUTH_TOKEN) ||
+    process.env.OPEN_CODE_CLI_OAUTH_TOKEN ||
     getOAuthTokenFromFileDescriptor()
   ) {
     return getClaudeAIOAuthTokens()
@@ -1411,7 +1411,7 @@ export async function getClaudeAIOAuthTokensAsync(): Promise<OAuthTokens | null>
   try {
     const secureStorage = getSecureStorage()
     const storageData = await secureStorage.readAsync()
-    const oauthData = storageData?.claudeAiOauth
+    const oauthData = storageData?.open-code-cliAiOauth
     if (!oauthData?.accessToken) {
       return null
     }
@@ -1483,7 +1483,7 @@ async function checkAndRefreshOAuthTokenIfNeededImpl(
   }
 
   // Tokens are still expired, try to acquire lock and refresh
-  const claudeDir = getClaudeConfigHomeDir()
+  const claudeDir = getOpenCodeCliConfigHomeDir()
   await mkdir(claudeDir, { recursive: true })
 
   let release
@@ -1593,9 +1593,9 @@ export function is1PApiCustomer(): boolean {
 
   // Exclude Vertex, Bedrock, and Foundry customers
   if (
-    isEnvTruthy((process.env.OPEN_CODE_CLI_USE_BEDROCK ?? process.env.CLAUDE_CODE_USE_BEDROCK)) ||
-    isEnvTruthy((process.env.OPEN_CODE_CLI_USE_VERTEX ?? process.env.CLAUDE_CODE_USE_VERTEX)) ||
-    isEnvTruthy((process.env.OPEN_CODE_CLI_USE_FOUNDRY ?? process.env.CLAUDE_CODE_USE_FOUNDRY))
+    isEnvTruthy(process.env.OPEN_CODE_CLI_USE_BEDROCK) ||
+    isEnvTruthy(process.env.OPEN_CODE_CLI_USE_VERTEX) ||
+    isEnvTruthy(process.env.OPEN_CODE_CLI_USE_FOUNDRY)
   ) {
     return false
   }
@@ -1732,9 +1732,9 @@ export function getSubscriptionName(): string {
 /** Check if using third-party services (Bedrock or Vertex or Foundry) */
 export function isUsing3PServices(): boolean {
   return !!(
-    isEnvTruthy((process.env.OPEN_CODE_CLI_USE_BEDROCK ?? process.env.CLAUDE_CODE_USE_BEDROCK)) ||
-    isEnvTruthy((process.env.OPEN_CODE_CLI_USE_VERTEX ?? process.env.CLAUDE_CODE_USE_VERTEX)) ||
-    isEnvTruthy((process.env.OPEN_CODE_CLI_USE_FOUNDRY ?? process.env.CLAUDE_CODE_USE_FOUNDRY))
+    isEnvTruthy(process.env.OPEN_CODE_CLI_USE_BEDROCK) ||
+    isEnvTruthy(process.env.OPEN_CODE_CLI_USE_VERTEX) ||
+    isEnvTruthy(process.env.OPEN_CODE_CLI_USE_FOUNDRY)
   )
 }
 
@@ -1777,7 +1777,7 @@ export function getOtelHeadersFromHelper(): Record<string, string> {
 
   // Return cached headers if still valid (debounce)
   const debounceMs = parseInt(
-    (process.env.OPEN_CODE_CLI_OTEL_HEADERS_HELPER_DEBOUNCE_MS ?? process.env.CLAUDE_CODE_OTEL_HEADERS_HELPER_DEBOUNCE_MS) ||
+    process.env.OPEN_CODE_CLI_OTEL_HEADERS_HELPER_DEBOUNCE_MS ||
       DEFAULT_OTEL_HEADERS_DEBOUNCE_MS.toString(),
   )
   if (
@@ -1870,8 +1870,8 @@ export function getAccountInformation() {
   const { source: authTokenSource } = getAuthTokenSource()
   const accountInfo: UserAccountInfo = {}
   if (
-    authTokenSource === 'CLAUDE_CODE_OAUTH_TOKEN' ||
-    authTokenSource === 'CLAUDE_CODE_OAUTH_TOKEN_FILE_DESCRIPTOR'
+    authTokenSource === 'OPEN_CODE_CLI_OAUTH_TOKEN' ||
+    authTokenSource === 'OPEN_CODE_CLI_OAUTH_TOKEN_FILE_DESCRIPTOR'
   ) {
     accountInfo.tokenSource = authTokenSource
   } else if (isClaudeAISubscriber()) {
@@ -1950,11 +1950,11 @@ export async function validateForceLoginOrg(): Promise<OrgValidationResult> {
 
   // Always fetch the authoritative org UUID from the profile endpoint.
   // Even keychain-sourced tokens verify server-side: the cached org UUID
-  // in ~/.claude.json is user-writable and cannot be trusted.
+  // in ~/.open-code-cli.json is user-writable and cannot be trusted.
   const { source } = getAuthTokenSource()
   const isEnvVarToken =
-    source === 'CLAUDE_CODE_OAUTH_TOKEN' ||
-    source === 'CLAUDE_CODE_OAUTH_TOKEN_FILE_DESCRIPTOR'
+    source === 'OPEN_CODE_CLI_OAUTH_TOKEN' ||
+    source === 'OPEN_CODE_CLI_OAUTH_TOKEN_FILE_DESCRIPTOR'
 
   const profile = await getOauthProfileFromOauthToken(tokens.accessToken)
   if (!profile) {
@@ -1977,9 +1977,9 @@ export async function validateForceLoginOrg(): Promise<OrgValidationResult> {
 
   if (isEnvVarToken) {
     const envVarName =
-      source === 'CLAUDE_CODE_OAUTH_TOKEN'
-        ? 'CLAUDE_CODE_OAUTH_TOKEN'
-        : 'CLAUDE_CODE_OAUTH_TOKEN_FILE_DESCRIPTOR'
+      source === 'OPEN_CODE_CLI_OAUTH_TOKEN'
+        ? 'OPEN_CODE_CLI_OAUTH_TOKEN'
+        : 'OPEN_CODE_CLI_OAUTH_TOKEN_FILE_DESCRIPTOR'
     return {
       valid: false,
       message:

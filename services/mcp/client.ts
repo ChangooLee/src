@@ -237,7 +237,7 @@ const claudeInChromeToolRendering =
     require('../../utils/claudeInChrome/toolRendering.js')
 // Lazy: wrapper.tsx → hostAdapter.ts → executor.ts pulls both native modules
 // (@ant/computer-use-input + @ant/computer-use-swift). Runtime-gated by
-// GrowthBook tengu_malort_pedway (see gates.ts).
+// GrowthBook open_code_cli_malort_pedway (see gates.ts).
 const computerUseWrapper = feature('CHICAGO_MCP')
   ? (): typeof import('../../utils/computerUse/wrapper.js') =>
       require('../../utils/computerUse/wrapper.js')
@@ -250,7 +250,7 @@ const isComputerUseMCPServer = feature('CHICAGO_MCP')
 
 import { mkdir, readFile, unlink, writeFile } from 'fs/promises'
 import { dirname, join } from 'path'
-import { getClaudeConfigHomeDir } from '../../utils/envUtils.js'
+import { getOpenCodeCliConfigHomeDir } from '../../utils/envUtils.js'
 /* eslint-enable @typescript-eslint/no-require-imports */
 import { jsonParse, jsonStringify } from '../../utils/slowOperations.js'
 
@@ -259,7 +259,7 @@ const MCP_AUTH_CACHE_TTL_MS = 15 * 60 * 1000 // 15 min
 type McpAuthCacheData = Record<string, { timestamp: number }>
 
 function getMcpAuthCachePath(): string {
-  return join(getClaudeConfigHomeDir(), 'mcp-needs-auth-cache.json')
+  return join(getOpenCodeCliConfigHomeDir(), 'mcp-needs-auth-cache.json')
 }
 
 // Memoized so N concurrent isMcpAuthCached() calls during batched connection
@@ -334,7 +334,7 @@ function mcpBaseUrlAnalytics(serverRef: ScopedMcpServerConfig): {
 
 /**
  * Shared handler for sse/http/claudeai-proxy auth failures during connect:
- * emits tengu_mcp_server_needs_auth, caches the needs-auth entry, and returns
+ * emits open_code_cli_mcp_server_needs_auth, caches the needs-auth entry, and returns
  * the needs-auth connection result.
  */
 function handleRemoteAuthFailure(
@@ -712,7 +712,7 @@ export const connectToServer = memoize(
           ...(serverRef.authToken && {
             'X-Open-Code-CLI-Ide-Authorization': serverRef.authToken,
             // Keep the legacy header for IDE servers that have not yet migrated.
-            'X-Claude-Code-Ide-Authorization': serverRef.authToken,
+            'X-Open-Code-CLI-Ide-Authorization': serverRef.authToken,
           }),
         }
 
@@ -945,8 +945,8 @@ export const connectToServer = memoize(
         logMCPDebug(name, `In-process Computer Use MCP server started`)
       } else if (serverRef.type === 'stdio' || !serverRef.type) {
         const finalCommand =
-          (process.env.OPEN_CODE_CLI_SHELL_PREFIX ?? process.env.CLAUDE_CODE_SHELL_PREFIX) || serverRef.command
-        const finalArgs = (process.env.OPEN_CODE_CLI_SHELL_PREFIX ?? process.env.CLAUDE_CODE_SHELL_PREFIX)
+          process.env.OPEN_CODE_CLI_SHELL_PREFIX || serverRef.command
+        const finalArgs = process.env.OPEN_CODE_CLI_SHELL_PREFIX
           ? [[serverRef.command, ...serverRef.args].join(' ')]
           : serverRef.args
         transport = new StdioClientTransport({

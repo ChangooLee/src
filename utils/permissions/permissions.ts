@@ -841,11 +841,11 @@ export const hasPermissionsToUseTool: CanUseToolFn = async (
           }
         }
         // When classifier is unavailable (API error), behavior depends on
-        // the tengu_iron_gate_closed gate.
+        // the open_code_cli_iron_gate_closed gate.
         if (classifierResult.unavailable) {
           if (
             getFeatureValue_CACHED_WITH_REFRESH(
-              'tengu_iron_gate_closed',
+              'open_code_cli_iron_gate_closed',
               true,
               CLASSIFIER_FAIL_CLOSED_REFRESH_MS,
             )
@@ -1141,7 +1141,7 @@ export async function checkRuleBasedPermissions(
     return toolPermissionResult
   }
 
-  // 1g. Safety checks (e.g. .git/, .claude/, .vscode/, shell configs) are
+  // 1g. Safety checks (e.g. .git/, .open-code-cli/, .vscode/, shell configs) are
   // bypass-immune — they must prompt even when a PreToolUse hook returned
   // allow. checkPathSafetyForAutoEdit returns {type:'safetyCheck'} for these.
   if (
@@ -1249,7 +1249,7 @@ async function hasPermissionsToUseToolInner(
     return toolPermissionResult
   }
 
-  // 1g. Safety checks (e.g. .git/, .claude/, .vscode/, shell configs) are
+  // 1g. Safety checks (e.g. .git/, .open-code-cli/, .vscode/, shell configs) are
   // bypass-immune — they must prompt even in bypassPermissions mode.
   // checkPathSafetyForAutoEdit returns {type:'safetyCheck'} for these paths.
   if (

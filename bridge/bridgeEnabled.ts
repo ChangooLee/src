@@ -31,7 +31,7 @@ export function isBridgeEnabled(): boolean {
   // inline string literals from external builds.
   return feature('BRIDGE_MODE')
     ? isClaudeAISubscriber() &&
-        getFeatureValue_CACHED_MAY_BE_STALE('tengu_ccr_bridge', false)
+        getFeatureValue_CACHED_MAY_BE_STALE('open_code_cli_ccr_bridge', false)
     : false
 }
 
@@ -50,7 +50,7 @@ export function isBridgeEnabled(): boolean {
 export async function isBridgeEnabledBlocking(): Promise<boolean> {
   return feature('BRIDGE_MODE')
     ? isClaudeAISubscriber() &&
-        (await checkGate_CACHED_OR_BLOCKING('tengu_ccr_bridge'))
+        (await checkGate_CACHED_OR_BLOCKING('open_code_cli_ccr_bridge'))
     : false
 }
 
@@ -62,7 +62,7 @@ export async function isBridgeEnabledBlocking(): Promise<boolean> {
  * The GrowthBook gate targets on organizationUUID, which comes from
  * config.oauthAccount — populated by /api/oauth/profile during login.
  * That endpoint requires the user:profile scope. Tokens without it
- * (setup-token, CLAUDE_CODE_OAUTH_TOKEN env var, or pre-scope-expansion
+ * (setup-token, OPEN_CODE_CLI_OAUTH_TOKEN env var, or pre-scope-expansion
  * logins) leave oauthAccount unpopulated, so the gate falls back to
  * false and users see a dead-end "not enabled" message with no hint
  * that re-login would fix it. See CC-1165 / gh-33105.
@@ -78,7 +78,7 @@ export async function getBridgeDisabledReason(): Promise<string | null> {
     if (!getOauthAccountInfo()?.organizationUuid) {
       return 'Unable to determine your organization for Remote Control eligibility. Run `open-code-cli auth login` to refresh your account information.'
     }
-    if (!(await checkGate_CACHED_OR_BLOCKING('tengu_ccr_bridge'))) {
+    if (!(await checkGate_CACHED_OR_BLOCKING('open_code_cli_ccr_bridge'))) {
       return 'Remote Control is not yet enabled for your account.'
     }
     return null
@@ -117,7 +117,7 @@ function getOauthAccountInfo(): ReturnType<
 
 /**
  * Runtime check for the env-less (v2) REPL bridge path.
- * Returns true when the GrowthBook flag `tengu_bridge_repl_v2` is enabled.
+ * Returns true when the GrowthBook flag `open_code_cli_bridge_repl_v2` is enabled.
  *
  * This gates which implementation initReplBridge uses — NOT whether bridge
  * is available at all (see isBridgeEnabled above). Daemon/print paths stay
@@ -125,7 +125,7 @@ function getOauthAccountInfo(): ReturnType<
  */
 export function isEnvLessBridgeEnabled(): boolean {
   return feature('BRIDGE_MODE')
-    ? getFeatureValue_CACHED_MAY_BE_STALE('tengu_bridge_repl_v2', false)
+    ? getFeatureValue_CACHED_MAY_BE_STALE('open_code_cli_bridge_repl_v2', false)
     : false
 }
 
@@ -141,7 +141,7 @@ export function isEnvLessBridgeEnabled(): boolean {
 export function isCseShimEnabled(): boolean {
   return feature('BRIDGE_MODE')
     ? getFeatureValue_CACHED_MAY_BE_STALE(
-        'tengu_bridge_repl_v2_cse_shim_enabled',
+        'open_code_cli_bridge_repl_v2_cse_shim_enabled',
         true,
       )
     : true
@@ -164,7 +164,7 @@ export function checkBridgeMinVersion(): string | null {
   if (feature('BRIDGE_MODE')) {
     const config = getDynamicConfig_CACHED_MAY_BE_STALE<{
       minVersion: string
-    }>('tengu_bridge_min_version', { minVersion: '0.0.0' })
+    }>('open_code_cli_bridge_min_version', { minVersion: '0.0.0' })
     if (config.minVersion && lt(MACRO.VERSION, config.minVersion)) {
       return `Your version of Open Code CLI (${MACRO.VERSION}) is too old for Remote Control.\nVersion ${config.minVersion} or higher is required. Run \`open-code-cli update\` to update.`
     }
@@ -175,7 +175,7 @@ export function checkBridgeMinVersion(): string | null {
 /**
  * Default for remoteControlAtStartup when the user hasn't explicitly set it.
  * When the CCR_AUTO_CONNECT build flag is present (ant-only) and the
- * tengu_cobalt_harbor GrowthBook gate is on, all sessions connect to CCR by
+ * open_code_cli_cobalt_harbor GrowthBook gate is on, all sessions connect to CCR by
  * default — the user can still opt out by setting remoteControlAtStartup=false
  * in config (explicit settings always win over this default).
  *
@@ -184,7 +184,7 @@ export function checkBridgeMinVersion(): string | null {
  */
 export function getCcrAutoConnectDefault(): boolean {
   return feature('CCR_AUTO_CONNECT')
-    ? getFeatureValue_CACHED_MAY_BE_STALE('tengu_cobalt_harbor', false)
+    ? getFeatureValue_CACHED_MAY_BE_STALE('open_code_cli_cobalt_harbor', false)
     : false
 }
 
@@ -196,7 +196,7 @@ export function getCcrAutoConnectDefault(): boolean {
  */
 export function isCcrMirrorEnabled(): boolean {
   return feature('CCR_MIRROR')
-    ? isEnvTruthy((process.env.OPEN_CODE_CLI_CCR_MIRROR ?? process.env.CLAUDE_CODE_CCR_MIRROR)) ||
-        getFeatureValue_CACHED_MAY_BE_STALE('tengu_ccr_mirror', false)
+    ? isEnvTruthy(process.env.OPEN_CODE_CLI_CCR_MIRROR) ||
+        getFeatureValue_CACHED_MAY_BE_STALE('open_code_cli_ccr_mirror', false)
     : false
 }

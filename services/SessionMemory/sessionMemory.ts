@@ -78,7 +78,7 @@ import {
  * Uses cached gate value - returns immediately without blocking.
  */
 function isSessionMemoryGateEnabled(): boolean {
-  return getFeatureValue_CACHED_MAY_BE_STALE('tengu_session_memory', false)
+  return getFeatureValue_CACHED_MAY_BE_STALE('open_code_cli_session_memory', false)
 }
 
 /**
@@ -87,7 +87,7 @@ function isSessionMemoryGateEnabled(): boolean {
  */
 function getSessionMemoryRemoteConfig(): Partial<SessionMemoryConfig> {
   return getDynamicConfig_CACHED_MAY_BE_STALE<Partial<SessionMemoryConfig>>(
-    'tengu_sm_config',
+    'open_code_cli_sm_config',
     {},
   )
 }

@@ -16,7 +16,7 @@ import type {
 
 const OPEN_CODE_CLI_DOCS_MAP_URL =
   'https://open-code-cli.dev/docs/open_code_cli_docs_map.md'
-const CDP_DOCS_MAP_URL = 'https://platform.claude.com/llms.txt'
+const CDP_DOCS_MAP_URL = 'https://platform.open-code-cli.com/llms.txt'
 
 export const OPEN_CODE_GUIDE_AGENT_TYPE = 'open-code-cli-guide'
 
@@ -74,7 +74,7 @@ function getOpenCodeGuideBasePrompt(): string {
 4. Fetch the specific documentation pages
 5. Provide clear, actionable guidance based on official documentation
 6. Use ${WEB_SEARCH_TOOL_NAME} if docs don't cover the topic
-7. Reference local project files (CLAUDE.md, .claude/ directory) when relevant using ${localSearchHint}
+7. Reference local project files (OPEN_CODE.md, .open-code-cli/ directory) when relevant using ${localSearchHint}
 
 **Guidelines:**
 - Always prioritize official documentation over assumptions
@@ -135,7 +135,7 @@ export const OPEN_CODE_GUIDE_AGENT: BuiltInAgentDefinition = {
       )
     }
 
-    // 2. Custom agents from .claude/agents/
+    // 2. Custom agents from .open-code-cli/agents/
     const customAgents =
       toolUseContext.options.agentDefinitions.activeAgents.filter(
         (a: AgentDefinition) => a.source !== 'built-in',

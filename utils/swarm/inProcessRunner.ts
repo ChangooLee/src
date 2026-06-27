@@ -497,7 +497,7 @@ export type InProcessRunnerConfig = {
   /** Short description of the task (used as summary for the initial prompt header) */
   description?: string
   /** request_id of the API call that spawned this teammate, for lineage
-   *  tracing on tengu_api_* events. */
+   *  tracing on open_code_cli_api_* events. */
   invokingRequestId?: string
 }
 

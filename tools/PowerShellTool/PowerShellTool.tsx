@@ -823,7 +823,7 @@ async function* runPowerShellCommand({
   // Set up auto-backgrounding on timeout if enabled
   if (shellCommand.onTimeout && shouldAutoBackground) {
     shellCommand.onTimeout(backgroundFn => {
-      startBackgrounding('tengu_powershell_command_timeout_backgrounded', backgroundFn);
+      startBackgrounding('open_code_cli_powershell_command_timeout_backgrounded', backgroundFn);
     });
   }
 
@@ -834,7 +834,7 @@ async function* runPowerShellCommand({
     setTimeout(() => {
       if (shellCommand.status === 'running' && backgroundShellId === undefined) {
         assistantAutoBackgrounded = true;
-        startBackgrounding('tengu_powershell_command_assistant_auto_backgrounded');
+        startBackgrounding('open_code_cli_powershell_command_assistant_auto_backgrounded');
       }
     }, ASSISTANT_BLOCKING_BUDGET_MS).unref();
   }
@@ -926,7 +926,7 @@ async function* runPowerShellCommand({
       if (abortController.signal.aborted && abortController.signal.reason === 'interrupt' && !interruptBackgroundingStarted) {
         interruptBackgroundingStarted = true;
         if (!isBackgroundTasksDisabled) {
-          startBackgrounding('tengu_powershell_command_interrupt_backgrounded');
+          startBackgrounding('open_code_cli_powershell_command_interrupt_backgrounded');
           // Reloop so the backgroundShellId check (above) catches the sync
           // foregroundTaskId→background path. Without this, we fall through
           // to the Ctrl+B check below, which matches status==='backgrounded'

@@ -108,7 +108,7 @@ async function initSessionMemoryCompactConfig(): Promise<void> {
   // Load config from GrowthBook, merging with defaults
   const remoteConfig = await getDynamicConfig_BLOCKS_ON_INIT<
     Partial<SessionMemoryCompactConfig>
-  >('tengu_sm_compact_config', {})
+  >('open_code_cli_sm_compact_config', {})
 
   // Only use remote values if they are explicitly set (positive numbers)
   // This ensures sensible defaults aren't overridden by zero values
@@ -402,19 +402,19 @@ export function calculateMessagesToKeepIndex(
  */
 export function shouldUseSessionMemoryCompaction(): boolean {
   // Allow env var override for eval runs and testing
-  if (isEnvTruthy(process.env.ENABLE_CLAUDE_CODE_SM_COMPACT)) {
+  if (isEnvTruthy(process.env.ENABLE_OPEN_CODE_CLI_SM_COMPACT)) {
     return true
   }
-  if (isEnvTruthy(process.env.DISABLE_CLAUDE_CODE_SM_COMPACT)) {
+  if (isEnvTruthy(process.env.DISABLE_OPEN_CODE_CLI_SM_COMPACT)) {
     return false
   }
 
   const sessionMemoryFlag = getFeatureValue_CACHED_MAY_BE_STALE(
-    'tengu_session_memory',
+    'open_code_cli_session_memory',
     false,
   )
   const smCompactFlag = getFeatureValue_CACHED_MAY_BE_STALE(
-    'tengu_sm_compact',
+    'open_code_cli_sm_compact',
     false,
   )
   const shouldUse = sessionMemoryFlag && smCompactFlag
@@ -422,8 +422,8 @@ export function shouldUseSessionMemoryCompaction(): boolean {
   // Log flag states for debugging (ant-only to avoid noise in external logs)
   if (process.env.USER_TYPE === 'ant') {
     logEvent('open_code_cli_sm_compact_flag_check', {
-      tengu_session_memory: sessionMemoryFlag,
-      tengu_sm_compact: smCompactFlag,
+      open_code_cli_session_memory: sessionMemoryFlag,
+      open_code_cli_sm_compact: smCompactFlag,
       should_use: shouldUse,
     })
   }
@@ -580,7 +580,7 @@ export async function trySessionMemoryCompaction(
       .slice(startIndex)
       .filter(m => !isCompactBoundaryMessage(m))
 
-    // Run session start hooks to restore CLAUDE.md and other context
+    // Run session start hooks to restore OPEN_CODE.md and other context
     const hookResults = await processSessionStartHooks('compact', {
       model: getMainLoopModel(),
     })

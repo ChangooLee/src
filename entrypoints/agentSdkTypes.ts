@@ -98,7 +98,7 @@ type CreateSdkMcpServerOptions = {
  * Creates an MCP server instance that can be used with the SDK transport.
  * This allows SDK users to define custom tools that run in the same process.
  *
- * If your SDK MCP calls will run longer than 60s, override CLAUDE_CODE_STREAM_CLOSE_TIMEOUT
+ * If your SDK MCP calls will run longer than 60s, override OPEN_CODE_CLI_STREAM_CLOSE_TIMEOUT
  */
 export function createSdkMcpServer(
   _options: CreateSdkMcpServerOptions,
@@ -277,7 +277,7 @@ export async function forkSession(
 // ============================================================================
 
 /**
- * A scheduled task from `<dir>/.claude/scheduled_tasks.json`.
+ * A scheduled task from `<dir>/.open-code-cli/scheduled_tasks.json`.
  * @internal
  */
 export type CronTask = {
@@ -290,7 +290,7 @@ export type CronTask = {
 
 /**
  * Cron scheduler tuning knobs (jitter + expiry). Sourced at runtime from the
- * `tengu_kairos_cron_config` GrowthBook config in CLI sessions; daemon hosts
+ * `open_code_cli_kairos_cron_config` GrowthBook config in CLI sessions; daemon hosts
  * pass this through `watchScheduledTasks({ getJitterConfig })` to get the
  * same tuning.
  * @internal
@@ -328,7 +328,7 @@ export type ScheduledTasksHandle = {
 }
 
 /**
- * Watch `<dir>/.claude/scheduled_tasks.json` and yield events as tasks fire.
+ * Watch `<dir>/.open-code-cli/scheduled_tasks.json` and yield events as tasks fire.
  *
  * Acquires the per-directory scheduler lock (PID-based liveness) so a REPL
  * session in the same dir won't double-fire. Releases the lock and closes
@@ -429,7 +429,7 @@ export type RemoteControlHandle = {
  * stream. Handle `controlRequests()` locally (interrupt → abort, set_model
  * → reconfigure).
  *
- * Skips the `tengu_ccr_bridge` gate and policy-limits check — @internal
+ * Skips the `open_code_cli_ccr_bridge` gate and policy-limits check — @internal
  * caller is pre-entitled. OAuth is still required (env var or keychain).
  *
  * Returns null on no-OAuth or registration failure.

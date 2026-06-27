@@ -30,10 +30,10 @@ function isDevMode(): boolean {
 /**
  * Builds a deep link URL for Claude Desktop to resume a CLI session.
  * Format: claude://resume?session={sessionId}&cwd={cwd}
- * In dev mode: claude-dev://resume?session={sessionId}&cwd={cwd}
+ * In dev mode: open-code-cli-dev://resume?session={sessionId}&cwd={cwd}
  */
 function buildDesktopDeepLink(sessionId: string): string {
-  const protocol = isDevMode() ? 'claude-dev' : 'claude'
+  const protocol = isDevMode() ? 'open-code-cli-dev' : 'open-code-cli'
   const url = new URL(`${protocol}://resume`)
   url.searchParams.set('session', sessionId)
   url.searchParams.set('cwd', getCwd())
@@ -64,14 +64,14 @@ async function isDesktopInstalled(): Promise<boolean> {
     const { code, stdout } = await execFileNoThrow('xdg-mime', [
       'query',
       'default',
-      'x-scheme-handler/claude',
+      'x-scheme-handler/open-code-cli',
     ])
     return code === 0 && stdout.trim().length > 0
   } else if (platform === 'win32') {
     // On Windows, try to query the registry for the protocol handler
     const { code } = await execFileNoThrow('reg', [
       'query',
-      'HKEY_CLASSES_ROOT\\claude',
+      'HKEY_CLASSES_ROOT\\open-code-cli',
       '/ve',
     ])
     return code === 0

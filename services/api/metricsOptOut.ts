@@ -7,7 +7,7 @@ import { getAuthHeaders, withOAuth401Retry } from '../../utils/http.js'
 import { logError } from '../../utils/log.js'
 import { memoizeWithTTLAsync } from '../../utils/memoize.js'
 import { isEssentialTrafficOnly } from '../../utils/privacyLevel.js'
-import { getClaudeCodeUserAgent } from '../../utils/userAgent.js'
+import { getOpenCodeCliUserAgent } from '../../utils/userAgent.js'
 
 type MetricsEnabledResponse = {
   metrics_logging_enabled: boolean
@@ -23,7 +23,7 @@ const CACHE_TTL_MS = 60 * 60 * 1000
 
 // Disk TTL — org settings rarely change. When disk cache is fresher than this,
 // we skip the network entirely (no background refresh). This is what collapses
-// N `claude -p` invocations into ~1 API call/day.
+// N `open-code-cli -p` invocations into ~1 API call/day.
 const DISK_CACHE_TTL_MS = 24 * 60 * 60 * 1000
 
 /**
@@ -38,11 +38,11 @@ async function _fetchMetricsEnabled(): Promise<MetricsEnabledResponse> {
 
   const headers = {
     'Content-Type': 'application/json',
-    'User-Agent': getClaudeCodeUserAgent(),
+    'User-Agent': getOpenCodeCliUserAgent(),
     ...authResult.headers,
   }
 
-  const endpoint = `https://api.anthropic.com/api/claude_code/organizations/metrics_enabled`
+  const endpoint = `https://api.anthropic.com/api/open_code_cli/organizations/metrics_enabled`
   const response = await axios.get<MetricsEnabledResponse>(endpoint, {
     headers,
     timeout: 5000,

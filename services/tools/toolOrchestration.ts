@@ -7,7 +7,7 @@ import { type MessageUpdateLazy, runToolUse } from './toolExecution.js'
 
 function getMaxToolUseConcurrency(): number {
   return (
-    parseInt((process.env.OPEN_CODE_CLI_MAX_TOOL_USE_CONCURRENCY ?? process.env.CLAUDE_CODE_MAX_TOOL_USE_CONCURRENCY) || '', 10) || 10
+    parseInt(process.env.OPEN_CODE_CLI_MAX_TOOL_USE_CONCURRENCY || '', 10) || 10
   )
 }
 

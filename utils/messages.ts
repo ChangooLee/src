@@ -185,7 +185,7 @@ const TOOL_REFERENCE_TURN_BOUNDARY = 'Tool loaded.'
 export function withMemoryCorrectionHint(message: string): string {
   if (
     isAutoMemoryEnabled() &&
-    getFeatureValue_CACHED_MAY_BE_STALE('tengu_amber_prism', false)
+    getFeatureValue_CACHED_MAY_BE_STALE('open_code_cli_amber_prism', false)
   ) {
     return message + MEMORY_CORRECTION_HINT
   }
@@ -2150,7 +2150,7 @@ export function normalizeMessagesForAPI(
           // pass's sibling gets a \n[id:xxx] suffix from appendMessageTag below,
           // so startsWith matches both bare and tagged forms.
           //
-          // Gated OFF when tengu_toolref_defer_j8m is active — that gate
+          // Gated OFF when open_code_cli_toolref_defer_j8m is active — that gate
           // enables relocateToolReferenceSiblings in post-processing below,
           // which moves existing siblings to a later non-ref message instead
           // of adding one here. This injection is itself one of the patterns
@@ -2158,7 +2158,7 @@ export function normalizeMessagesForAPI(
           // off, this is the fallback (same as pre-#21049 main).
           if (
             !checkStatsigFeatureGate_CACHED_MAY_BE_STALE(
-              'tengu_toolref_defer_j8m',
+              'open_code_cli_toolref_defer_j8m',
             )
           ) {
             const contentAfterStrip = normalizedMessage.message.content
@@ -2271,7 +2271,7 @@ export function normalizeMessagesForAPI(
             message.attachment,
           )
           const attachmentMessage = checkStatsigFeatureGate_CACHED_MAY_BE_STALE(
-            'tengu_chair_sermon',
+            'open_code_cli_chair_sermon',
           )
             ? rawAttachmentMessage.map(ensureSystemReminderWrap)
             : rawAttachmentMessage
@@ -2299,7 +2299,7 @@ export function normalizeMessagesForAPI(
   // tags reflect final positions). When gate is OFF, this is a noop and
   // the TOOL_REFERENCE_TURN_BOUNDARY injection above serves as fallback.
   const relocated = checkStatsigFeatureGate_CACHED_MAY_BE_STALE(
-    'tengu_toolref_defer_j8m',
+    'open_code_cli_toolref_defer_j8m',
   )
     ? relocateToolReferenceSiblings(result)
     : result
@@ -2332,7 +2332,7 @@ export function normalizeMessagesForAPI(
   // ungated changes VCR fixture hashes for @-mention scenarios (adjacent
   // [prompt, attachment] users) without any benefit when the smoosh is off.
   const smooshed = checkStatsigFeatureGate_CACHED_MAY_BE_STALE(
-    'tengu_chair_sermon',
+    'open_code_cli_chair_sermon',
   )
     ? smooshSystemReminderSiblings(mergeAdjacentUserMessages(withNonEmpty))
     : withNonEmpty
@@ -2612,7 +2612,7 @@ export function mergeUserContentBlocks(
     return [...a, ...b]
   }
 
-  if (!checkStatsigFeatureGate_CACHED_MAY_BE_STALE('tengu_chair_sermon')) {
+  if (!checkStatsigFeatureGate_CACHED_MAY_BE_STALE('open_code_cli_chair_sermon')) {
     // Legacy (ungated) smoosh: only string-content tool_result + all-text
     // siblings → joined string. Matches pre-universal-smoosh behavior on main.
     // The precondition guarantees smooshIntoToolResult hits its string path
@@ -4238,10 +4238,10 @@ You have exited auto mode. The user may now want to interact more directly. You 
       ])
     }
     case 'verify_plan_reminder': {
-      // Dead code elimination: CLAUDE_CODE_VERIFY_PLAN='false' in external builds, so === 'true' check allows Bun to eliminate the string
+      // Dead code elimination: OPEN_CODE_CLI_VERIFY_PLAN='false' in external builds, so === 'true' check allows Bun to eliminate the string
       /* eslint-disable-next-line custom-rules/no-process-env-top-level */
       const toolName =
-        (process.env.OPEN_CODE_CLI_VERIFY_PLAN ?? process.env.CLAUDE_CODE_VERIFY_PLAN) === 'true'
+        process.env.OPEN_CODE_CLI_VERIFY_PLAN === 'true'
           ? 'VerifyPlanExecution'
           : ''
       const content = `You have completed implementing the plan. Please call the "${toolName}" tool directly (NOT the ${AGENT_TOOL_NAME} tool or an agent) to verify that all plan items were completed correctly.`
@@ -5368,7 +5368,7 @@ export function ensureToolResultPairing(
         // [tool_result, text] sibling the smoosh inside normalize never saw
         // (pairing runs after normalize). Re-smoosh just this one message.
         result.push(
-          checkStatsigFeatureGate_CACHED_MAY_BE_STALE('tengu_chair_sermon')
+          checkStatsigFeatureGate_CACHED_MAY_BE_STALE('open_code_cli_chair_sermon')
             ? smooshSystemReminderSiblings([patchedNext])[0]!
             : patchedNext,
         )

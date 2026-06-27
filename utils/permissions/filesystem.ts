@@ -17,7 +17,7 @@ import { checkStatsigFeatureGate_CACHED_MAY_BE_STALE } from '../../services/anal
 import type { AnyObject, Tool, ToolPermissionContext } from '../../Tool.js'
 import { FILE_READ_TOOL_NAME } from '../../tools/FileReadTool/prompt.js'
 import { getCwd } from '../cwd.js'
-import { getClaudeConfigHomeDir } from '../envUtils.js'
+import { getOpenCodeCliConfigHomeDir } from '../envUtils.js'
 import {
   getFsImplementation,
   getPathsForPermissionCheck,
@@ -64,7 +64,7 @@ export const DANGEROUS_FILES = [
   '.profile',
   '.ripgreprc',
   '.mcp.json',
-  '.claude.json',
+  '.open-code-cli.json',
 ] as const
 
 /**
@@ -75,7 +75,7 @@ export const DANGEROUS_DIRECTORIES = [
   '.git',
   '.vscode',
   '.idea',
-  '.claude',
+  '.open-code-cli',
 ] as const
 
 /**
@@ -92,11 +92,11 @@ export function normalizeCaseForComparison(path: string): string {
 }
 
 /**
- * If filePath is inside a .claude/skills/{name}/ directory (project or global),
+ * If filePath is inside a .open-code-cli/skills/{name}/ directory (project or global),
  * return the skill name and a session-allow pattern scoped to just that skill.
  * Used to offer a narrower "allow edits to this skill only" option in the
  * permission dialog and SDK suggestions, so iterating on one skill doesn't
- * require granting session access to all of .claude/ (settings.json, hooks/, etc.).
+ * require granting session access to all of .open-code-cli/ (settings.json, hooks/, etc.).
  */
 export function getClaudeSkillScope(
   filePath: string,
@@ -106,12 +106,12 @@ export function getClaudeSkillScope(
 
   const bases = [
     {
-      dir: expandPath(join(getOriginalCwd(), '.claude', 'skills')),
-      prefix: '/.claude/skills/',
+      dir: expandPath(join(getOriginalCwd(), '.open-code-cli', 'skills')),
+      prefix: '/.open-code-cli/skills/',
     },
     {
-      dir: expandPath(join(homedir(), '.claude', 'skills')),
-      prefix: '~/.claude/skills/',
+      dir: expandPath(join(homedir(), '.open-code-cli', 'skills')),
+      prefix: '~/.open-code-cli/skills/',
     },
   ]
 
@@ -145,7 +145,7 @@ export function getClaudeSkillScope(
         // Reject glob metacharacters. skillName is interpolated into a
         // gitignore pattern consumed by ignore().add() in matchingRuleForInput
         // at step 1.6. A directory literally named '*' (valid on POSIX) would
-        // produce '/.claude/skills/*/**' which matches ALL skills. Return null
+        // produce '/.open-code-cli/skills/*/**' which matches ALL skills. Return null
         // to fall through to generateSuggestions() instead.
         if (/[*?[\]]/.test(skillName)) return null
         return { skillName, pattern: prefix + skillName + '/**' }
@@ -199,7 +199,7 @@ function getSettingsPaths(): string[] {
 
 export function isClaudeSettingsPath(filePath: string): boolean {
   // SECURITY: Normalize path structure first to prevent bypass via redundant ./
-  // sequences like `./.claude/./settings.json` which would evade the endsWith() check
+  // sequences like `./.open-code-cli/./settings.json` which would evade the endsWith() check
   const expandedPath = expandPath(filePath)
 
   // Normalize for case-insensitive comparison to prevent bypassing security
@@ -208,10 +208,10 @@ export function isClaudeSettingsPath(filePath: string): boolean {
 
   // Use platform separator so endsWith checks work on both Unix (/) and Windows (\)
   if (
-    normalizedPath.endsWith(`${sep}.claude${sep}settings.json`) ||
-    normalizedPath.endsWith(`${sep}.claude${sep}settings.local.json`)
+    normalizedPath.endsWith(`${sep}.open-code-cli${sep}settings.json`) ||
+    normalizedPath.endsWith(`${sep}.open-code-cli${sep}settings.local.json`)
   ) {
-    // Include .claude/settings.json even for other projects
+    // Include .open-code-cli/settings.json even for other projects
     return true
   }
   // Check for current project's settings files (including managed settings and CLI args)
@@ -227,12 +227,12 @@ function isClaudeConfigFilePath(filePath: string): boolean {
     return true
   }
 
-  // Check if file is within .claude/commands or .claude/agents directories
+  // Check if file is within .open-code-cli/commands or .open-code-cli/agents directories
   // using proper path segment validation (not string matching with includes())
   // pathInWorkingPath now handles case-insensitive comparison to prevent bypasses
-  const commandsDir = join(getOriginalCwd(), '.claude', 'commands')
-  const agentsDir = join(getOriginalCwd(), '.claude', 'agents')
-  const skillsDir = join(getOriginalCwd(), '.claude', 'skills')
+  const commandsDir = join(getOriginalCwd(), '.open-code-cli', 'commands')
+  const agentsDir = join(getOriginalCwd(), '.open-code-cli', 'agents')
+  const skillsDir = join(getOriginalCwd(), '.open-code-cli', 'skills')
 
   return (
     pathInWorkingPath(filePath, commandsDir) ||
@@ -279,7 +279,7 @@ function isSessionMemoryPath(absolutePath: string): boolean {
 
 /**
  * Check if file is within the current project's directory.
- * Path format: ~/.claude/projects/{sanitized-cwd}/...
+ * Path format: ~/.open-code-cli/projects/{sanitized-cwd}/...
  */
 function isProjectDirPath(absolutePath: string): boolean {
   const projectDir = getProjectDir(getCwd())
@@ -292,45 +292,45 @@ function isProjectDirPath(absolutePath: string): boolean {
 
 /**
  * Checks if the scratchpad directory feature is enabled.
- * The scratchpad is a per-session directory for Claude to write temporary files.
- * Controlled by the tengu_scratch Statsig gate.
+ * The scratchpad is a per-session directory for Open Code CLI to write temporary files.
+ * Controlled by the open_code_cli_scratch Statsig gate.
  */
 export function isScratchpadEnabled(): boolean {
-  return checkStatsigFeatureGate_CACHED_MAY_BE_STALE('tengu_scratch')
+  return checkStatsigFeatureGate_CACHED_MAY_BE_STALE('open_code_cli_scratch')
 }
 
 /**
- * Returns the user-specific Claude temp directory name.
- * On Unix: 'claude-{uid}' to prevent multi-user permission conflicts
- * On Windows: 'claude' (tmpdir() is already per-user)
+ * Returns the user-specific Open Code CLI temp directory name.
+ * On Unix: 'open-code-cli-{uid}' to prevent multi-user permission conflicts
+ * On Windows: 'open-code-cli' (tmpdir() is already per-user)
  */
-export function getClaudeTempDirName(): string {
+export function getOpenCodeCliTempDirName(): string {
   if (getPlatform() === 'windows') {
-    return 'claude'
+    return 'open-code-cli'
   }
   // Use UID to create per-user directories, preventing permission conflicts
   // when multiple users share the same /tmp directory
   const uid = process.getuid?.() ?? 0
-  return `claude-${uid}`
+  return `open-code-cli-${uid}`
 }
 
 /**
- * Returns the Claude temp directory path with symlinks resolved.
+ * Returns the Open Code CLI temp directory path with symlinks resolved.
  * Uses TMPDIR env var if set, otherwise:
- * - On Unix: /tmp/claude-{uid}/ (resolved to /private/tmp/claude-{uid}/ on macOS)
- * - On Windows: {tmpdir}/claude/ (e.g., C:\Users\{user}\AppData\Local\Temp\claude\)
+ * - On Unix: /tmp/open-code-cli-{uid}/ (resolved to /private/tmp/open-code-cli-{uid}/ on macOS)
+ * - On Windows: {tmpdir}/claude/ (e.g., C:\Users\{user}\AppData\Local\Temp\open-code-cli\)
  * This is a per-user temporary directory used by Open Code CLI for all temp files.
  *
  * NOTE: We resolve symlinks to ensure this path matches the resolved paths used
  * in permission checks. On macOS, /tmp is a symlink to /private/tmp, so without
- * resolution, paths like /tmp/claude-{uid}/... wouldn't match /private/tmp/claude-{uid}/...
+ * resolution, paths like /tmp/open-code-cli-{uid}/... wouldn't match /private/tmp/open-code-cli-{uid}/...
  */
 // Memoized: called per-tool from permission checks (yoloClassifier, sandbox-adapter)
-// and per-turn from BashTool prompt. Inputs (CLAUDE_CODE_TMPDIR env + platform) are
+// and per-turn from BashTool prompt. Inputs (OPEN_CODE_CLI_TMPDIR env + platform) are
 // fixed at startup, and the realpath of the system tmp dir does not change mid-session.
-export const getClaudeTempDir = memoize(function getClaudeTempDir(): string {
+export const getOpenCodeCliTempDir = memoize(function getOpenCodeCliTempDir(): string {
   const baseTmpDir =
-    (process.env.OPEN_CODE_CLI_TMPDIR ?? process.env.CLAUDE_CODE_TMPDIR) ||
+    process.env.OPEN_CODE_CLI_TMPDIR ||
     (getPlatform() === 'windows' ? tmpdir() : '/tmp')
 
   // Resolve symlinks in the base temp directory (e.g., /tmp -> /private/tmp on macOS)
@@ -343,7 +343,7 @@ export const getClaudeTempDir = memoize(function getClaudeTempDir(): string {
     // If resolution fails, use the original path
   }
 
-  return join(resolvedBaseTmpDir, getClaudeTempDirName()) + sep
+  return join(resolvedBaseTmpDir, getOpenCodeCliTempDirName()) + sep
 })
 
 /**
@@ -365,21 +365,21 @@ export const getClaudeTempDir = memoize(function getClaudeTempDir(): string {
 export const getBundledSkillsRoot = memoize(
   function getBundledSkillsRoot(): string {
     const nonce = randomBytes(16).toString('hex')
-    return join(getClaudeTempDir(), 'bundled-skills', MACRO.VERSION, nonce)
+    return join(getOpenCodeCliTempDir(), 'bundled-skills', MACRO.VERSION, nonce)
   },
 )
 
 /**
  * Returns the project temp directory path with trailing separator.
- * Path format: /tmp/claude-{uid}/{sanitized-cwd}/
+ * Path format: /tmp/open-code-cli-{uid}/{sanitized-cwd}/
  */
 export function getProjectTempDir(): string {
-  return join(getClaudeTempDir(), sanitizePath(getOriginalCwd())) + sep
+  return join(getOpenCodeCliTempDir(), sanitizePath(getOriginalCwd())) + sep
 }
 
 /**
  * Returns the scratchpad directory path for the current session.
- * Path format: /tmp/claude-{uid}/{sanitized-cwd}/{sessionId}/scratchpad/
+ * Path format: /tmp/open-code-cli-{uid}/{sanitized-cwd}/{sessionId}/scratchpad/
  */
 export function getScratchpadDir(): string {
   return join(getProjectTempDir(), getSessionId(), 'scratchpad')
@@ -414,7 +414,7 @@ function isScratchpadPath(absolutePath: string): boolean {
   const scratchpadDir = getScratchpadDir()
   // SECURITY: Normalize the path to resolve .. segments before checking
   // This prevents path traversal bypasses like:
-  //   echo "malicious" > /tmp/claude-0/proj/session/scratchpad/../../../etc/passwd
+  //   echo "malicious" > /tmp/open-code-cli-0/proj/session/scratchpad/../../../etc/passwd
   // Without normalization, the path would pass the startsWith check but write to /etc/passwd
   const normalizedPath = normalize(absolutePath)
   return (
@@ -453,17 +453,17 @@ function isDangerousFilePathToAutoEdit(path: string): boolean {
         continue
       }
 
-      // Special case: .claude/worktrees/ is a structural path (where Claude stores
-      // git worktrees), not a user-created dangerous directory. Skip the .claude
-      // segment when it's followed by 'worktrees'. Any nested .claude directories
+      // Special case: .open-code-cli/worktrees/ is a structural path (where Open Code CLI stores
+      // git worktrees), not a user-created dangerous directory. Skip the .open-code-cli
+      // segment when it's followed by 'worktrees'. Any nested .open-code-cli directories
       // within the worktree (not followed by 'worktrees') are still blocked.
-      if (dir === '.claude') {
+      if (dir === '.open-code-cli') {
         const nextSegment = pathSegments[i + 1]
         if (
           nextSegment &&
           normalizeCaseForComparison(nextSegment) === 'worktrees'
         ) {
-          break // Skip this .claude, continue checking other segments
+          break // Skip this .open-code-cli, continue checking other segments
         }
       }
 
@@ -493,7 +493,7 @@ function isDangerousFilePathToAutoEdit(path: string): boolean {
  * - NTFS Alternate Data Streams (e.g., file.txt::$DATA or file.txt:stream)
  * - 8.3 short names (e.g., GIT~1, CLAUDE~1, SETTIN~1.JSON)
  * - Long path prefixes (e.g., \\?\C:\..., \\.\C:\..., //?/C:/..., //./C:/...)
- * - Trailing dots and spaces (e.g., .git., .claude , .bashrc...)
+ * - Trailing dots and spaces (e.g., .git., .open-code-cli , .bashrc...)
  * - DOS device names (e.g., .git.CON, settings.json.PRN, .bashrc.AUX)
  * - Three or more consecutive dots (e.g., .../file.txt, path/.../file, file...txt)
  *
@@ -569,7 +569,7 @@ function hasSuspiciousWindowsPathPattern(path: string): boolean {
   }
 
   // Check for trailing dots and spaces that Windows strips during path resolution
-  // Examples: .git., .claude , .bashrc..., settings.json.
+  // Examples: .git., .open-code-cli , .bashrc..., settings.json.
   // This can bypass string matching if ".git" is blocked but ".git." is used
   if (/[.\s]+$/.test(path)) {
     return true
@@ -607,7 +607,7 @@ function hasSuspiciousWindowsPathPattern(path: string): boolean {
  *
  * This function performs comprehensive safety checks including:
  * - Suspicious Windows path patterns (NTFS streams, 8.3 names, long path prefixes, etc.)
- * - Claude config files (.claude/settings.json, .claude/commands/, .claude/agents/)
+ * - Open Code CLI config files (.open-code-cli/settings.json, .open-code-cli/commands/, .open-code-cli/agents/)
  * - MCP CLI state files (managed internally by Open Code CLI)
  * - Dangerous files (.bashrc, .gitconfig, .git/, .vscode/, .idea/, etc.)
  *
@@ -638,7 +638,7 @@ export function checkPathSafetyForAutoEdit(
     }
   }
 
-  // Check for Claude config files on all paths
+  // Check for Open Code CLI config files on all paths
   for (const pathToCheck of pathsToCheck) {
     if (isClaudeConfigFilePath(pathToCheck)) {
       return {
@@ -897,7 +897,7 @@ function patternWithRoot(
       root: homedir().normalize('NFC'),
     }
   } else if (pattern.startsWith(DIR_SEP)) {
-    // Patterns starting with / resolve relative to the directory where settings are stored (without .claude/)
+    // Patterns starting with / resolve relative to the directory where settings are stored (without .open-code-cli/)
     return {
       relativePattern: pattern,
       root: rootPathForSource(source),
@@ -1239,7 +1239,7 @@ export function checkWritePermissionForTool<Input extends AnyObject>(
   }
 
   // 1.5. Allow writes to internal editable paths (plan files, scratchpad)
-  // This MUST come before isDangerousFilePathToAutoEdit check since .claude is a dangerous directory
+  // This MUST come before isDangerousFilePathToAutoEdit check since .open-code-cli is a dangerous directory
   const absolutePathForEdit = expandPath(path)
   const internalEditResult = checkEditableInternalPath(
     absolutePathForEdit,
@@ -1249,16 +1249,16 @@ export function checkWritePermissionForTool<Input extends AnyObject>(
     return internalEditResult
   }
 
-  // 1.6. Check for .claude/** allow rules BEFORE safety checks
-  // This allows session-level permissions to bypass the safety blocks for .claude/
+  // 1.6. Check for .open-code-cli/** allow rules BEFORE safety checks
+  // This allows session-level permissions to bypass the safety blocks for .open-code-cli/
   // We only allow this for session-level rules to prevent users from accidentally
-  // permanently granting broad access to their .claude/ folder.
+  // permanently granting broad access to their .open-code-cli/ folder.
   //
   // matchingRuleForInput returns the first match across all sources. If the user
-  // also has a broader Edit(.claude) rule in userSettings (e.g. from sandbox
+  // also has a broader Edit(.open-code-cli) rule in userSettings (e.g. from sandbox
   // write-allow conversion), that rule would be found first and its source check
   // below would fail. Scope the search to session-only rules so the dialog's
-  // "allow Claude to edit its own settings for this session" option actually works.
+  // "allow Open Code CLI to edit its own settings for this session" option actually works.
   const claudeFolderAllowRule = matchingRuleForInput(
     path,
     {
@@ -1271,13 +1271,13 @@ export function checkWritePermissionForTool<Input extends AnyObject>(
     'allow',
   )
   if (claudeFolderAllowRule) {
-    // Check if this rule is scoped under .claude/ (project or global).
-    // Accepts both the broad patterns ('/.claude/**', '~/.claude/**') and
-    // narrowed ones like '/.claude/skills/my-skill/**' so users can grant
+    // Check if this rule is scoped under .open-code-cli/ (project or global).
+    // Accepts both the broad patterns ('/.open-code-cli/**', '~/.open-code-cli/**') and
+    // narrowed ones like '/.open-code-cli/skills/my-skill/**' so users can grant
     // session access to a single skill without also exposing settings.json
     // or hooks/. The rule already matched the path via matchingRuleForInput;
     // this is an additional scope check. Reject '..' to prevent a rule like
-    // '/.claude/../**' from leaking this bypass outside .claude/.
+    // '/.open-code-cli/../**' from leaking this bypass outside .open-code-cli/.
     const ruleContent = claudeFolderAllowRule.ruleValue.ruleContent
     if (
       ruleContent &&
@@ -1299,14 +1299,14 @@ export function checkWritePermissionForTool<Input extends AnyObject>(
     }
   }
 
-  // 1.7. Check comprehensive safety validations (Windows patterns, Claude config, dangerous files)
+  // 1.7. Check comprehensive safety validations (Windows patterns, Open Code CLI config, dangerous files)
   // This MUST come before checking allow rules to prevent users from accidentally granting
   // permission to edit protected files
   const safetyCheck = checkPathSafetyForAutoEdit(path, pathsToCheck)
   if (!safetyCheck.safe) {
-    // SDK suggestion: if under .claude/skills/{name}/, emit the narrowed
+    // SDK suggestion: if under .open-code-cli/skills/{name}/, emit the narrowed
     // session-scoped addRules that step 1.6 will honor on the next call.
-    // Everything else (.claude/settings.json, .git/, .vscode/, .idea/) falls
+    // Everything else (.open-code-cli/settings.json, .git/, .vscode/, .idea/) falls
     // back to generateSuggestions — its setMode suggestion doesn't bypass
     // this check, but preserving it avoids a surprising empty array.
     const skillScope = getClaudeSkillScope(path)
@@ -1511,7 +1511,7 @@ export function checkEditableInternalPath(
   // Template job's own directory. Env key hardcoded (vs importing JOB_ENV_KEY
   // from jobs/state) so tree-shaking eliminates the string from external
   // builds — spawn.test.ts asserts the string matches. Hijack guard: the env
-  // var value must itself resolve under ~/.claude/jobs/. Symlink guard: every
+  // var value must itself resolve under ~/.open-code-cli/jobs/. Symlink guard: every
   // resolved form of the target (lexical + symlink chain) must fall under some
   // resolved form of the job dir, so a symlink inside the job dir pointing at
   // e.g. ~/.ssh/authorized_keys does not get a free write. Resolving both
@@ -1520,12 +1520,12 @@ export function checkEditableInternalPath(
   if (feature('TEMPLATES')) {
     const jobDir = process.env.CLAUDE_JOB_DIR
     if (jobDir) {
-      const jobsRoot = join(getClaudeConfigHomeDir(), 'jobs')
+      const jobsRoot = join(getOpenCodeCliConfigHomeDir(), 'jobs')
       const jobDirForms = getPathsForPermissionCheck(jobDir).map(normalize)
       const jobsRootForms = getPathsForPermissionCheck(jobsRoot).map(normalize)
       // Hijack guard: every resolved form of the job dir must sit under
       // some resolved form of the jobs root. Resolving both sides handles
-      // the case where ~/.claude is a symlink (e.g. to /data/claude-config).
+      // the case where ~/.open-code-cli is a symlink (e.g. to /data/claude-config).
       const isUnderJobsRoot = jobDirForms.every(jd =>
         jobsRootForms.some(jr => jd.startsWith(jr + sep)),
       )
@@ -1564,7 +1564,7 @@ export function checkEditableInternalPath(
 
   // Memdir directory (persistent memory for cross-session learning)
   // This pre-safety-check carve-out exists because the default path is under
-  // ~/.claude/, which is in DANGEROUS_DIRECTORIES. The CLAUDE_COWORK_MEMORY_PATH_OVERRIDE
+  // ~/.open-code-cli/, which is in DANGEROUS_DIRECTORIES. The CLAUDE_COWORK_MEMORY_PATH_OVERRIDE
   // override is an arbitrary caller-designated directory with no such conflict,
   // so it gets NO special permission treatment here — writes go through normal
   // permission flow (step 5 → ask). SDK callers who want silent memory should
@@ -1580,16 +1580,16 @@ export function checkEditableInternalPath(
     }
   }
 
-  // .claude/launch.json — desktop preview config (dev server command + port).
-  // The desktop's preview_start MCP tool instructs Claude to create/update
+  // .open-code-cli/launch.json — desktop preview config (dev server command + port).
+  // The desktop's preview_start MCP tool instructs Open Code CLI to create/update
   // this file as part of the preview workflow. Without this carve-out the
-  // .claude/ DANGEROUS_DIRECTORIES check prompts for it, which in SDK mode
+  // .open-code-cli/ DANGEROUS_DIRECTORIES check prompts for it, which in SDK mode
   // cascades: user clicks "Always allow" → setMode:acceptEdits suggestion
   // applied → silent downgrade from auto mode. Matches the project-level
-  // .claude/ only (not ~/.claude/) since launch.json is per-project.
+  // .open-code-cli/ only (not ~/.open-code-cli/) since launch.json is per-project.
   if (
     normalizeCaseForComparison(normalizedPath) ===
-    normalizeCaseForComparison(join(getOriginalCwd(), '.claude', 'launch.json'))
+    normalizeCaseForComparison(join(getOriginalCwd(), '.open-code-cli', 'launch.json'))
   ) {
     return {
       behavior: 'allow',
@@ -1629,7 +1629,7 @@ export function checkReadableInternalPath(
   }
 
   // Project directory (for reading past session memories)
-  // Path format: ~/.claude/projects/{sanitized-cwd}/...
+  // Path format: ~/.open-code-cli/projects/{sanitized-cwd}/...
   if (isProjectDirPath(normalizedPath)) {
     return {
       behavior: 'allow',
@@ -1685,7 +1685,7 @@ export function checkReadableInternalPath(
     }
   }
 
-  // Project temp directory (/tmp/claude/{sanitized-cwd}/)
+  // Project temp directory (/tmp/open-code-cli/{sanitized-cwd}/)
   // Intentionally allows reading files from all sessions in this project, not just the current session.
   // This enables cross-session file access within the same project's temp space.
   const projectTempDir = getProjectTempDir()
@@ -1724,8 +1724,8 @@ export function checkReadableInternalPath(
     }
   }
 
-  // Tasks directory (~/.claude/tasks/) for swarm task coordination
-  const tasksDir = join(getClaudeConfigHomeDir(), 'tasks') + sep
+  // Tasks directory (~/.open-code-cli/tasks/) for swarm task coordination
+  const tasksDir = join(getOpenCodeCliConfigHomeDir(), 'tasks') + sep
   if (
     normalizedPath === tasksDir.slice(0, -1) ||
     normalizedPath.startsWith(tasksDir)
@@ -1740,8 +1740,8 @@ export function checkReadableInternalPath(
     }
   }
 
-  // Teams directory (~/.claude/teams/) for swarm coordination
-  const teamsReadDir = join(getClaudeConfigHomeDir(), 'teams') + sep
+  // Teams directory (~/.open-code-cli/teams/) for swarm coordination
+  const teamsReadDir = join(getOpenCodeCliConfigHomeDir(), 'teams') + sep
   if (
     normalizedPath === teamsReadDir.slice(0, -1) ||
     normalizedPath.startsWith(teamsReadDir)

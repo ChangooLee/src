@@ -1,7 +1,7 @@
 /**
  * User keybinding configuration loader with hot-reload support.
  *
- * Loads keybindings from ~/.claude/keybindings.json and watches
+ * Loads keybindings from ~/.open-code-cli/keybindings.json and watches
  * for changes to reload them automatically.
  *
  * NOTE: User keybinding customization is currently only available for
@@ -17,7 +17,7 @@ import { getFeatureValue_CACHED_MAY_BE_STALE } from '../services/analytics/growt
 import { logEvent } from '../services/analytics/index.js'
 import { registerCleanup } from '../utils/cleanupRegistry.js'
 import { logForDebugging } from '../utils/debug.js'
-import { getClaudeConfigHomeDir } from '../utils/envUtils.js'
+import { getOpenCodeCliConfigHomeDir } from '../utils/envUtils.js'
 import { errorMessage, isENOENT } from '../utils/errors.js'
 import { createSignal } from '../utils/signal.js'
 import { jsonParse } from '../utils/slowOperations.js'
@@ -33,14 +33,14 @@ import {
 /**
  * Check if keybinding customization is enabled.
  *
- * Returns true if the tengu_keybinding_customization_release GrowthBook gate is enabled.
+ * Returns true if the open_code_cli_keybinding_customization_release GrowthBook gate is enabled.
  *
  * This function is exported so other parts of the codebase (e.g., /doctor)
  * can check the same condition consistently.
  */
 export function isKeybindingCustomizationEnabled(): boolean {
   return getFeatureValue_CACHED_MAY_BE_STALE(
-    'tengu_keybinding_customization_release',
+    'open_code_cli_keybinding_customization_release',
     false,
   )
 }
@@ -113,7 +113,7 @@ function isKeybindingBlockArray(arr: unknown): arr is KeybindingBlock[] {
  * Get the path to the user keybindings file.
  */
 export function getKeybindingsPath(): string {
-  return join(getClaudeConfigHomeDir(), 'keybindings.json')
+  return join(getOpenCodeCliConfigHomeDir(), 'keybindings.json')
 }
 
 /**

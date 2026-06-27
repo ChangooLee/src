@@ -4,9 +4,9 @@ function syncOpenCodeCliEnvAliases(): void {
   for (const [key, value] of Object.entries(process.env)) {
     if (value === undefined) continue;
     if (key.startsWith('OPEN_CODE_CLI_')) {
-      process.env[`CLAUDE_CODE_${key.slice('OPEN_CODE_CLI_'.length)}`] = value;
-    } else if (key.startsWith('CLAUDE_CODE_')) {
-      process.env[`OPEN_CODE_CLI_${key.slice('CLAUDE_CODE_'.length)}`] ??= value;
+      process.env[`OPEN_CODE_CLI_${key.slice('OPEN_CODE_CLI_'.length)}`] = value;
+    } else if (key.startsWith('OPEN_CODE_CLI_')) {
+      process.env[`OPEN_CODE_CLI_${key.slice('OPEN_CODE_CLI_'.length)}`] ??= value;
     }
   }
 }
@@ -37,7 +37,7 @@ if (feature('ABLATION_BASELINE') && process.env.OPEN_CODE_CLI_ABLATION_BASELINE)
     // eslint-disable-next-line custom-rules/no-top-level-side-effects, custom-rules/no-process-env-top-level
     process.env[k] ??= '1';
     if (k.startsWith('OPEN_CODE_CLI_')) {
-      process.env[`CLAUDE_CODE_${k.slice('OPEN_CODE_CLI_'.length)}`] ??= '1';
+      process.env[`OPEN_CODE_CLI_${k.slice('OPEN_CODE_CLI_'.length)}`] ??= '1';
     }
   }
 }
@@ -197,7 +197,7 @@ async function main(): Promise<void> {
   }
 
   // Fast-path for `claude ps|logs|attach|kill` and `--bg`/`--background`.
-  // Session management against the ~/.claude/sessions/ registry. Flag
+  // Session management against the ~/.open-code-cli/sessions/ registry. Flag
   // literals are inlined so bg.js only loads when actually dispatching.
   if (feature('BG_SESSIONS') && (args[0] === 'ps' || args[0] === 'logs' || args[0] === 'attach' || args[0] === 'kill' || args.includes('--bg') || args.includes('--background'))) {
     profileCheckpoint('cli_bg_path');
@@ -299,7 +299,7 @@ async function main(): Promise<void> {
   // option building (not just inside the action handler).
   if (args.includes('--bare')) {
     process.env.OPEN_CODE_CLI_SIMPLE = '1';
-    (process.env.OPEN_CODE_CLI_SIMPL ?? process.env.CLAUDE_CODE_SIMPL)E = '1';
+    process.env.OPEN_CODE_CLI_SIMPLE = '1';
   }
 
   // No special flags detected, load and run the full CLI

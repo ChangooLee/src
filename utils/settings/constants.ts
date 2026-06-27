@@ -198,5 +198,5 @@ export const SOURCES = [
  * The JSON Schema URL for Open Code CLI settings
  * You can edit the contents at https://github.com/SchemaStore/schemastore/blob/master/src/schemas/json/open-code-cli-settings.json
  */
-export const CLAUDE_CODE_SETTINGS_SCHEMA_URL =
+export const OPEN_CODE_CLI_SETTINGS_SCHEMA_URL =
   'https://json.schemastore.org/open-code-cli-settings.json'

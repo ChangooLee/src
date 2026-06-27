@@ -21,9 +21,6 @@
 import { partiallySanitizeUnicode } from '../sanitization.js'
 
 export const DEEP_LINK_PROTOCOL = 'open-code-cli'
-export const LEGACY_CLAUDE_CLI_DEEP_LINK_PROTOCOL = 'claude-cli'
-const LEGACY_DEEP_LINK_PROTOCOLS = [LEGACY_CLAUDE_CLI_DEEP_LINK_PROTOCOL]
-
 export type DeepLinkAction = {
   query?: string
   cwd?: string
@@ -85,10 +82,7 @@ const MAX_CWD_LENGTH = 4096
  */
 export function parseDeepLink(uri: string): DeepLinkAction {
   // Normalize: accept with or without the trailing colon in protocol
-  const acceptedProtocols = [
-    DEEP_LINK_PROTOCOL,
-    ...LEGACY_DEEP_LINK_PROTOCOLS,
-  ]
+  const acceptedProtocols = [DEEP_LINK_PROTOCOL]
   const protocol = acceptedProtocols.find(
     p => uri.startsWith(`${p}://`) || uri.startsWith(`${p}:`),
   )

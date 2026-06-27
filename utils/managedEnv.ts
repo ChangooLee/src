@@ -30,7 +30,7 @@ function withoutSSHTunnelVars(
     ANTHROPIC_API_KEY: _3,
     ANTHROPIC_AUTH_TOKEN: _4,
     OPEN_CODE_CLI_OAUTH_TOKEN: _5,
-    CLAUDE_CODE_OAUTH_TOKEN: _6,
+    OPEN_CODE_CLI_OAUTH_TOKEN: _6,
     ...rest
   } = env
   return rest
@@ -181,7 +181,7 @@ export function applySafeConfigEnvironmentVariables(): void {
 /**
  * Apply environment variables from settings to process.env.
  * This applies ALL environment variables (except provider-routing vars when
- * CLAUDE_CODE_PROVIDER_MANAGED_BY_HOST is set — see filterSettingsEnv) and
+ * OPEN_CODE_CLI_PROVIDER_MANAGED_BY_HOST is set — see filterSettingsEnv) and
  * should only be called after trust is established. This applies potentially
  * dangerous environment variables such as LD_PRELOAD, PATH, etc.
  */

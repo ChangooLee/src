@@ -170,7 +170,7 @@ export type ToolSearchMode = 'tst' | 'tst-auto' | 'standard'
  *   (unset)               tst (default: always defer MCP and shouldDefer tools)
  */
 export function getToolSearchMode(): ToolSearchMode {
-  // CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS is a kill switch for beta API
+  // OPEN_CODE_CLI_DISABLE_EXPERIMENTAL_BETAS is a kill switch for beta API
   // features. Tool search emits defer_loading on tool definitions and
   // tool_reference content blocks — both require the API to accept a beta
   // header. When the kill switch is set, force 'standard' so no beta shapes
@@ -178,7 +178,7 @@ export function getToolSearchMode(): ToolSearchMode {
   // explicit escape hatch for proxy gateways that the heuristic in
   // isToolSearchEnabledOptimistic doesn't cover.
   // github.com/anthropics/open-code-cli/issues/20031
-  if (isEnvTruthy((process.env.OPEN_CODE_CLI_DISABLE_EXPERIMENTAL_BETAS ?? process.env.CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS))) {
+  if (isEnvTruthy(process.env.OPEN_CODE_CLI_DISABLE_EXPERIMENTAL_BETAS)) {
     return 'standard'
   }
 
@@ -211,7 +211,7 @@ function getUnsupportedToolReferencePatterns(): string[] {
   try {
     // Try to get from GrowthBook for live configuration
     const patterns = getFeatureValue_CACHED_MAY_BE_STALE<string[] | null>(
-      'tengu_tool_search_unsupported_models',
+      'open_code_cli_tool_search_unsupported_models',
       null,
     )
     if (patterns && Array.isArray(patterns) && patterns.length > 0) {
@@ -231,7 +231,7 @@ function getUnsupportedToolReferencePatterns(): string[] {
  * models work by default without code changes.
  *
  * Currently, Haiku models do NOT support tool_reference. This can be
- * updated via GrowthBook feature 'tengu_tool_search_unsupported_models'.
+ * updated via GrowthBook feature 'open_code_cli_tool_search_unsupported_models'.
  *
  * @param model The model name to check
  * @returns true if the model supports tool_reference, false otherwise
@@ -599,7 +599,7 @@ export type DeferredToolsDelta = {
 }
 
 /**
- * Call-site discriminator for the tengu_deferred_tools_pool_change event.
+ * Call-site discriminator for the open_code_cli_deferred_tools_pool_change event.
  * The scan runs from several sites with different expected-prior semantics
  * (inc-4747):
  *   - attachments_main: main-thread getAttachments → prior=0 is a BUG on fire-2+
@@ -629,7 +629,7 @@ export type DeferredToolsDeltaScanContext = {
 export function isDeferredToolsDeltaEnabled(): boolean {
   return (
     process.env.USER_TYPE === 'ant' ||
-    getFeatureValue_CACHED_MAY_BE_STALE('tengu_glacier_2xr', false)
+    getFeatureValue_CACHED_MAY_BE_STALE('open_code_cli_glacier_2xr', false)
   )
 }
 

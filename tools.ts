@@ -87,10 +87,10 @@ import { TaskListTool } from './tools/TaskListTool/TaskListTool.js'
 import uniqBy from 'lodash-es/uniqBy.js'
 import { isToolSearchEnabledOptimistic } from './utils/toolSearch.js'
 import { isTodoV2Enabled } from './utils/tasks.js'
-// Dead code elimination: conditional import for CLAUDE_CODE_VERIFY_PLAN
+// Dead code elimination: conditional import for OPEN_CODE_CLI_VERIFY_PLAN
 /* eslint-disable custom-rules/no-process-env-top-level, @typescript-eslint/no-require-imports */
 const VerifyPlanExecutionTool =
-  (process.env.OPEN_CODE_CLI_VERIFY_PLAN ?? process.env.CLAUDE_CODE_VERIFY_PLAN) === 'true'
+  process.env.OPEN_CODE_CLI_VERIFY_PLAN === 'true'
     ? require('./tools/VerifyPlanExecutionTool/VerifyPlanExecutionTool.js')
         .VerifyPlanExecutionTool
     : null
@@ -189,7 +189,7 @@ export function getToolsForDefaultPreset(): string[] {
  * This is the source of truth for ALL tools.
  */
 /**
- * NOTE: This MUST stay in sync with https://console.statsig.com/4aF3Ewatb6xPVpCwxb5nA3/dynamic_configs/claude_code_global_system_caching, in order to cache the system prompt across users.
+ * NOTE: This MUST stay in sync with https://console.statsig.com/4aF3Ewatb6xPVpCwxb5nA3/dynamic_configs/open_code_cli_global_system_caching, in order to cache the system prompt across users.
  */
 export function getAllBaseTools(): Tools {
   return [
@@ -353,7 +353,7 @@ export function assembleToolPool(
   const allowedMcpTools = filterToolsByDenyRules(mcpTools, permissionContext)
 
   // Sort each partition for prompt-cache stability, keeping built-ins as a
-  // contiguous prefix. The server's claude_code_system_cache_policy places a
+  // contiguous prefix. The server's open_code_cli_system_cache_policy places a
   // global cache breakpoint after the last prefix-matched built-in tool; a flat
   // sort would interleave MCP tools into built-ins and invalidate all downstream
   // cache keys whenever an MCP tool sorts between existing built-ins. uniqBy

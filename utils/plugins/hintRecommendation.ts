@@ -63,11 +63,11 @@ export type PluginHintRecommendation = {
  * later in resolvePluginHint (hook side).
  */
 export function maybeRecordPluginHint(hint: OpenCodeCliHint): void {
-  if (!getFeatureValue_CACHED_MAY_BE_STALE('tengu_lapis_finch', false)) return
+  if (!getFeatureValue_CACHED_MAY_BE_STALE('open_code_cli_lapis_finch', false)) return
   if (hasShownHintThisSession()) return
 
   const config = getGlobalConfig()
-  const state = config.openCodeCliHints ?? config.claudeCodeHints
+  const state = config.openCodeCliHints ?? config.openCodeCliHints
   if (state?.disabled) return
 
   const shown = state?.plugin ?? []
@@ -142,12 +142,12 @@ export async function resolvePluginHint(
 export function markHintPluginShown(pluginId: string): void {
   saveGlobalConfig(current => {
     const existing =
-      current.openCodeCliHints?.plugin ?? current.claudeCodeHints?.plugin ?? []
+      current.openCodeCliHints?.plugin ?? current.openCodeCliHints?.plugin ?? []
     if (existing.includes(pluginId)) return current
     return {
       ...current,
       openCodeCliHints: {
-        ...current.claudeCodeHints,
+        ...current.openCodeCliHints,
         ...current.openCodeCliHints,
         plugin: [...existing, pluginId],
       },
@@ -162,7 +162,7 @@ export function disableHintRecommendations(): void {
     return {
       ...current,
       openCodeCliHints: {
-        ...current.claudeCodeHints,
+        ...current.openCodeCliHints,
         ...current.openCodeCliHints,
         disabled: true,
       },

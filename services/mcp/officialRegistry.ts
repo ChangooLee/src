@@ -31,7 +31,7 @@ function normalizeUrl(url: string): string | undefined {
  * Populates officialUrls for isOfficialMcpUrl lookups.
  */
 export async function prefetchOfficialMcpUrls(): Promise<void> {
-  if ((process.env.OPEN_CODE_CLI_DISABLE_NONESSENTIAL_TRAFFIC ?? process.env.CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC)) {
+  if (process.env.OPEN_CODE_CLI_DISABLE_NONESSENTIAL_TRAFFIC) {
     return
   }
 

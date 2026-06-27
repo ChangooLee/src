@@ -311,7 +311,7 @@ end tell`
         '--window-save-state=never',
       ]
       if (cwd) args.push(`--working-directory=${cwd}`)
-      args.push('-e', claudePath, ...claudeArgs)
+      args.push('-e', claudePath, ...open-code-cliArgs)
       const { code } = await execFileNoThrow('open', args, { useCwd: false })
       if (code === 0) return true
       break
@@ -320,7 +320,7 @@ end tell`
     case 'Alacritty': {
       const args = ['-na', terminal.command, '--args']
       if (cwd) args.push('--working-directory', cwd)
-      args.push('-e', claudePath, ...claudeArgs)
+      args.push('-e', claudePath, ...open-code-cliArgs)
       const { code } = await execFileNoThrow('open', args, { useCwd: false })
       if (code === 0) return true
       break
@@ -329,7 +329,7 @@ end tell`
     case 'kitty': {
       const args = ['-na', terminal.command, '--args']
       if (cwd) args.push('--directory', cwd)
-      args.push(claudePath, ...claudeArgs)
+      args.push(claudePath, ...open-code-cliArgs)
       const { code } = await execFileNoThrow('open', args, { useCwd: false })
       if (code === 0) return true
       break
@@ -338,7 +338,7 @@ end tell`
     case 'WezTerm': {
       const args = ['-na', terminal.command, '--args', 'start']
       if (cwd) args.push('--cwd', cwd)
-      args.push('--', claudePath, ...claudeArgs)
+      args.push('--', claudePath, ...open-code-cliArgs)
       const { code } = await execFileNoThrow('open', args, { useCwd: false })
       if (code === 0) return true
       break
@@ -374,41 +374,41 @@ async function launchLinuxTerminal(
   switch (terminal.name) {
     case 'gnome-terminal':
       args = cwd ? [`--working-directory=${cwd}`, '--'] : ['--']
-      args.push(claudePath, ...claudeArgs)
+      args.push(claudePath, ...open-code-cliArgs)
       break
     case 'konsole':
       args = cwd ? ['--workdir', cwd, '-e'] : ['-e']
-      args.push(claudePath, ...claudeArgs)
+      args.push(claudePath, ...open-code-cliArgs)
       break
     case 'kitty':
       args = cwd ? ['--directory', cwd] : []
-      args.push(claudePath, ...claudeArgs)
+      args.push(claudePath, ...open-code-cliArgs)
       break
     case 'wezterm':
       args = cwd ? ['start', '--cwd', cwd, '--'] : ['start', '--']
-      args.push(claudePath, ...claudeArgs)
+      args.push(claudePath, ...open-code-cliArgs)
       break
     case 'alacritty':
       args = cwd ? ['--working-directory', cwd, '-e'] : ['-e']
-      args.push(claudePath, ...claudeArgs)
+      args.push(claudePath, ...open-code-cliArgs)
       break
     case 'ghostty':
       args = cwd ? [`--working-directory=${cwd}`, '-e'] : ['-e']
-      args.push(claudePath, ...claudeArgs)
+      args.push(claudePath, ...open-code-cliArgs)
       break
     case 'xfce4-terminal':
     case 'mate-terminal':
       args = cwd ? [`--working-directory=${cwd}`, '-x'] : ['-x']
-      args.push(claudePath, ...claudeArgs)
+      args.push(claudePath, ...open-code-cliArgs)
       break
     case 'tilix':
       args = cwd ? [`--working-directory=${cwd}`, '-e'] : ['-e']
-      args.push(claudePath, ...claudeArgs)
+      args.push(claudePath, ...open-code-cliArgs)
       break
     default:
       // xterm, x-terminal-emulator, $TERMINAL — no reliable cwd flag.
       // spawn({cwd}) sets the terminal's own cwd; most inherit.
-      args = ['-e', claudePath, ...claudeArgs]
+      args = ['-e', claudePath, ...open-code-cliArgs]
       spawnCwd = cwd
       break
   }
@@ -428,7 +428,7 @@ async function launchWindowsTerminal(
     // --- PURE ARGV PATH ---
     case 'Windows Terminal':
       if (cwd) args.push('-d', cwd)
-      args.push('--', claudePath, ...claudeArgs)
+      args.push('--', claudePath, ...open-code-cliArgs)
       break
 
     // --- SHELL-STRING PATHS ---
@@ -508,7 +508,7 @@ function buildShellCommand(
   cwd?: string,
 ): string {
   const cdPrefix = cwd ? `cd ${shellQuote(cwd)} && ` : ''
-  return `${cdPrefix}${[claudePath, ...claudeArgs].map(shellQuote).join(' ')}`
+  return `${cdPrefix}${[claudePath, ...open-code-cliArgs].map(shellQuote).join(' ')}`
 }
 
 /**

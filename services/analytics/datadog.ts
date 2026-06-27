@@ -24,49 +24,49 @@ const DATADOG_LEGACY_ALLOWED_EVENTS = [
   'chrome_bridge_tool_call_error',
   'chrome_bridge_tool_call_started',
   'chrome_bridge_tool_call_timeout',
-  'tengu_api_error',
-  'tengu_api_success',
-  'tengu_brief_mode_enabled',
-  'tengu_brief_mode_toggled',
-  'tengu_brief_send',
-  'tengu_cancel',
-  'tengu_compact_failed',
-  'tengu_exit',
-  'tengu_flicker',
-  'tengu_init',
-  'tengu_model_fallback_triggered',
-  'tengu_oauth_error',
-  'tengu_oauth_success',
-  'tengu_oauth_token_refresh_failure',
-  'tengu_oauth_token_refresh_success',
-  'tengu_oauth_token_refresh_lock_acquiring',
-  'tengu_oauth_token_refresh_lock_acquired',
-  'tengu_oauth_token_refresh_starting',
-  'tengu_oauth_token_refresh_completed',
-  'tengu_oauth_token_refresh_lock_releasing',
-  'tengu_oauth_token_refresh_lock_released',
-  'tengu_query_error',
-  'tengu_session_file_read',
-  'tengu_started',
-  'tengu_tool_use_error',
-  'tengu_tool_use_granted_in_prompt_permanent',
-  'tengu_tool_use_granted_in_prompt_temporary',
-  'tengu_tool_use_rejected_in_prompt',
-  'tengu_tool_use_success',
-  'tengu_uncaught_exception',
-  'tengu_unhandled_rejection',
-  'tengu_voice_recording_started',
-  'tengu_voice_toggled',
-  'tengu_team_mem_sync_pull',
-  'tengu_team_mem_sync_push',
-  'tengu_team_mem_sync_started',
-  'tengu_team_mem_entries_capped',
+  'open_code_cli_api_error',
+  'open_code_cli_api_success',
+  'open_code_cli_brief_mode_enabled',
+  'open_code_cli_brief_mode_toggled',
+  'open_code_cli_brief_send',
+  'open_code_cli_cancel',
+  'open_code_cli_compact_failed',
+  'open_code_cli_exit',
+  'open_code_cli_flicker',
+  'open_code_cli_init',
+  'open_code_cli_model_fallback_triggered',
+  'open_code_cli_oauth_error',
+  'open_code_cli_oauth_success',
+  'open_code_cli_oauth_token_refresh_failure',
+  'open_code_cli_oauth_token_refresh_success',
+  'open_code_cli_oauth_token_refresh_lock_acquiring',
+  'open_code_cli_oauth_token_refresh_lock_acquired',
+  'open_code_cli_oauth_token_refresh_starting',
+  'open_code_cli_oauth_token_refresh_completed',
+  'open_code_cli_oauth_token_refresh_lock_releasing',
+  'open_code_cli_oauth_token_refresh_lock_released',
+  'open_code_cli_query_error',
+  'open_code_cli_session_file_read',
+  'open_code_cli_started',
+  'open_code_cli_tool_use_error',
+  'open_code_cli_tool_use_granted_in_prompt_permanent',
+  'open_code_cli_tool_use_granted_in_prompt_temporary',
+  'open_code_cli_tool_use_rejected_in_prompt',
+  'open_code_cli_tool_use_success',
+  'open_code_cli_uncaught_exception',
+  'open_code_cli_unhandled_rejection',
+  'open_code_cli_voice_recording_started',
+  'open_code_cli_voice_toggled',
+  'open_code_cli_team_mem_sync_pull',
+  'open_code_cli_team_mem_sync_push',
+  'open_code_cli_team_mem_sync_started',
+  'open_code_cli_team_mem_entries_capped',
 ]
 
 const DATADOG_ALLOWED_EVENTS = new Set(
   DATADOG_LEGACY_ALLOWED_EVENTS.flatMap(eventName =>
-    eventName.startsWith('tengu_')
-      ? [eventName, `open_code_cli_${eventName.slice('tengu_'.length)}`]
+    eventName.startsWith('open_code_cli_')
+      ? [eventName, `open_code_cli_${eventName.slice('open_code_cli_'.length)}`]
       : [eventName],
   ),
 )
@@ -309,7 +309,7 @@ const getUserBucket = memoize((): number => {
 function getFlushIntervalMs(): number {
   // Allow tests to override to not block on the default flush interval.
   return (
-    parseInt((process.env.OPEN_CODE_CLI_DATADOG_FLUSH_INTERVAL_MS ?? process.env.CLAUDE_CODE_DATADOG_FLUSH_INTERVAL_MS) || '', 10) ||
+    parseInt(process.env.OPEN_CODE_CLI_DATADOG_FLUSH_INTERVAL_MS || '', 10) ||
     DEFAULT_FLUSH_INTERVAL_MS
   )
 }

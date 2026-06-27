@@ -67,8 +67,8 @@ type QueuedEvent = {
 }
 
 export function normalizeAnalyticsEventName(eventName: string): string {
-  return eventName.startsWith('tengu_')
-    ? `open_code_cli_${eventName.slice('tengu_'.length)}`
+  return eventName.startsWith('open_code_cli_')
+    ? `open_code_cli_${eventName.slice('open_code_cli_'.length)}`
     : eventName
 }
 
@@ -131,7 +131,7 @@ export function attachAnalyticsSink(newSink: AnalyticsSink): void {
 /**
  * Log an event to analytics backends (synchronous)
  *
- * Events may be sampled based on the 'tengu_event_sampling_config' dynamic config.
+ * Events may be sampled based on the 'open_code_cli_event_sampling_config' dynamic config.
  * When sampled, the sample_rate is added to the event metadata.
  *
  * If no sink is attached, events are queued and drained when the sink attaches.
@@ -152,7 +152,7 @@ export function logEvent(
 /**
  * Log an event to analytics backends (asynchronous)
  *
- * Events may be sampled based on the 'tengu_event_sampling_config' dynamic config.
+ * Events may be sampled based on the 'open_code_cli_event_sampling_config' dynamic config.
  * When sampled, the sample_rate is added to the event metadata.
  *
  * If no sink is attached, events are queued and drained when the sink attaches.

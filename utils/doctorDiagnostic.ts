@@ -36,8 +36,8 @@ import { SandboxManager } from './sandbox/sandbox-adapter.js'
 import { getManagedFilePath } from './settings/managedPath.js'
 import { CUSTOMIZATION_SURFACES } from './settings/types.js'
 import {
-  findClaudeAlias,
-  findValidClaudeAlias,
+  findOpenCodeCliAlias,
+  findValidOpenCodeCliAlias,
   getShellConfigPaths,
 } from './shellConfig.js'
 import { jsonParse } from './slowOperations.js'
@@ -162,7 +162,7 @@ async function getInstallationPath(): Promise<string> {
     }
 
     try {
-      const path = await which('claude')
+      const path = await which('open-code-cli')
       if (path) {
         return path
       }
@@ -172,8 +172,8 @@ async function getInstallationPath(): Promise<string> {
 
     // If we can't find it, check common locations
     try {
-      await getFsImplementation().stat(join(homedir(), '.local/bin/claude'))
-      return join(homedir(), '.local/bin/claude')
+      await getFsImplementation().stat(join(homedir(), '.local/bin/open-code-cli'))
+      return join(homedir(), '.local/bin/open-code-cli')
     } catch {
       // Not found
     }
@@ -209,7 +209,7 @@ async function detectMultipleInstallations(): Promise<
   const installations: Array<{ type: string; path: string }> = []
 
   // Check for local installation
-  const localPath = join(homedir(), '.claude', 'local')
+  const localPath = join(homedir(), '.open-code-cli', 'local')
   if (await localInstallationExists()) {
     installations.push({ type: 'npm-local', path: localPath })
   }
@@ -229,12 +229,12 @@ async function detectMultipleInstallations(): Promise<
     const npmPrefix = npmResult.stdout.trim()
     const isWindows = getPlatform() === 'windows'
 
-    // First check for active installations via bin/claude
-    // Linux / macOS have prefix/bin/claude and prefix/lib/node_modules
-    // Windows has prefix/claude and prefix/node_modules
+    // First check for active installations via bin/open-code-cli
+    // Linux / macOS have prefix/bin/open-code-cli and prefix/lib/node_modules
+    // Windows has prefix/open-code-cli and prefix/node_modules
     const globalBinPath = isWindows
-      ? join(npmPrefix, 'claude')
-      : join(npmPrefix, 'bin', 'claude')
+      ? join(npmPrefix, 'open-code-cli')
+      : join(npmPrefix, 'bin', 'open-code-cli')
 
     let globalBinExists = false
     try {
@@ -246,7 +246,7 @@ async function detectMultipleInstallations(): Promise<
 
     if (globalBinExists) {
       // Check if this is actually a Homebrew cask installation, not npm-global
-      // When npm is installed via Homebrew, both can exist at /opt/homebrew/bin/claude
+      // When npm is installed via Homebrew, both can exist at /opt/homebrew/bin/open-code-cli
       // We need to resolve the symlink to see where it actually points
       let isCurrentHomebrewInstallation = false
 
@@ -267,7 +267,7 @@ async function detectMultipleInstallations(): Promise<
         installations.push({ type: 'npm-global', path: globalBinPath })
       }
     } else {
-      // If no bin/claude exists, check for orphaned packages (no bin/claude symlink)
+      // If no bin/open-code-cli exists, check for orphaned packages (no bin/open-code-cli symlink)
       for (const packageName of packagesToCheck) {
         const globalPackagePath = isWindows
           ? join(npmPrefix, 'node_modules', packageName)
@@ -289,7 +289,7 @@ async function detectMultipleInstallations(): Promise<
   // Check for native installation
 
   // Check common native installation paths
-  const nativeBinPath = join(homedir(), '.local', 'bin', 'claude')
+  const nativeBinPath = join(homedir(), '.local', 'bin', 'open-code-cli')
   try {
     await fs.stat(nativeBinPath)
     installations.push({ type: 'native', path: nativeBinPath })
@@ -300,7 +300,7 @@ async function detectMultipleInstallations(): Promise<
   // Also check if config indicates native installation
   const config = getGlobalConfig()
   if (config.installMethod === 'native') {
-    const nativeDataPath = join(homedir(), '.local', 'share', 'claude')
+    const nativeDataPath = join(homedir(), '.local', 'share', 'open-code-cli')
     try {
       await fs.stat(nativeDataPath)
       if (!installations.some(i => i.type === 'native')) {
@@ -454,13 +454,13 @@ async function detectConfigurationIssues(
     })
   }
 
-  const existingAlias = await findClaudeAlias()
-  const validAlias = await findValidClaudeAlias()
+  const existingAlias = await findOpenCodeCliAlias()
+  const validAlias = await findValidOpenCodeCliAlias()
 
   // Check if running local installation but it's not in PATH
   if (type === 'npm-local') {
     // Check if open-code-cli is already accessible via PATH
-    const whichResult = await which('claude')
+    const whichResult = await which('open-code-cli')
     const claudeInPath = !!whichResult
 
     // Only show warning if open-code-cli is NOT in PATH AND no valid alias exists
@@ -469,13 +469,13 @@ async function detectConfigurationIssues(
         // Alias exists but points to invalid target
         warnings.push({
           issue: 'Local installation not accessible',
-          fix: `Alias exists but points to invalid target: ${existingAlias}. Update alias: alias open-code-cli="~/.open-code-cli/local/claude"`,
+          fix: `Alias exists but points to invalid target: ${existingAlias}. Update alias: alias open-code-cli="~/.open-code-cli/local/open-code-cli"`,
         })
       } else {
         // No alias exists and not in PATH
         warnings.push({
           issue: 'Local installation not accessible',
-          fix: 'Create alias: alias open-code-cli="~/.open-code-cli/local/claude"',
+          fix: 'Create alias: alias open-code-cli="~/.open-code-cli/local/open-code-cli"',
         })
       }
     }

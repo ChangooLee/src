@@ -13,7 +13,7 @@
  *
  * External callers reach this via the lazy require thunk in `client.ts`, gated
  * on `feature('CHICAGO_MCP')`. Runtime enablement is controlled by the
- * GrowthBook gate `tengu_malort_pedway` (see gates.ts).
+ * GrowthBook gate `open_code_cli_malort_pedway` (see gates.ts).
  */
 
 import { bindSessionContext, type ComputerUseSessionContext, type CuCallToolResult, type CuPermissionRequest, type CuPermissionResponse, DEFAULT_GRANT_FLAGS, type ScreenshotDims } from '@ant/computer-use-mcp';
@@ -42,7 +42,7 @@ type Binding = {
  * `setToolJSX`, `sendOSNotification`) are always current.
  *
  * Module-level `let` is a deliberate exception to the no-module-scope-state
- * rule (src/CLAUDE.md): the dispatcher closure must persist across calls so
+ * rule (src/OPEN_CODE.md): the dispatcher closure must persist across calls so
  * its internal screenshot blob survives, but `ToolUseContext` is per-call.
  * Tests will need to either inject the cache or run serially.
  */

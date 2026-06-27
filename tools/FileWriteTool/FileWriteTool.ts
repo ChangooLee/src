@@ -250,7 +250,7 @@ export const FileWriteTool = buildTool({
     // Ensure parent directory exists before the atomic read-modify-write section.
     // Must stay OUTSIDE the critical section below (a yield between the staleness
     // check and writeTextContent lets concurrent edits interleave), and BEFORE the
-    // write (lazy-mkdir-on-ENOENT would fire a spurious tengu_atomic_write_error
+    // write (lazy-mkdir-on-ENOENT would fire a spurious open_code_cli_atomic_write_error
     // inside writeFileSyncAndFlush_DEPRECATED before ENOENT propagates back).
     await getFsImplementation().mkdir(dir)
     if (fileHistoryEnabled()) {
@@ -337,15 +337,15 @@ export const FileWriteTool = buildTool({
       limit: undefined,
     })
 
-    // Log when writing to CLAUDE.md
-    if (fullFilePath.endsWith(`${sep}CLAUDE.md`)) {
+    // Log when writing to OPEN_CODE.md
+    if (fullFilePath.endsWith(`${sep}OPEN_CODE.md`)) {
       logEvent('open_code_cli_write_claudemd', {})
     }
 
     let gitDiff: ToolUseDiff | undefined
     if (
       isEnvTruthy(getOpenCodeCliEnv('REMOTE')) &&
-      getFeatureValue_CACHED_MAY_BE_STALE('tengu_quartz_lantern', false)
+      getFeatureValue_CACHED_MAY_BE_STALE('open_code_cli_quartz_lantern', false)
     ) {
       const startTime = Date.now()
       const diff = await fetchSingleFileGitDiff(fullFilePath)

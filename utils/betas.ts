@@ -7,7 +7,7 @@ import {
 import { getIsNonInteractiveSession, getSdkBetas } from '../bootstrap/state.js'
 import {
   BEDROCK_EXTRA_PARAMS_HEADERS,
-  CLAUDE_CODE_20250219_BETA_HEADER,
+  OPEN_CODE_CLI_20250219_BETA_HEADER,
   CLI_INTERNAL_BETA_HEADER,
   CONTEXT_1M_BETA_HEADER,
   CONTEXT_MANAGEMENT_BETA_HEADER,
@@ -166,13 +166,13 @@ export function modelSupportsAutoMode(model: string): boolean {
     if (process.env.USER_TYPE !== 'ant' && getAPIProvider() !== 'firstParty') {
       return false
     }
-    // GrowthBook override: tengu_auto_mode_config.allowModels force-enables
+    // GrowthBook override: open_code_cli_auto_mode_config.allowModels force-enables
     // auto mode for listed models, bypassing the denylist/allowlist below.
     // Exact model IDs (e.g. "claude-strudel-v6-p") match only that model;
     // canonical names (e.g. "claude-strudel") match the whole family.
     const config = getFeatureValue_CACHED_MAY_BE_STALE<{
       allowModels?: string[]
-    }>('tengu_auto_mode_config', {})
+    }>('open_code_cli_auto_mode_config', {})
     const rawLower = model.toLowerCase()
     if (
       config?.allowModels?.some(
@@ -215,7 +215,7 @@ export function getToolSearchBetaHeader(): string {
 export function shouldIncludeFirstPartyOnlyBetas(): boolean {
   return (
     (getAPIProvider() === 'firstParty' || getAPIProvider() === 'foundry') &&
-    !isEnvTruthy((process.env.OPEN_CODE_CLI_DISABLE_EXPERIMENTAL_BETAS ?? process.env.CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS))
+    !isEnvTruthy(process.env.OPEN_CODE_CLI_DISABLE_EXPERIMENTAL_BETAS)
   )
 }
 
@@ -227,7 +227,7 @@ export function shouldIncludeFirstPartyOnlyBetas(): boolean {
 export function shouldUseGlobalCacheScope(): boolean {
   return (
     getAPIProvider() === 'firstParty' &&
-    !isEnvTruthy((process.env.OPEN_CODE_CLI_DISABLE_EXPERIMENTAL_BETAS ?? process.env.CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS))
+    !isEnvTruthy(process.env.OPEN_CODE_CLI_DISABLE_EXPERIMENTAL_BETAS)
   )
 }
 
@@ -238,7 +238,7 @@ export const getAllModelBetas = memoize((model: string): string[] => {
   const includeFirstPartyOnlyBetas = shouldIncludeFirstPartyOnlyBetas()
 
   if (!isHaiku) {
-    betaHeaders.push(CLAUDE_CODE_20250219_BETA_HEADER)
+    betaHeaders.push(OPEN_CODE_CLI_20250219_BETA_HEADER)
     if (
       process.env.USER_TYPE === 'ant' &&
       getOpenCodeCliEnv('ENTRYPOINT') === 'cli'
@@ -280,7 +280,7 @@ export const getAllModelBetas = memoize((model: string): string[] => {
   // API buffers assistant text between tool calls, summarizes it, and returns
   // the summary with a signature so the original can be restored on subsequent
   // turns — same mechanism as thinking blocks. Ant-only while we measure
-  // TTFT/TTLT/capacity; betas already flow to tengu_api_success for splitting.
+  // TTFT/TTLT/capacity; betas already flow to open_code_cli_api_success for splitting.
   // Backend independently requires Capability.ANTHROPIC_INTERNAL_RESEARCH.
   //
   // USE_CONNECTOR_TEXT_SUMMARIZATION is tri-state: =1 forces on (opt-in even
@@ -292,7 +292,7 @@ export const getAllModelBetas = memoize((model: string): string[] => {
     includeFirstPartyOnlyBetas &&
     !isEnvDefinedFalsy(process.env.USE_CONNECTOR_TEXT_SUMMARIZATION) &&
     (isEnvTruthy(process.env.USE_CONNECTOR_TEXT_SUMMARIZATION) ||
-      getFeatureValue_CACHED_MAY_BE_STALE('tengu_slate_prism', false))
+      getFeatureValue_CACHED_MAY_BE_STALE('open_code_cli_slate_prism', false))
   ) {
     betaHeaders.push(SUMMARIZE_CONNECTOR_TEXT_BETA_HEADER)
   }
@@ -311,18 +311,18 @@ export const getAllModelBetas = memoize((model: string): string[] => {
     betaHeaders.push(CONTEXT_MANAGEMENT_BETA_HEADER)
   }
   // Add strict tool use beta if experiment is enabled.
-  // Gate on includeFirstPartyOnlyBetas: CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS
+  // Gate on includeFirstPartyOnlyBetas: OPEN_CODE_CLI_DISABLE_EXPERIMENTAL_BETAS
   // already strips schema.strict from tool bodies at api.ts's choke point, but
   // this header was escaping that kill switch. Proxy gateways that look like
   // firstParty but forward to Vertex reject this header with 400.
   // github.com/deshaw/anthropic-issues/issues/5
   const strictToolsEnabled =
-    checkStatsigFeatureGate_CACHED_MAY_BE_STALE('tengu_tool_pear')
+    checkStatsigFeatureGate_CACHED_MAY_BE_STALE('open_code_cli_tool_pear')
   // 3P default: false. API rejects strict + token-efficient-tools together
   // (tool_use.py:139), so these are mutually exclusive — strict wins.
   const tokenEfficientToolsEnabled =
     !strictToolsEnabled &&
-    getFeatureValue_CACHED_MAY_BE_STALE('tengu_amber_json_tools', false)
+    getFeatureValue_CACHED_MAY_BE_STALE('open_code_cli_amber_json_tools', false)
   if (
     includeFirstPartyOnlyBetas &&
     modelSupportsStructuredOutputs(model) &&
@@ -404,8 +404,8 @@ export function getMergedBetas(
   // For non-Haiku models these are already in baseBetas; for Haiku they're
   // excluded by getAllModelBetas() since non-agentic Haiku calls don't need them.
   if (options?.isAgenticQuery) {
-    if (!baseBetas.includes(CLAUDE_CODE_20250219_BETA_HEADER)) {
-      baseBetas.push(CLAUDE_CODE_20250219_BETA_HEADER)
+    if (!baseBetas.includes(OPEN_CODE_CLI_20250219_BETA_HEADER)) {
+      baseBetas.push(OPEN_CODE_CLI_20250219_BETA_HEADER)
     }
     if (
       process.env.USER_TYPE === 'ant' &&

@@ -143,7 +143,7 @@ import { registerMcpXaaIdpCommand } from 'src/commands/mcp/xaaIdpCommand.js';
 import { logPermissionContextForAnts } from 'src/services/internalLogging.js';
 import { fetchClaudeAIMcpConfigsIfEligible } from 'src/services/mcp/claudeai.js';
 import { clearServerCache } from 'src/services/mcp/client.js';
-import { areMcpConfigsAllowedWithEnterpriseMcpConfig, dedupClaudeAiMcpServers, doesEnterpriseMcpConfigExist, filterMcpServersByPolicy, getClaudeCodeMcpConfigs, getMcpServerSignature, parseMcpConfig, parseMcpConfigFromFilePath } from 'src/services/mcp/config.js';
+import { areMcpConfigsAllowedWithEnterpriseMcpConfig, dedupClaudeAiMcpServers, doesEnterpriseMcpConfigExist, filterMcpServersByPolicy, getOpenCodeCliMcpConfigs, getMcpServerSignature, parseMcpConfig, parseMcpConfigFromFilePath } from 'src/services/mcp/config.js';
 import { excludeCommandsByServer, excludeResourcesByServer } from 'src/services/mcp/utils.js';
 import { isXaaEnabled } from 'src/services/mcp/xaaIdpLogin.js';
 import { getRelevantTips } from 'src/services/tips/tipRegistry.js';
@@ -293,7 +293,7 @@ function getCertEnvVarTelemetry(): Record<string, boolean> {
   if (process.env.NODE_EXTRA_CA_CERTS) {
     result.has_node_extra_ca_certs = true;
   }
-  if ((process.env.OPEN_CODE_CLI_CLIENT_CERT ?? process.env.CLAUDE_CODE_CLIENT_CERT)) {
+  if (process.env.OPEN_CODE_CLI_CLIENT_CERT) {
     result.has_client_cert = true;
   }
   if (hasNodeOption('--use-system-ca')) {
@@ -390,7 +390,7 @@ export function startDeferredPrefetches(): void {
   // However, the spawned processes and async work still contend for CPU and event
   // loop time, which skews startup benchmarks (CPU profiles, time-to-first-render
   // measurements). Skip all of it when we're only measuring startup performance.
-  if (isEnvTruthy((process.env.OPEN_CODE_CLI_EXIT_AFTER_FIRST_RENDER ?? process.env.CLAUDE_CODE_EXIT_AFTER_FIRST_RENDER)) ||
+  if (isEnvTruthy(process.env.OPEN_CODE_CLI_EXIT_AFTER_FIRST_RENDER) ||
   // --bare: skip ALL prefetches. These are cache-warms for the REPL's
   // first-turn responsiveness (initUser, getUserContext, tips, countFiles,
   // modelCapabilities, change detectors). Scripted -p calls don't have a
@@ -405,10 +405,10 @@ export function startDeferredPrefetches(): void {
   void getUserContext();
   prefetchSystemContextIfSafe();
   void getRelevantTips();
-  if (isEnvTruthy((process.env.OPEN_CODE_CLI_USE_BEDROCK ?? process.env.CLAUDE_CODE_USE_BEDROCK)) && !isEnvTruthy((process.env.OPEN_CODE_CLI_SKIP_BEDROCK_AUTH ?? process.env.CLAUDE_CODE_SKIP_BEDROCK_AUTH))) {
+  if (isEnvTruthy(process.env.OPEN_CODE_CLI_USE_BEDROCK) && !isEnvTruthy(process.env.OPEN_CODE_CLI_SKIP_BEDROCK_AUTH)) {
     void prefetchAwsCredentialsAndBedRockInfoIfSafe();
   }
-  if (isEnvTruthy((process.env.OPEN_CODE_CLI_USE_VERTEX ?? process.env.CLAUDE_CODE_USE_VERTEX)) && !isEnvTruthy((process.env.OPEN_CODE_CLI_SKIP_VERTEX_AUTH ?? process.env.CLAUDE_CODE_SKIP_VERTEX_AUTH))) {
+  if (isEnvTruthy(process.env.OPEN_CODE_CLI_USE_VERTEX) && !isEnvTruthy(process.env.OPEN_CODE_CLI_SKIP_VERTEX_AUTH)) {
     void prefetchGcpCredentialsIfSafe();
   }
   void countFilesRoundedRg(getCwd(), AbortSignal.timeout(3000), []);
@@ -533,7 +533,7 @@ function initializeEntrypoint(isNonInteractive: boolean): void {
   }
 
   // Note: 'local-agent' entrypoint is set by the local agent mode launcher
-  // via OPEN_CODE_CLI_ENTRYPOINT env var (legacy CLAUDE_CODE_ENTRYPOINT also works).
+  // via OPEN_CODE_CLI_ENTRYPOINT env var (legacy OPEN_CODE_CLI_ENTRYPOINT also works).
 
   // Set based on interactive status
   setOpenCodeCliEnv('ENTRYPOINT', isNonInteractive ? 'sdk-cli' : 'cli');
@@ -679,7 +679,7 @@ export async function main() {
   // `open-code-cli assistant [sessionId]` — stash and strip so the main
   // command handles it, giving the full interactive TUI. Position-0 only
   // (matching the ssh pattern below) — indexOf would false-positive on
-  // `claude -p "explain assistant"`. Root-flag-before-subcommand
+  // `open-code-cli -p "explain assistant"`. Root-flag-before-subcommand
   // (e.g. `--debug assistant`) falls through to the stub, which
   // prints usage.
   if (feature('KAIROS') && _pendingAssistantChat) {
@@ -734,7 +734,7 @@ export async function main() {
       }
       // Forward session-resume + model flags to the remote CLI's initial spawn.
       // --continue/-c and --resume <uuid> operate on the REMOTE session history
-      // (which persists under the remote's ~/.claude/projects/<cwd>/).
+      // (which persists under the remote's ~/.open-code-cli/projects/<cwd>/).
       // --model controls which model the remote uses.
       const extractFlag = (flag: string, opts: {
         hasValue?: boolean;
@@ -826,14 +826,14 @@ export async function main() {
     if (entrypoint === 'claude-desktop') return 'claude-desktop';
 
     // Check if session-ingress token is provided (indicates remote session)
-    const hasSessionIngressToken = (process.env.OPEN_CODE_CLI_SESSION_ACCESS_TOKEN ?? process.env.CLAUDE_CODE_SESSION_ACCESS_TOKEN) || (process.env.OPEN_CODE_CLI_WEBSOCKET_AUTH_FILE_DESCRIPTOR ?? process.env.CLAUDE_CODE_WEBSOCKET_AUTH_FILE_DESCRIPTOR);
+    const hasSessionIngressToken = process.env.OPEN_CODE_CLI_SESSION_ACCESS_TOKEN || process.env.OPEN_CODE_CLI_WEBSOCKET_AUTH_FILE_DESCRIPTOR;
     if (entrypoint === 'remote' || hasSessionIngressToken) {
       return 'remote';
     }
     return 'cli';
   })();
   setClientType(clientType);
-  const previewFormat = (process.env.OPEN_CODE_CLI_QUESTION_PREVIEW_FORMAT ?? process.env.CLAUDE_CODE_QUESTION_PREVIEW_FORMAT);
+  const previewFormat = process.env.OPEN_CODE_CLI_QUESTION_PREVIEW_FORMAT;
   if (previewFormat === 'markdown' || previewFormat === 'html') {
     setQuestionPreviewFormat(previewFormat);
   } else if (!clientType.startsWith('sdk-') &&
@@ -844,7 +844,7 @@ export async function main() {
   }
 
   // Tag sessions created via `open-code-cli remote-control` so the backend can identify them
-  if ((process.env.OPEN_CODE_CLI_ENVIRONMENT_KIND ?? process.env.CLAUDE_CODE_ENVIRONMENT_KIND) === 'bridge') {
+  if (process.env.OPEN_CODE_CLI_ENVIRONMENT_KIND === 'bridge') {
     setSessionSource('remote-control');
   }
   profileCheckpoint('main_client_type_determined');
@@ -920,7 +920,7 @@ async function run(): Promise<CommanderCommand> {
     // process.title on Windows sets the console title directly; on POSIX,
     // terminal shell integration may mirror the process name to the tab.
     // After init() so settings.json env can also gate this (gh-4765).
-    if (!isEnvTruthy((process.env.OPEN_CODE_CLI_DISABLE_TERMINAL_TITLE ?? process.env.CLAUDE_CODE_DISABLE_TERMINAL_TITLE))) {
+    if (!isEnvTruthy(process.env.OPEN_CODE_CLI_DISABLE_TERMINAL_TITLE)) {
       process.title = 'open-code-cli';
     }
 
@@ -974,7 +974,7 @@ async function run(): Promise<CommanderCommand> {
     // If not provided but flag is present, value will be true
     // The actual filtering is handled in debug.ts by parsing process.argv
     return true;
-  }).addOption(new Option('-d2e, --debug-to-stderr', 'Enable debug mode (to stderr)').argParser(Boolean).hideHelp()).option('--debug-file <path>', 'Write debug logs to a specific file path (implicitly enables debug mode)', () => true).option('--verbose', 'Override verbose mode setting from config', () => true).option('-p, --print', 'Print response and exit (useful for pipes). Note: The workspace trust dialog is skipped when Open Code CLI is run with the -p mode. Only use this flag in directories you trust.', () => true).option('--bare', 'Minimal mode: skip hooks, LSP, plugin sync, attribution, auto-memory, background prefetches, keychain reads, and CLAUDE.md auto-discovery. Sets OPEN_CODE_CLI_SIMPLE=1. Anthropic auth is strictly ANTHROPIC_API_KEY or apiKeyHelper via --settings (OAuth and keychain are never read). 3P providers (Bedrock/Vertex/Foundry) use their own credentials. Skills still resolve via /skill-name. Explicitly provide context via: --system-prompt[-file], --append-system-prompt[-file], --add-dir (CLAUDE.md dirs), --mcp-config, --settings, --agents, --plugin-dir.', () => true).addOption(new Option('--init', 'Run Setup hooks with init trigger, then continue').hideHelp()).addOption(new Option('--init-only', 'Run Setup and SessionStart:startup hooks, then exit').hideHelp()).addOption(new Option('--maintenance', 'Run Setup hooks with maintenance trigger, then continue').hideHelp()).addOption(new Option('--output-format <format>', 'Output format (only works with --print): "text" (default), "json" (single result), or "stream-json" (realtime streaming)').choices(['text', 'json', 'stream-json'])).addOption(new Option('--json-schema <schema>', 'JSON Schema for structured output validation. ' + 'Example: {"type":"object","properties":{"name":{"type":"string"}},"required":["name"]}').argParser(String)).option('--include-hook-events', 'Include all hook lifecycle events in the output stream (only works with --output-format=stream-json)', () => true).option('--include-partial-messages', 'Include partial message chunks as they arrive (only works with --print and --output-format=stream-json)', () => true).addOption(new Option('--input-format <format>', 'Input format (only works with --print): "text" (default), or "stream-json" (realtime streaming input)').choices(['text', 'stream-json'])).option('--mcp-debug', '[DEPRECATED. Use --debug instead] Enable MCP debug mode (shows MCP server errors)', () => true).option('--dangerously-skip-permissions', 'Bypass all permission checks. Recommended only for sandboxes with no internet access.', () => true).option('--allow-dangerously-skip-permissions', 'Enable bypassing all permission checks as an option, without it being enabled by default. Recommended only for sandboxes with no internet access.', () => true).addOption(new Option('--thinking <mode>', 'Thinking mode: enabled (equivalent to adaptive), disabled').choices(['enabled', 'adaptive', 'disabled']).hideHelp()).addOption(new Option('--max-thinking-tokens <tokens>', '[DEPRECATED. Use --thinking instead for newer models] Maximum number of thinking tokens (only works with --print)').argParser(Number).hideHelp()).addOption(new Option('--max-turns <turns>', 'Maximum number of agentic turns in non-interactive mode. This will early exit the conversation after the specified number of turns. (only works with --print)').argParser(Number).hideHelp()).addOption(new Option('--max-budget-usd <amount>', 'Maximum dollar amount to spend on API calls (only works with --print)').argParser(value => {
+  }).addOption(new Option('-d2e, --debug-to-stderr', 'Enable debug mode (to stderr)').argParser(Boolean).hideHelp()).option('--debug-file <path>', 'Write debug logs to a specific file path (implicitly enables debug mode)', () => true).option('--verbose', 'Override verbose mode setting from config', () => true).option('-p, --print', 'Print response and exit (useful for pipes). Note: The workspace trust dialog is skipped when Open Code CLI is run with the -p mode. Only use this flag in directories you trust.', () => true).option('--bare', 'Minimal mode: skip hooks, LSP, plugin sync, attribution, auto-memory, background prefetches, keychain reads, and OPEN_CODE.md auto-discovery. Sets OPEN_CODE_CLI_SIMPLE=1. Anthropic auth is strictly ANTHROPIC_API_KEY or apiKeyHelper via --settings (OAuth and keychain are never read). 3P providers (Bedrock/Vertex/Foundry) use their own credentials. Skills still resolve via /skill-name. Explicitly provide context via: --system-prompt[-file], --append-system-prompt[-file], --add-dir (OPEN_CODE.md dirs), --mcp-config, --settings, --agents, --plugin-dir.', () => true).addOption(new Option('--init', 'Run Setup hooks with init trigger, then continue').hideHelp()).addOption(new Option('--init-only', 'Run Setup and SessionStart:startup hooks, then exit').hideHelp()).addOption(new Option('--maintenance', 'Run Setup hooks with maintenance trigger, then continue').hideHelp()).addOption(new Option('--output-format <format>', 'Output format (only works with --print): "text" (default), "json" (single result), or "stream-json" (realtime streaming)').choices(['text', 'json', 'stream-json'])).addOption(new Option('--json-schema <schema>', 'JSON Schema for structured output validation. ' + 'Example: {"type":"object","properties":{"name":{"type":"string"}},"required":["name"]}').argParser(String)).option('--include-hook-events', 'Include all hook lifecycle events in the output stream (only works with --output-format=stream-json)', () => true).option('--include-partial-messages', 'Include partial message chunks as they arrive (only works with --print and --output-format=stream-json)', () => true).addOption(new Option('--input-format <format>', 'Input format (only works with --print): "text" (default), or "stream-json" (realtime streaming input)').choices(['text', 'stream-json'])).option('--mcp-debug', '[DEPRECATED. Use --debug instead] Enable MCP debug mode (shows MCP server errors)', () => true).option('--dangerously-skip-permissions', 'Bypass all permission checks. Recommended only for sandboxes with no internet access.', () => true).option('--allow-dangerously-skip-permissions', 'Enable bypassing all permission checks as an option, without it being enabled by default. Recommended only for sandboxes with no internet access.', () => true).addOption(new Option('--thinking <mode>', 'Thinking mode: enabled (equivalent to adaptive), disabled').choices(['enabled', 'adaptive', 'disabled']).hideHelp()).addOption(new Option('--max-thinking-tokens <tokens>', '[DEPRECATED. Use --thinking instead for newer models] Maximum number of thinking tokens (only works with --print)').argParser(Number).hideHelp()).addOption(new Option('--max-turns <turns>', 'Maximum number of agentic turns in non-interactive mode. This will early exit the conversation after the specified number of turns. (only works with --print)').argParser(Number).hideHelp()).addOption(new Option('--max-budget-usd <amount>', 'Maximum dollar amount to spend on API calls (only works with --print)').argParser(value => {
     const amount = Number(value);
     if (isNaN(amount) || amount <= 0) {
       throw new Error('--max-budget-usd must be a positive number greater than 0');
@@ -1000,7 +1000,7 @@ async function run(): Promise<CommanderCommand> {
     return value;
   })).option('--agent <agent>', `Agent for the current session. Overrides the 'agent' setting.`).option('--betas <betas...>', 'Beta headers to include in API requests (API key users only)').option('--fallback-model <model>', 'Enable automatic fallback to specified model when default model is overloaded (only works with --print)').addOption(new Option('--workload <tag>', 'Workload tag for billing-header attribution (cc_workload). Process-scoped; set by SDK daemon callers that spawn subprocesses for cron work. (only works with --print)').hideHelp()).option('--settings <file-or-json>', 'Path to a settings JSON file or a JSON string to load additional settings from').option('--add-dir <directories...>', 'Additional directories to allow tool access to').option('--ide', 'Automatically connect to IDE on startup if exactly one valid IDE is available', () => true).option('--strict-mcp-config', 'Only use MCP servers from --mcp-config, ignoring all other MCP configurations', () => true).option('--session-id <uuid>', 'Use a specific session ID for the conversation (must be a valid UUID)').option('-n, --name <name>', 'Set a display name for this session (shown in /resume and terminal title)').option('--agents <json>', 'JSON object defining custom agents (e.g. \'{"reviewer": {"description": "Reviews code", "prompt": "You are a code reviewer"}}\')').option('--setting-sources <sources>', 'Comma-separated list of setting sources to load (user, project, local).')
   // gh-33508: <paths...> (variadic) consumed everything until the next
-  // --flag. `claude --plugin-dir /path mcp add --transport http` swallowed
+  // --flag. `open-code-cli --plugin-dir /path mcp add --transport http` swallowed
   // `mcp` and `add` as paths, then choked on --transport as an unknown
   // top-level option. Single-value + collect accumulator means each
   // --plugin-dir takes exactly one arg; repeat the flag for multiple dirs.
@@ -1008,7 +1008,7 @@ async function run(): Promise<CommanderCommand> {
     profileCheckpoint('action_handler_start');
 
     // --bare = one-switch minimal mode. Sets SIMPLE so all the existing
-    // gates fire (CLAUDE.md, skills, hooks inside executeHooks, agent
+    // gates fire (OPEN_CODE.md, skills, hooks inside executeHooks, agent
     // dir-walk). Must be set before setup() / any of the gated work runs.
     if ((options as {
       bare?: boolean;
@@ -1031,8 +1031,8 @@ async function run(): Promise<CommanderCommand> {
       });
     }
 
-    // Assistant mode: when .claude/settings.json has assistant: true AND
-    // the tengu_kairos GrowthBook gate is on, force brief on. Permission
+    // Assistant mode: when .open-code-cli/settings.json has assistant: true AND
+    // the open_code_cli_kairos GrowthBook gate is on, force brief on. Permission
     // mode is left to the user — settings defaultMode or --permission-mode
     // apply as normal. REPL-typed messages already default to 'next'
     // priority (messageQueueManager.enqueue) so they drain mid-turn between
@@ -1041,10 +1041,10 @@ async function run(): Promise<CommanderCommand> {
     // kairosEnabled is computed once here and reused at the
     // getAssistantSystemPromptAddendum() call site further down.
     //
-    // Trust gate: .claude/settings.json is attacker-controllable in an
+    // Trust gate: .open-code-cli/settings.json is attacker-controllable in an
     // untrusted clone. We run ~1000 lines before showSetupScreens() shows
     // the trust dialog, and by then we've already appended
-    // .claude/agents/assistant.md to the system prompt. Refuse to activate
+    // .open-code-cli/agents/assistant.md to the system prompt. Refuse to activate
     // until the directory has been explicitly trusted.
     let kairosEnabled = false;
     let assistantTeamContext: Awaited<ReturnType<NonNullable<typeof assistantModule>['initializeAssistantTeam']>> | undefined;
@@ -1053,7 +1053,7 @@ async function run(): Promise<CommanderCommand> {
     }).assistant && assistantModule) {
       // --assistant (Agent SDK daemon mode): force the latch before
       // isAssistantMode() runs below. The daemon has already checked
-      // entitlement — don't make the child re-check tengu_kairos.
+      // entitlement — don't make the child re-check open_code_cli_kairos.
       assistantModule.markAssistantForced();
     }
     if (feature('KAIROS') && assistantModule?.isAssistantMode() &&
@@ -1187,7 +1187,7 @@ async function run(): Promise<CommanderCommand> {
     let storedTeammateOpts: TeammateOptions | undefined;
     if (isAgentSwarmsEnabled()) {
       // Extract agent identity options (for tmux-spawned agents)
-      // These replace the CLAUDE_CODE_* environment variables
+      // These replace the OPEN_CODE_CLI_* environment variables
       const teammateOpts = extractTeammateOptions(options);
       storedTeammateOpts = teammateOpts;
 
@@ -1403,7 +1403,7 @@ async function run(): Promise<CommanderCommand> {
       // is auto, OR settings defaultMode is auto but the gate denied it
       // (permissionMode resolved to default with no explicit CLI override).
       // Used by verifyAutoModeGateAccess to decide whether to notify on
-      // auto-unavailable, and by tengu_auto_mode_config opt-in carousel.
+      // auto-unavailable, and by open_code_cli_auto_mode_config opt-in carousel.
       if ((options as {
         enableAutoMode?: boolean;
       }).enableAutoMode || permissionModeCli === 'auto' || permissionMode === 'auto' || !permissionModeCli && isDefaultPermissionModeAuto()) {
@@ -1506,7 +1506,7 @@ async function run(): Promise<CommanderCommand> {
         // Enforce managed policy (allowedMcpServers / deniedMcpServers) on
         // --mcp-config servers. Without this, the CLI flag bypasses the
         // enterprise allowlist that user/project/local configs go through in
-        // getClaudeCodeMcpConfigs — callers spread dynamicMcpConfig back on
+        // getOpenCodeCliMcpConfigs — callers spread dynamicMcpConfig back on
         // top of filtered results. Filter here at the source so all
         // downstream consumers see the policy-filtered set.
         const {
@@ -1630,7 +1630,7 @@ async function run(): Promise<CommanderCommand> {
       }
     }
 
-    // Store additional directories for CLAUDE.md loading (controlled by env var)
+    // Store additional directories for OPEN_CODE.md loading (controlled by env var)
     setAdditionalDirectoriesForClaudeMd(addDir);
 
     // Channel server allowlist from --channels flag — servers whose
@@ -1701,9 +1701,9 @@ async function run(): Promise<CommanderCommand> {
         }
       }
       // Flag-usage telemetry. Plugin identifiers are logged (same tier as
-      // tengu_plugin_installed — public-registry-style names); server-kind
+      // open_code_cli_plugin_installed — public-registry-style names); server-kind
       // names are not (MCP-server-name tier, opt-in-only elsewhere).
-      // Per-server gate outcomes land in tengu_mcp_channel_gate once
+      // Per-server gate outcomes land in open_code_cli_mcp_channel_gate once
       // servers connect. Dev entries go through a confirmation dialog after
       // this — dev_plugins captures what was typed, not what was accepted.
       if (channelEntries.length > 0 || (devChannels?.length ?? 0) > 0) {
@@ -1798,7 +1798,7 @@ async function run(): Promise<CommanderCommand> {
     }) : Promise.resolve({});
 
     // Kick off MCP config loading early (safe - just reads files, no execution).
-    // Both interactive and -p use getClaudeCodeMcpConfigs (local file reads only).
+    // Both interactive and -p use getOpenCodeCliMcpConfigs (local file reads only).
     // The local promise is awaited later (before prefetchAllMcpResources) to
     // overlap config I/O with setup(), commands loading, and trust dialog.
     logForDebugging('[STARTUP] Loading MCP configs...');
@@ -1809,7 +1809,7 @@ async function run(): Promise<CommanderCommand> {
     // allMcpConfigs downstream so it survives this skip.
     const mcpConfigPromise = (strictMcpConfig || isBareMode() ? Promise.resolve({
       servers: {} as Record<string, ScopedMcpServerConfig>
-    }) : getClaudeCodeMcpConfigs(dynamicMcpConfig)).then(result => {
+    }) : getOpenCodeCliMcpConfigs(dynamicMcpConfig)).then(result => {
       mcpConfigResolvedMs = Date.now() - mcpConfigStart;
       return result;
     });
@@ -1870,7 +1870,7 @@ async function run(): Promise<CommanderCommand> {
 
     // Apply coordinator mode tool filtering for headless path
     // (mirrors useMergedTools.ts filtering for REPL/interactive path)
-    if (feature('COORDINATOR_MODE') && isEnvTruthy((process.env.OPEN_CODE_CLI_COORDINATOR_MODE ?? process.env.CLAUDE_CODE_COORDINATOR_MODE))) {
+    if (feature('COORDINATOR_MODE') && isEnvTruthy(process.env.OPEN_CODE_CLI_COORDINATOR_MODE)) {
       const {
         applyCoordinatorToolFilter
       } = await import('./utils/toolPool.js');
@@ -1952,7 +1952,7 @@ async function run(): Promise<CommanderCommand> {
     }
     if (getIsNonInteractiveSession()) {
       // Apply full merged settings env now (including project-scoped
-      // .claude/settings.json PATH/GIT_DIR/GIT_WORK_TREE) so gitExe() and
+      // .open-code-cli/settings.json PATH/GIT_DIR/GIT_WORK_TREE) so gitExe() and
       // the git spawn below see it. Trust is implicit in -p mode; the
       // docstring at managedEnv.ts:96-97 says this applies "potentially
       // dangerous environment variables such as LD_PRELOAD, PATH" from all
@@ -1977,7 +1977,7 @@ async function run(): Promise<CommanderCommand> {
       // (same gate as prefetchSystemContextIfSafe).
       void getSystemContext();
       // Kick getUserContext now too — its first await (fs.readFile in
-      // getMemoryFiles) yields naturally, so the CLAUDE.md directory walk
+      // getMemoryFiles) yields naturally, so the OPEN_CODE.md directory walk
       // runs during the ~280ms overlap window before the context
       // Promise.all join in print.ts. The void getUserContext() in
       // startDeferredPrefetches becomes a memoize cache-hit.
@@ -2000,7 +2000,7 @@ async function run(): Promise<CommanderCommand> {
     }
 
     // Ant model aliases (capybara-fast etc.) resolve via the
-    // tengu_ant_model_override GrowthBook flag. _CACHED_MAY_BE_STALE reads
+    // open_code_cli_ant_model_override GrowthBook flag. _CACHED_MAY_BE_STALE reads
     // disk synchronously; disk is populated by a fire-and-forget write. On a
     // cold cache, parseUserSpecifiedModel returns the unresolved alias, the
     // API 404s, and -p exits before the async write lands — crashloop on
@@ -2011,7 +2011,7 @@ async function run(): Promise<CommanderCommand> {
     //  - no env override (which short-circuits _CACHED_MAY_BE_STALE before disk)
     //  - flag absent from disk (== null also catches pre-#22279 poisoned null)
     const explicitModel = options.model || process.env.ANTHROPIC_MODEL;
-    if ("external" === 'ant' && explicitModel && explicitModel !== 'default' && !hasGrowthBookEnvOverride('tengu_ant_model_override') && getGlobalConfig().cachedGrowthBookFeatures?.['tengu_ant_model_override'] == null) {
+    if ("external" === 'ant' && explicitModel && explicitModel !== 'default' && !hasGrowthBookEnvOverride('open_code_cli_ant_model_override') && getGlobalConfig().cachedGrowthBookFeatures?.['open_code_cli_ant_model_override'] == null) {
       await initializeGrowthBook();
     }
 
@@ -2197,7 +2197,7 @@ async function run(): Promise<CommanderCommand> {
     // access and conflict with delegation instructions.
     if ((feature('PROACTIVE') || feature('KAIROS')) && ((options as {
       proactive?: boolean;
-    }).proactive || isEnvTruthy((process.env.OPEN_CODE_CLI_PROACTIVE ?? process.env.CLAUDE_CODE_PROACTIVE))) && !coordinatorModeModule?.isCoordinatorMode()) {
+    }).proactive || isEnvTruthy(process.env.OPEN_CODE_CLI_PROACTIVE)) && !coordinatorModeModule?.isCoordinatorMode()) {
       /* eslint-disable @typescript-eslint/no-require-imports */
       const briefVisibility = feature('KAIROS') || feature('KAIROS_BRIEF') ? (require('./tools/BriefTool/BriefTool.js') as typeof import('./tools/BriefTool/BriefTool.js')).isBriefEnabled() ? 'Call SendUserMessage at checkpoints to mark where things stand.' : 'The user will see any text you output.' : 'The user will see any text you output.';
       /* eslint-enable @typescript-eslint/no-require-imports */
@@ -2220,7 +2220,7 @@ async function run(): Promise<CommanderCommand> {
       const ctx = getRenderContext(false);
       getFpsMetrics = ctx.getFpsMetrics;
       stats = ctx.stats;
-      // Install asciicast recorder before Ink mounts (ant-only, opt-in via CLAUDE_CODE_TERMINAL_RECORDING=1)
+      // Install asciicast recorder before Ink mounts (ant-only, opt-in via OPEN_CODE_CLI_TERMINAL_RECORDING=1)
       if ("external" === 'ant') {
         installAsciicastRecorder();
       }
@@ -2287,7 +2287,7 @@ async function run(): Promise<CommanderCommand> {
         // Refresh GrowthBook after login to get updated feature flags (e.g., for claude.ai MCPs)
         refreshGrowthBookAfterAuthChange();
         // Clear any stale trusted device token then enroll for Remote Control.
-        // Both self-gate on tengu_sessions_elevated_auth_enforcement internally
+        // Both self-gate on open_code_cli_sessions_elevated_auth_enforcement internally
         // — enrollTrustedDevice() via checkGate_CACHED_OR_BLOCKING (awaits
         // the GrowthBook reinit above), clearTrustedDeviceToken() via the
         // sync cached check (acceptable since clear is idempotent).
@@ -2342,7 +2342,7 @@ async function run(): Promise<CommanderCommand> {
     // --bare / SIMPLE: skip — these are cache-warms for the REPL's
     // first-turn responsiveness (quota, passes, fastMode, bootstrap data). Fast
     // mode doesn't apply to the Agent SDK anyway (see getFastModeUnavailableReason).
-    const bgRefreshThrottleMs = getFeatureValue_CACHED_MAY_BE_STALE('tengu_cicada_nap_ms', 0);
+    const bgRefreshThrottleMs = getFeatureValue_CACHED_MAY_BE_STALE('open_code_cli_cicada_nap_ms', 0);
     const lastPrefetched = getGlobalConfig().startupPrefetchedAt ?? 0;
     const skipStartupPrefetches = isBareMode() || bgRefreshThrottleMs > 0 && Date.now() - lastPrefetched < bgRefreshThrottleMs;
     if (!skipStartupPrefetches) {
@@ -2355,7 +2355,7 @@ async function run(): Promise<CommanderCommand> {
 
       // TODO: Consolidate other prefetches into a single bootstrap request.
       void prefetchPassesEligibility();
-      if (!getFeatureValue_CACHED_MAY_BE_STALE('tengu_miraculo_the_bard', false)) {
+      if (!getFeatureValue_CACHED_MAY_BE_STALE('open_code_cli_miraculo_the_bard', false)) {
         void prefetchFastModeStatus();
       } else {
         // Kill switch skips the network call, not org-policy enforcement.
@@ -2425,9 +2425,9 @@ async function run(): Promise<CommanderCommand> {
     // local dedup flags, so merging two calls can yield duplicates. print.ts
     // already uniqBy's the final tool pool, but dedup here keeps appState clean.
     const mcpPromise = Promise.all([localMcpPromise, claudeaiMcpPromise]).then(([local, claudeai]) => ({
-      clients: [...local.clients, ...claudeai.clients],
-      tools: uniqBy([...local.tools, ...claudeai.tools], 'name'),
-      commands: uniqBy([...local.commands, ...claudeai.commands], 'name')
+      clients: [...local.clients, ...open-code-cliai.clients],
+      tools: uniqBy([...local.tools, ...open-code-cliai.tools], 'name'),
+      commands: uniqBy([...local.commands, ...open-code-cliai.commands], 'name')
     }));
 
     // Start hooks early so they run in parallel with MCP connections.
@@ -2524,7 +2524,7 @@ async function run(): Promise<CommanderCommand> {
     void logPermissionContextForAnts(null, 'initialization');
     logManagedSettings();
 
-    // Register PID file for concurrent-session detection (~/.claude/sessions/)
+    // Register PID file for concurrent-session detection (~/.open-code-cli/sessions/)
     // and fire running multiple Open Code CLI sessions telemetry. Lives here (not init.ts) so only the
     // REPL path registers — not subcommands like `open-code-cli doctor`. Chained:
     // count must run after register's write completes or it misses our own file.
@@ -2732,7 +2732,7 @@ async function run(): Promise<CommanderCommand> {
       // Dedup: suppress plugin MCP servers that duplicate a claude.ai
       // connector (connector wins), then connect claude.ai servers.
       // Bounded wait — #23725 made this blocking so single-turn -p sees
-      // connectors, but with 40+ slow connectors tengu_startup_perf p99
+      // connectors, but with 40+ slow connectors open_code_cli_startup_perf p99
       // climbed to 76s. If fetch+connect doesn't finish in time, proceed;
       // the promise keeps running and updates headlessStore in the
       // background so turn 2+ still sees connectors.
@@ -3060,7 +3060,7 @@ async function run(): Promise<CommanderCommand> {
     // environments can be recreated at any user message index. Gating:
     //   - Build-time: this import is stubbed in external builds.
     //   - Runtime: uploader checks github.com/anthropics/* remote + gcloud auth.
-    //   - Safety: CLAUDE_CODE_DISABLE_SESSION_DATA_UPLOAD=1 bypasses (tests set this).
+    //   - Safety: OPEN_CODE_CLI_DISABLE_SESSION_DATA_UPLOAD=1 bypasses (tests set this).
     // Import is dynamic + async to avoid adding startup latency.
     const sessionUploaderPromise = "external" === 'ant' ? import('./utils/sessionDataUploader.js') : null;
 
@@ -3155,7 +3155,7 @@ async function run(): Promise<CommanderCommand> {
         process.exit(1);
       }
     } else if (feature('DIRECT_CONNECT') && _pendingConnect?.url) {
-      // `claude connect <url>` — full interactive TUI connected to a remote server
+      // `open-code-cli connect <url>` — full interactive TUI connected to a remote server
       let directConnectConfig;
       try {
         const session = await createDirectConnectSession({
@@ -3412,7 +3412,7 @@ async function run(): Promise<CommanderCommand> {
         const hasInitialPrompt = remote.length > 0;
 
         // Check if TUI mode is enabled - description is only optional in TUI mode
-        const isRemoteTuiEnabled = getFeatureValue_CACHED_MAY_BE_STALE('tengu_remote_backend', false);
+        const isRemoteTuiEnabled = getFeatureValue_CACHED_MAY_BE_STALE('open_code_cli_remote_backend', false);
         if (!isRemoteTuiEnabled && !hasInitialPrompt) {
           return await exitWithError(root, 'Error: --remote requires a description.\nUsage: open-code-cli --remote "your task description"', () => gracefulShutdown(1));
         }
@@ -3776,7 +3776,7 @@ async function run(): Promise<CommanderCommand> {
       // knows the session originated externally. Linux xdg-open and
       // browsers with "always allow" set dispatch the link with no OS-level
       // confirmation, so this is the only signal the user gets that the
-      // prompt — and the working directory / CLAUDE.md it implies — came
+      // prompt — and the working directory / OPEN_CODE.md it implies — came
       // from an external source rather than something they typed.
       let deepLinkBanner: ReturnType<typeof createSystemMessage> | null = null;
       if (feature('LODESTONE')) {
@@ -3848,7 +3848,7 @@ async function run(): Promise<CommanderCommand> {
   }
 
   // Teammate identity options (set by leader when spawning tmux teammates)
-  // These replace the CLAUDE_CODE_* environment variables
+  // These replace the OPEN_CODE_CLI_* environment variables
   program.addOption(new Option('--agent-id <id>', 'Teammate agent ID').hideHelp());
   program.addOption(new Option('--agent-name <name>', 'Teammate display name').hideHelp());
   program.addOption(new Option('--team-name <name>', 'Team name for swarm coordination').hideHelp());
@@ -3958,7 +3958,7 @@ async function run(): Promise<CommanderCommand> {
     await mcpResetChoicesHandler();
   });
 
-  // claude server
+  // open-code-cli server
   if (feature('DIRECT_CONNECT')) {
     program.command('server').description('Start a Open Code CLI session server').option('--port <number>', 'HTTP port', '0').option('--host <string>', 'Bind address', '0.0.0.0').option('--auth-token <token>', 'Bearer token for auth').option('--unix <path>', 'Listen on a unix domain socket').option('--workspace <dir>', 'Default working directory for sessions that do not specify cwd').option('--idle-timeout <ms>', 'Idle timeout for detached sessions in ms (0 = never expire)', '600000').option('--max-sessions <n>', 'Maximum concurrent sessions (0 = unlimited)', '32').action(async (opts: {
       port: string;
@@ -3994,7 +3994,7 @@ async function run(): Promise<CommanderCommand> {
       } = await import('./server/lockfile.js');
       const existing = await probeRunningServer();
       if (existing) {
-        process.stderr.write(`A claude server is already running (pid ${existing.pid}) at ${existing.httpUrl}\n`);
+        process.stderr.write(`A open-code-cli server is already running (pid ${existing.pid}) at ${existing.httpUrl}\n`);
         process.exit(1);
       }
       const authToken = opts.authToken ?? `sk-ant-cc-${randomBytes(16).toString('base64url')}`;
@@ -4170,7 +4170,7 @@ async function run(): Promise<CommanderCommand> {
 
   // Marketplace subcommands
   const marketplaceCmd = pluginCmd.command('marketplace').description('Manage Open Code CLI marketplaces').configureHelp(createSortedHelpConfig());
-  marketplaceCmd.command('add <source>').description('Add a marketplace from a URL, path, or GitHub repo').addOption(coworkOption()).option('--sparse <paths...>', 'Limit checkout to specific directories via git sparse-checkout (for monorepos). Example: --sparse .claude-plugin plugins').option('--scope <scope>', 'Where to declare the marketplace: user (default), project, or local').action(async (source: string, options: {
+  marketplaceCmd.command('add <source>').description('Add a marketplace from a URL, path, or GitHub repo').addOption(coworkOption()).option('--sparse <paths...>', 'Limit checkout to specific directories via git sparse-checkout (for monorepos). Example: --sparse .open-code-cli-plugin plugins').option('--scope <scope>', 'Where to declare the marketplace: user (default), project, or local').action(async (source: string, options: {
     cowork?: boolean;
     sparse?: string[];
     scope?: string;
@@ -4284,7 +4284,7 @@ async function run(): Promise<CommanderCommand> {
     process.exit(0);
   });
   if (feature('TRANSCRIPT_CLASSIFIER')) {
-    // Skip when tengu_auto_mode_config.enabled === 'disabled' (circuit breaker).
+    // Skip when open_code_cli_auto_mode_config.enabled === 'disabled' (circuit breaker).
     // Reads from disk cache — GrowthBook isn't initialized at registration time.
     if (getAutoModeEnabledStateIfCached() !== 'disabled') {
       const autoModeCmd = program.command('auto-mode').description('Inspect auto mode classifier configuration');
@@ -4367,9 +4367,9 @@ async function run(): Promise<CommanderCommand> {
     await update();
   });
 
-  // open-code-cli up — run the project's CLAUDE.md "# open-code-cli up" setup instructions.
+  // open-code-cli up — run the project's OPEN_CODE.md "# open-code-cli up" setup instructions.
   if ("external" === 'ant') {
-    program.command('up').description('[ANT-ONLY] Initialize or upgrade the local dev environment using the "# open-code-cli up" section of the nearest CLAUDE.md').action(async () => {
+    program.command('up').description('[ANT-ONLY] Initialize or upgrade the local dev environment using the "# open-code-cli up" section of the nearest OPEN_CODE.md').action(async () => {
       const {
         up
       } = await import('src/cli/up.js');
@@ -4392,7 +4392,7 @@ async function run(): Promise<CommanderCommand> {
     });
   }
 
-  // claude install
+  // open-code-cli install
   program.command('install [target]').description('Install Open Code CLI native build. Use [target] to specify version (stable, latest, or specific version)').option('--force', 'Force installation even if already installed').action(async (target: string | undefined, options: {
     force?: boolean;
   }) => {
@@ -4409,7 +4409,7 @@ async function run(): Promise<CommanderCommand> {
       if (maybeSessionId) return maybeSessionId;
       return Number(value);
     };
-    // claude log
+    // open-code-cli log
     program.command('log').description('[ANT-ONLY] Manage conversation logs.').argument('[number|sessionId]', 'A number (0, 1, 2, etc.) to display a specific log, or the sesssion ID (uuid) of a log', validateLogId).action(async (logId: string | number | undefined) => {
       const {
         logHandler
@@ -4417,7 +4417,7 @@ async function run(): Promise<CommanderCommand> {
       await logHandler(logId);
     });
 
-    // claude error
+    // open-code-cli error
     program.command('error').description('[ANT-ONLY] View error logs. Optionally provide a number (0, -1, -2, etc.) to display a specific log.').argument('[number]', 'A number (0, 1, 2, etc.) to display a specific log', parseInt).action(async (number: number | undefined) => {
       const {
         errorHandler
@@ -4425,7 +4425,7 @@ async function run(): Promise<CommanderCommand> {
       await errorHandler(number);
     });
 
-    // claude export
+    // open-code-cli export
     program.command('export').description('[ANT-ONLY] Export a conversation to a text file.').usage('<source> <outputFile>').argument('<source>', 'Session ID, log index (0, 1, 2...), or path to a .json/.jsonl log file').argument('<outputFile>', 'Output file path for the exported text').addHelpText('after', `
 Examples:
   $ open-code-cli export 0 conversation.txt                Export conversation at log index 0
@@ -4612,7 +4612,7 @@ async function logTenguInit({
 function maybeActivateProactive(options: unknown): void {
   if ((feature('PROACTIVE') || feature('KAIROS')) && ((options as {
     proactive?: boolean;
-  }).proactive || isEnvTruthy((process.env.OPEN_CODE_CLI_PROACTIVE ?? process.env.CLAUDE_CODE_PROACTIVE)))) {
+  }).proactive || isEnvTruthy(process.env.OPEN_CODE_CLI_PROACTIVE))) {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const proactiveModule = require('./proactive/index.js');
     if (!proactiveModule.isProactiveActive()) {
@@ -4625,12 +4625,12 @@ function maybeActivateBrief(options: unknown): void {
   const briefFlag = (options as {
     brief?: boolean;
   }).brief;
-  const briefEnv = isEnvTruthy((process.env.OPEN_CODE_CLI_BRIEF ?? process.env.CLAUDE_CODE_BRIEF));
+  const briefEnv = isEnvTruthy(process.env.OPEN_CODE_CLI_BRIEF);
   if (!briefFlag && !briefEnv) return;
-  // --brief / CLAUDE_CODE_BRIEF are explicit opt-ins: check entitlement,
+  // --brief / OPEN_CODE_CLI_BRIEF are explicit opt-ins: check entitlement,
   // then set userMsgOptIn to activate the tool + prompt section. The env
   // var also grants entitlement (isBriefEntitled() reads it), so setting
-  // CLAUDE_CODE_BRIEF=1 alone force-enables for dev/testing — no GB gate
+  // OPEN_CODE_CLI_BRIEF=1 alone force-enables for dev/testing — no GB gate
   // needed. initialIsBriefOnly reads getUserMsgOptIn() directly.
   // Conditional require: static import would leak the tool name string
   // into external builds via BriefTool.ts → prompt.ts.

@@ -20,7 +20,7 @@ import {
   LEGACY_AGENT_TOOL_NAME,
 } from '../tools/AgentTool/constants.js'
 import type { LogOption } from '../types/logs.js'
-import { getClaudeConfigHomeDir } from '../utils/envUtils.js'
+import { getOpenCodeCliConfigHomeDir } from '../utils/envUtils.js'
 import { toError } from '../utils/errors.js'
 import { execFileNoThrow } from '../utils/execFileNoThrow.js'
 import { logError } from '../utils/log.js'
@@ -87,7 +87,7 @@ const getRemoteHostSessionCount: (hs: string) => Promise<number> =
           'ssh',
           [
             `${homespace}.coder`,
-            'find /root/.claude/projects -name "*.jsonl" 2>/dev/null | wc -l',
+            'find /root/.open-code-cli/projects -name "*.jsonl" 2>/dev/null | wc -l',
           ],
           { timeout: 30000 },
         )
@@ -111,7 +111,7 @@ const collectFromRemoteHost: (
           // SCP the projects folder
           const scpResult = await execFileNoThrow(
             'scp',
-            ['-rq', `${homespace}.coder:/root/.claude/projects/`, tempDir],
+            ['-rq', `${homespace}.coder:/root/.open-code-cli/projects/`, tempDir],
             { timeout: 300000 },
           )
           if (scpResult.code !== 0) {
@@ -377,7 +377,7 @@ const LABEL_MAP: Record<string, string> = {
   wrong_approach: 'Wrong Approach',
   buggy_code: 'Buggy Code',
   user_rejected_action: 'User Rejected Action',
-  claude_got_blocked: 'Claude Got Blocked',
+  open_code_cli_got_blocked: 'Open Code CLI Got Blocked',
   user_stopped_early: 'User Stopped Early',
   wrong_file_or_location: 'Wrong File/Location',
   excessive_changes: 'Excessive Changes',
@@ -414,11 +414,11 @@ const LABEL_MAP: Record<string, string> = {
   essential: 'Essential',
 }
 
-// Lazy getters: getClaudeConfigHomeDir() is memoized and reads process.env.
+// Lazy getters: getOpenCodeCliConfigHomeDir() is memoized and reads process.env.
 // Calling it at module scope would populate the memoize cache before
 // entrypoints can set CLAUDE_CONFIG_DIR, breaking all 150+ other callers.
 function getDataDir(): string {
-  return join(getClaudeConfigHomeDir(), 'usage-data')
+  return join(getOpenCodeCliConfigHomeDir(), 'usage-data')
 }
 function getFacetsDir(): string {
   return join(getDataDir(), 'facets')
@@ -444,7 +444,7 @@ CRITICAL GUIDELINES:
    - "this is broken", "I give up" → frustrated
 
 3. **friction_counts**: Be specific about what went wrong.
-   - misunderstood_request: Claude interpreted incorrectly
+   - misunderstood_request: Open Code CLI interpreted incorrectly
    - wrong_approach: Right goal, wrong solution method
    - buggy_code: Code didn't work correctly
    - user_rejected_action: User said no/stop to a tool call
@@ -869,7 +869,7 @@ function formatTranscriptForFacets(log: LogOption): string {
 
 const SUMMARIZE_CHUNK_PROMPT = `Summarize this portion of a Open Code CLI session transcript. Focus on:
 1. What the user asked for
-2. What Claude did (tools used, files modified)
+2. What Open Code CLI did (tools used, files modified)
 3. Any friction or issues
 4. The outcome
 
@@ -1262,8 +1262,8 @@ function aggregateData(
       }
 
       // Helpfulness
-      result.helpfulness[sessionFacets.claude_helpfulness] =
-        (result.helpfulness[sessionFacets.claude_helpfulness] || 0) + 1
+      result.helpfulness[sessionFacets.open-code-cli_helpfulness] =
+        (result.helpfulness[sessionFacets.open-code-cli_helpfulness] || 0) + 1
 
       // Session types
       result.session_types[sessionFacets.session_type] =
@@ -1399,25 +1399,25 @@ Include 3 friction categories with 2 examples each.`,
    - Good for: database queries, Slack integration, GitHub issue lookup, connecting to internal APIs
 
 2. **Custom Skills**: Reusable prompts you define as markdown files that run with a single /command.
-   - How to use: Create \`.claude/skills/commit/SKILL.md\` with instructions. Then type \`/commit\` to run it.
+   - How to use: Create \`.open-code-cli/skills/commit/SKILL.md\` with instructions. Then type \`/commit\` to run it.
    - Good for: repetitive workflows - /commit, /review, /test, /deploy, /pr, or complex multi-step workflows
 
 3. **Hooks**: Shell commands that auto-run at specific lifecycle events.
-   - How to use: Add to \`.claude/settings.json\` under "hooks" key.
+   - How to use: Add to \`.open-code-cli/settings.json\` under "hooks" key.
    - Good for: auto-formatting code, running type checks, enforcing conventions
 
 4. **Headless Mode**: Run Open Code CLI non-interactively from scripts and CI/CD.
    - How to use: \`open-code-cli -p "fix lint errors" --allowedTools "Edit,Read,Bash"\`
    - Good for: CI/CD integration, batch code fixes, automated reviews
 
-5. **Task Agents**: Claude spawns focused sub-agents for complex exploration or parallel work.
-   - How to use: Claude auto-invokes when helpful, or ask "use an agent to explore X"
+5. **Task Agents**: Open Code CLI spawns focused sub-agents for complex exploration or parallel work.
+   - How to use: Open Code CLI auto-invokes when helpful, or ask "use an agent to explore X"
    - Good for: codebase exploration, understanding complex systems
 
 RESPOND WITH ONLY A VALID JSON OBJECT:
 {
   "claude_md_additions": [
-    {"addition": "A specific line or block to add to CLAUDE.md based on workflow patterns. E.g., 'Always run tests after modifying auth-related files'", "why": "1 sentence explaining why this would help based on actual sessions", "prompt_scaffold": "Instructions for where to add this in CLAUDE.md. E.g., 'Add under ## Testing section'"}
+    {"addition": "A specific line or block to add to OPEN_CODE.md based on workflow patterns. E.g., 'Always run tests after modifying auth-related files'", "why": "1 sentence explaining why this would help based on actual sessions", "prompt_scaffold": "Instructions for where to add this in OPEN_CODE.md. E.g., 'Add under ## Testing section'"}
   ],
   "features_to_try": [
     {"feature": "Feature name from CC FEATURES REFERENCE above", "one_liner": "What it does", "why_for_you": "Why this would help YOU based on your sessions", "example_code": "Actual command or config to copy"}
@@ -1616,7 +1616,7 @@ async function generateParallelInsights(
   // Build data context string
   const facetSummaries = Array.from(facets.values())
     .slice(0, 50)
-    .map(f => `- ${f.brief_summary} (${f.outcome}, ${f.claude_helpfulness})`)
+    .map(f => `- ${f.brief_summary} (${f.outcome}, ${f.open-code-cli_helpfulness})`)
     .join('\n')
 
   const frictionDetails = Array.from(facets.values())
@@ -2064,21 +2064,21 @@ function generateHtmlReport(
   const suggestionsHtml = suggestions
     ? `
     ${
-      suggestions.claude_md_additions &&
-      suggestions.claude_md_additions.length > 0
+      suggestions.open-code-cli_md_additions &&
+      suggestions.open-code-cli_md_additions.length > 0
         ? `
     <h2 id="section-features">Existing CC Features to Try</h2>
     <div class="claude-md-section">
-      <h3>Suggested CLAUDE.md Additions</h3>
-      <p style="font-size: 12px; color: #64748b; margin-bottom: 12px;">Just copy this into Open Code CLI to add it to your CLAUDE.md.</p>
+      <h3>Suggested OPEN_CODE.md Additions</h3>
+      <p style="font-size: 12px; color: #64748b; margin-bottom: 12px;">Just copy this into Open Code CLI to add it to your OPEN_CODE.md.</p>
       <div class="claude-md-actions">
         <button class="copy-all-btn" onclick="copyAllCheckedClaudeMd()">Copy All Checked</button>
       </div>
-      ${suggestions.claude_md_additions
+      ${suggestions.open-code-cli_md_additions
         .map(
           (add, i) => `
         <div class="claude-md-item">
-          <input type="checkbox" id="cmd-${i}" class="cmd-checkbox" checked data-text="${escapeHtml(add.prompt_scaffold || add.where || 'Add to CLAUDE.md')}\\n\\n${escapeHtml(add.addition)}">
+          <input type="checkbox" id="cmd-${i}" class="cmd-checkbox" checked data-text="${escapeHtml(add.prompt_scaffold || add.where || 'Add to OPEN_CODE.md')}\\n\\n${escapeHtml(add.addition)}">
           <label for="cmd-${i}">
             <code class="cmd-code">${escapeHtml(add.addition)}</code>
             <button class="copy-btn" onclick="copyCmdItem(${i})">Copy</button>
@@ -2310,14 +2310,14 @@ function generateHtmlReport(
     .friction-desc { font-size: 13px; color: #7f1d1d; margin-bottom: 10px; }
     .friction-examples { margin: 0 0 0 20px; font-size: 13px; color: #334155; }
     .friction-examples li { margin-bottom: 4px; }
-    .claude-md-section { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 16px; margin-bottom: 20px; }
-    .claude-md-section h3 { font-size: 14px; font-weight: 600; color: #1e40af; margin: 0 0 12px 0; }
-    .claude-md-actions { margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #dbeafe; }
+    .open-code-cli-md-section { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 16px; margin-bottom: 20px; }
+    .open-code-cli-md-section h3 { font-size: 14px; font-weight: 600; color: #1e40af; margin: 0 0 12px 0; }
+    .open-code-cli-md-actions { margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #dbeafe; }
     .copy-all-btn { background: #2563eb; color: white; border: none; border-radius: 4px; padding: 6px 12px; font-size: 12px; cursor: pointer; font-weight: 500; transition: all 0.2s; }
     .copy-all-btn:hover { background: #1d4ed8; }
     .copy-all-btn.copied { background: #16a34a; }
-    .claude-md-item { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 8px; padding: 10px 0; border-bottom: 1px solid #dbeafe; }
-    .claude-md-item:last-child { border-bottom: none; }
+    .open-code-cli-md-item { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 8px; padding: 10px 0; border-bottom: 1px solid #dbeafe; }
+    .open-code-cli-md-item:last-child { border-bottom: none; }
     .cmd-checkbox { margin-top: 2px; }
     .cmd-code { background: white; padding: 8px 12px; border-radius: 4px; font-size: 12px; color: #1e40af; border: 1px solid #bfdbfe; font-family: monospace; display: block; white-space: pre-wrap; word-break: break-word; flex: 1; }
     .cmd-why { font-size: 12px; color: #64748b; width: 100%; padding-left: 24px; margin-top: 4px; }
@@ -2656,7 +2656,7 @@ export type InsightsExport = {
   metadata: {
     username: string
     generated_at: string
-    claude_code_version: string
+    open_code_cli_version: string
     date_range: { start: string; end: string }
     session_count: number
     remote_hosts_collected?: string[]
@@ -2722,7 +2722,7 @@ export function buildExportData(
     metadata: {
       username: process.env.SAFEUSER || process.env.USER || 'unknown',
       generated_at: new Date().toISOString(),
-      claude_code_version: version,
+      open_code_cli_version: version,
       date_range: data.date_range,
       session_count: data.total_sessions,
       ...(remote_hosts_collected &&
@@ -2806,7 +2806,7 @@ export async function generateUsageReport(options?: {
 
   // Optionally collect data from remote hosts first (ant-only)
   if (process.env.USER_TYPE === 'ant' && options?.collectRemote) {
-    const destDir = join(getClaudeConfigHomeDir(), 'projects')
+    const destDir = join(getOpenCodeCliConfigHomeDir(), 'projects')
     const { hosts, totalCopied } = await collectAllRemoteHostData(destDir)
     remoteStats = { hosts, totalCopied }
   }
@@ -2994,7 +2994,7 @@ export async function generateUsageReport(options?: {
   const aggregated = aggregateData(substantiveSessions, substantiveFacets)
   aggregated.total_sessions_scanned = totalSessionsScanned
 
-  // Generate parallel insights from Claude (6 sections)
+  // Generate parallel insights from Open Code CLI (6 sections)
   const insights = await generateParallelInsights(aggregated, facets)
 
   // Generate HTML report
@@ -3152,7 +3152,7 @@ ${remoteInfo}
 
 Your full shareable insights report is ready: ${reportUrl}${uploadHint}`
 
-    // Return prompt for Claude to respond to
+    // Return prompt for Open Code CLI to respond to
     return [
       {
         type: 'text',

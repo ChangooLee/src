@@ -8,7 +8,7 @@ import type { Message } from 'src/types/message.js'
 import { logForDebugging } from 'src/utils/debug.js'
 import { djb2Hash } from 'src/utils/hash.js'
 import { logError } from 'src/utils/log.js'
-import { getClaudeTempDir } from 'src/utils/permissions/filesystem.js'
+import { getOpenCodeCliTempDir } from 'src/utils/permissions/filesystem.js'
 import { jsonStringify } from 'src/utils/slowOperations.js'
 import type { QuerySource } from '../../constants/querySource.js'
 import {
@@ -22,7 +22,7 @@ function getCacheBreakDiffPath(): string {
   for (let i = 0; i < 4; i++) {
     suffix += chars[Math.floor(Math.random() * chars.length)]
   }
-  return join(getClaudeTempDir(), `cache-break-${suffix}.diff`)
+  return join(getOpenCodeCliTempDir(), `cache-break-${suffix}.diff`)
 }
 
 type PreviousState = {
@@ -56,7 +56,7 @@ type PreviousState = {
   /** Resolved effort (env → options → model default). Goes into output_config
    *  or anthropic_internal.effort_override. */
   effortValue: string
-  /** Hash of getExtraBodyParams() — catches CLAUDE_CODE_EXTRA_BODY and
+  /** Hash of getExtraBodyParams() — catches OPEN_CODE_CLI_EXTRA_BODY and
    *  anthropic_internal changes. */
   extraBodyHash: number
   callCount: number
@@ -144,7 +144,7 @@ function isExcludedModel(model: string): boolean {
  * are short-lived forked agents where cache break detection provides no
  * value — they run 1-3 turns with a fresh agentId each time, so there's
  * nothing meaningful to compare against. Their cache metrics are still
- * logged via tengu_api_success for analytics.
+ * logged via open_code_cli_api_success for analytics.
  */
 function getTrackingKey(
   querySource: QuerySource,
@@ -711,7 +711,7 @@ async function writeCacheBreakDiff(
 ): Promise<string | undefined> {
   try {
     const diffPath = getCacheBreakDiffPath()
-    await mkdir(getClaudeTempDir(), { recursive: true })
+    await mkdir(getOpenCodeCliTempDir(), { recursive: true })
     const patch = createPatch(
       'prompt-state',
       prevContent,

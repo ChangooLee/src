@@ -115,7 +115,7 @@ export function LogoV2() {
   useEffect(t2, t3);
   let t4;
   if ($[5] === Symbol.for("react.memo_cache_sentinel")) {
-    t4 = !hasReleaseNotes && !showOnboarding && !isEnvTruthy((process.env.OPEN_CODE_CLI_FORCE_FULL_LOGO ?? process.env.CLAUDE_CODE_FORCE_FULL_LOGO));
+    t4 = !hasReleaseNotes && !showOnboarding && !isEnvTruthy(process.env.OPEN_CODE_CLI_FORCE_FULL_LOGO);
     $[5] = t4;
   } else {
     t4 = $[5];
@@ -176,7 +176,7 @@ export function LogoV2() {
     t10 = $[14];
   }
   const modelDisplayName = t10;
-  if (!hasReleaseNotes && !showOnboarding && !isEnvTruthy((process.env.OPEN_CODE_CLI_FORCE_FULL_LOGO ?? process.env.CLAUDE_CODE_FORCE_FULL_LOGO))) {
+  if (!hasReleaseNotes && !showOnboarding && !isEnvTruthy(process.env.OPEN_CODE_CLI_FORCE_FULL_LOGO)) {
     let t11;
     let t12;
     let t13;
@@ -191,7 +191,7 @@ export function LogoV2() {
       t14 = ChannelsNoticeModule && <ChannelsNoticeModule.ChannelsNotice />;
       t15 = isDebugMode() && <Box paddingLeft={2} flexDirection="column"><Text color="warning">Debug mode enabled</Text><Text dimColor={true}>Logging to: {isDebugToStdErr() ? "stderr" : getDebugLogPath()}</Text></Box>;
       t16 = <EmergencyTip />;
-      t17 = (process.env.OPEN_CODE_CLI_TMUX_SESSION ?? process.env.CLAUDE_CODE_TMUX_SESSION) && <Box paddingLeft={2} flexDirection="column"><Text dimColor={true}>tmux session: {(process.env.OPEN_CODE_CLI_TMUX_SESSION ?? process.env.CLAUDE_CODE_TMUX_SESSION)}</Text><Text dimColor={true}>{(process.env.OPEN_CODE_CLI_TMUX_PREFIX_CONFLICTS ?? process.env.CLAUDE_CODE_TMUX_PREFIX_CONFLICTS) ? `Detach: ${(process.env.OPEN_CODE_CLI_TMUX_PREFIX ?? process.env.CLAUDE_CODE_TMUX_PREFIX)} ${(process.env.OPEN_CODE_CLI_TMUX_PREFIX ?? process.env.CLAUDE_CODE_TMUX_PREFIX)} d (press prefix twice - Open Code CLI uses ${(process.env.OPEN_CODE_CLI_TMUX_PREFIX ?? process.env.CLAUDE_CODE_TMUX_PREFIX)})` : `Detach: ${(process.env.OPEN_CODE_CLI_TMUX_PREFIX ?? process.env.CLAUDE_CODE_TMUX_PREFIX)} d`}</Text></Box>;
+      t17 = process.env.OPEN_CODE_CLI_TMUX_SESSION && <Box paddingLeft={2} flexDirection="column"><Text dimColor={true}>tmux session: {process.env.OPEN_CODE_CLI_TMUX_SESSION}</Text><Text dimColor={true}>{process.env.OPEN_CODE_CLI_TMUX_PREFIX_CONFLICTS ? `Detach: ${process.env.OPEN_CODE_CLI_TMUX_PREFIX} ${process.env.OPEN_CODE_CLI_TMUX_PREFIX} d (press prefix twice - Open Code CLI uses ${process.env.OPEN_CODE_CLI_TMUX_PREFIX})` : `Detach: ${process.env.OPEN_CODE_CLI_TMUX_PREFIX} d`}</Text></Box>;
       $[15] = t11;
       $[16] = t12;
       $[17] = t13;
@@ -462,7 +462,7 @@ export function LogoV2() {
     t31 = ChannelsNoticeModule && <ChannelsNoticeModule.ChannelsNotice />;
     t32 = isDebugMode() && <Box paddingLeft={2} flexDirection="column"><Text color="warning">Debug mode enabled</Text><Text dimColor={true}>Logging to: {isDebugToStdErr() ? "stderr" : getDebugLogPath()}</Text></Box>;
     t33 = <EmergencyTip />;
-    t34 = (process.env.OPEN_CODE_CLI_TMUX_SESSION ?? process.env.CLAUDE_CODE_TMUX_SESSION) && <Box paddingLeft={2} flexDirection="column"><Text dimColor={true}>tmux session: {(process.env.OPEN_CODE_CLI_TMUX_SESSION ?? process.env.CLAUDE_CODE_TMUX_SESSION)}</Text><Text dimColor={true}>{(process.env.OPEN_CODE_CLI_TMUX_PREFIX_CONFLICTS ?? process.env.CLAUDE_CODE_TMUX_PREFIX_CONFLICTS) ? `Detach: ${(process.env.OPEN_CODE_CLI_TMUX_PREFIX ?? process.env.CLAUDE_CODE_TMUX_PREFIX)} ${(process.env.OPEN_CODE_CLI_TMUX_PREFIX ?? process.env.CLAUDE_CODE_TMUX_PREFIX)} d (press prefix twice - Open Code CLI uses ${(process.env.OPEN_CODE_CLI_TMUX_PREFIX ?? process.env.CLAUDE_CODE_TMUX_PREFIX)})` : `Detach: ${(process.env.OPEN_CODE_CLI_TMUX_PREFIX ?? process.env.CLAUDE_CODE_TMUX_PREFIX)} d`}</Text></Box>;
+    t34 = process.env.OPEN_CODE_CLI_TMUX_SESSION && <Box paddingLeft={2} flexDirection="column"><Text dimColor={true}>tmux session: {process.env.OPEN_CODE_CLI_TMUX_SESSION}</Text><Text dimColor={true}>{process.env.OPEN_CODE_CLI_TMUX_PREFIX_CONFLICTS ? `Detach: ${process.env.OPEN_CODE_CLI_TMUX_PREFIX} ${process.env.OPEN_CODE_CLI_TMUX_PREFIX} d (press prefix twice - Open Code CLI uses ${process.env.OPEN_CODE_CLI_TMUX_PREFIX})` : `Detach: ${process.env.OPEN_CODE_CLI_TMUX_PREFIX} d`}</Text></Box>;
     $[75] = t29;
     $[76] = t30;
     $[77] = t31;

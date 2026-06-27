@@ -27,7 +27,7 @@ function readConfig(): ChicagoConfig {
   return {
     ...DEFAULTS,
     ...getDynamicConfig_CACHED_MAY_BE_STALE<Partial<ChicagoConfig>>(
-      'tengu_malort_pedway',
+      'open_code_cli_malort_pedway',
       DEFAULTS,
     ),
   }
@@ -35,7 +35,7 @@ function readConfig(): ChicagoConfig {
 
 // Max/Pro only for external rollout. Ant bypass so dogfooding continues
 // regardless of subscription tier — not all ants are max/pro, and per
-// CLAUDE.md:281, USER_TYPE !== 'ant' branches get zero antfooding.
+// OPEN_CODE.md:281, USER_TYPE !== 'ant' branches get zero antfooding.
 function hasRequiredSubscription(): boolean {
   if (process.env.USER_TYPE === 'ant') return true
   const tier = getSubscriptionType()

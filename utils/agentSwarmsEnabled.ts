@@ -18,8 +18,8 @@ function isAgentTeamsFlagSet(): boolean {
  *
  * Ant builds: always enabled.
  * External builds require both:
- * 1. Opt-in via CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS env var OR --agent-teams flag
- * 2. GrowthBook gate 'tengu_amber_flint' enabled (killswitch)
+ * 1. Opt-in via OPEN_CODE_CLI_EXPERIMENTAL_AGENT_TEAMS env var OR --agent-teams flag
+ * 2. GrowthBook gate 'open_code_cli_amber_flint' enabled (killswitch)
  */
 export function isAgentSwarmsEnabled(): boolean {
   // Ant: always on
@@ -29,14 +29,14 @@ export function isAgentSwarmsEnabled(): boolean {
 
   // External: require opt-in via env var or --agent-teams flag
   if (
-    !isEnvTruthy((process.env.OPEN_CODE_CLI_EXPERIMENTAL_AGENT_TEAMS ?? process.env.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS)) &&
+    !isEnvTruthy(process.env.OPEN_CODE_CLI_EXPERIMENTAL_AGENT_TEAMS) &&
     !isAgentTeamsFlagSet()
   ) {
     return false
   }
 
   // Killswitch — always respected for external users
-  if (!getFeatureValue_CACHED_MAY_BE_STALE('tengu_amber_flint', true)) {
+  if (!getFeatureValue_CACHED_MAY_BE_STALE('open_code_cli_amber_flint', true)) {
     return false
   }
 

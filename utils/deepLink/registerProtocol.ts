@@ -22,7 +22,7 @@ import {
   logEvent,
 } from 'src/services/analytics/index.js'
 import { logForDebugging } from '../debug.js'
-import { getClaudeConfigHomeDir } from '../envUtils.js'
+import { getOpenCodeCliConfigHomeDir } from '../envUtils.js'
 import { getErrnoCode } from '../errors.js'
 import { execFileNoThrow } from '../execFileNoThrow.js'
 import { getInitialSettings } from '../settings/settings.js'
@@ -232,14 +232,14 @@ export async function registerProtocolHandler(
 
 /**
  * Resolve the Open Code CLI binary path for protocol registration. Prefers
- * the native installer's stable symlink; falls back to the legacy `claude`
+ * the native installer's stable symlink; uses the Open Code CLI protocol
  * alias, then process.execPath for dev builds and non-native installs.
  */
 async function resolveOpenCodeCliPath(): Promise<string> {
   const binaryNames =
     process.platform === 'win32'
-      ? ['open-code-cli.exe', 'claude.exe']
-      : ['open-code-cli', 'claude']
+      ? ['open-code-cli.exe']
+      : ['open-code-cli']
   for (const binaryName of binaryNames) {
     const stablePath = path.join(getUserBinDir(), binaryName)
     try {
@@ -256,7 +256,7 @@ async function resolveOpenCodeCliPath(): Promise<string> {
  * Check whether the OS-level protocol handler is already registered AND
  * points at the expected Open Code CLI binary. Reads the registration artifact
  * directly (symlink target, .desktop Exec line, registry value) rather than
- * a cached flag in ~/.claude.json, so:
+ * a cached flag in ~/.open-code-cli.json, so:
  *   - the check is per-machine (config can sync across machines; OS state can't)
  *   - stale paths self-heal (install-method change → re-register next session)
  *   - deleted artifacts self-heal
@@ -302,7 +302,7 @@ export async function ensureDeepLinkProtocolRegistered(): Promise<void> {
   if (getInitialSettings().disableDeepLinkRegistration === 'disable') {
     return
   }
-  if (!getFeatureValue_CACHED_MAY_BE_STALE('tengu_lodestone_enabled', false)) {
+  if (!getFeatureValue_CACHED_MAY_BE_STALE('open_code_cli_lodestone_enabled', false)) {
     return
   }
 
@@ -314,9 +314,9 @@ export async function ensureDeepLinkProtocolRegistered(): Promise<void> {
   // EACCES/ENOSPC are deterministic — retrying next session won't help.
   // Throttle to once per 24h so a read-only ~/.local/share/applications
   // doesn't generate a failure event on every startup. Marker lives in
-  // config home (per-machine, not synced) rather than ~/.claude.json (can sync).
+  // config home (per-machine, not synced) rather than ~/.open-code-cli.json (can sync).
   const failureMarkerPath = path.join(
-    getClaudeConfigHomeDir(),
+    getOpenCodeCliConfigHomeDir(),
     '.deep-link-register-failed',
   )
   try {

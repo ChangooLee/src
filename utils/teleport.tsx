@@ -751,7 +751,7 @@ export async function teleportToRemote(options: {
   /**
    * Per-session env vars merged into session_context.environment_variables.
    * Write-only at the API layer (stripped from Get/List responses). When
-   * environmentId is set, CLAUDE_CODE_OAUTH_TOKEN is auto-injected from the
+   * environmentId is set, OPEN_CODE_CLI_OAUTH_TOKEN is auto-injected from the
    * caller's accessToken so the container's hook can hit inference (the
    * server only passes through what the caller sends; bughunter.go mints
    * its own, user sessions don't get one automatically).
@@ -826,7 +826,7 @@ export async function teleportToRemote(options: {
         'x-organization-uuid': orgUUID
       };
       const envVars = {
-        CLAUDE_CODE_OAUTH_TOKEN: accessToken,
+        OPEN_CODE_CLI_OAUTH_TOKEN: accessToken,
         ...(options.environmentVariables ?? {})
       };
 
@@ -941,7 +941,7 @@ export async function teleportToRemote(options: {
     // point awaiting GrowthBook when there's nothing to bundle.
     const gitRoot = findGitRoot(getCwd());
     const forceBundle = !options.skipBundle && isEnvTruthy(process.env.CCR_FORCE_BUNDLE);
-    const bundleSeedGateOn = !options.skipBundle && gitRoot !== null && (isEnvTruthy(process.env.CCR_ENABLE_BUNDLE) || (await checkGate_CACHED_OR_BLOCKING('tengu_ccr_bundle_seed_enabled')));
+    const bundleSeedGateOn = !options.skipBundle && gitRoot !== null && (isEnvTruthy(process.env.CCR_ENABLE_BUNDLE) || (await checkGate_CACHED_OR_BLOCKING('open_code_cli_ccr_bundle_seed_enabled')));
     if (repoInfo && !forceBundle) {
       if (repoInfo.host === 'github.com') {
         ghViable = await checkGithubAppInstalled(repoInfo.owner, repoInfo.name, signal);

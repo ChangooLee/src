@@ -41,7 +41,7 @@ import { getOpenCodeCliEnv } from '../../utils/envUtils.js';
  * Execute file persistence for modified files in the outputs directory.
  *
  * Assembles all config internally:
- * - Checks environment kind (CLAUDE_CODE_ENVIRONMENT_KIND)
+ * - Checks environment kind (OPEN_CODE_CLI_ENVIRONMENT_KIND)
  * - Retrieves session access token
  * - Requires OPEN_CODE_CLI_REMOTE_SESSION_ID for session ID
  *

@@ -7,7 +7,7 @@ import {
 
 /**
  * Kill-switch check for voice mode. Returns true unless the
- * `tengu_amber_quartz_disabled` GrowthBook flag is flipped on (emergency
+ * `open_code_cli_amber_quartz_disabled` GrowthBook flag is flipped on (emergency
  * off). Default `false` means a missing/stale disk cache reads as "not
  * killed" — so fresh installs get voice working immediately without
  * waiting for GrowthBook init. Use this for deciding whether voice mode
@@ -18,7 +18,7 @@ export function isVoiceGrowthBookEnabled(): boolean {
   // Negative pattern (if (!feature(...)) return) does not eliminate
   // inline string literals from external builds.
   return feature('VOICE_MODE')
-    ? !getFeatureValue_CACHED_MAY_BE_STALE('tengu_amber_quartz_disabled', false)
+    ? !getFeatureValue_CACHED_MAY_BE_STALE('open_code_cli_amber_quartz_disabled', false)
     : false
 }
 

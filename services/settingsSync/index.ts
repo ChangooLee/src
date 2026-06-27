@@ -37,7 +37,7 @@ import { markInternalWrite } from '../../utils/settings/internalWrites.js'
 import { getSettingsFilePathForSource } from '../../utils/settings/settings.js'
 import { resetSettingsCache } from '../../utils/settings/settingsCache.js'
 import { sleep } from '../../utils/sleep.js'
-import { getClaudeCodeUserAgent } from '../../utils/userAgent.js'
+import { getOpenCodeCliUserAgent } from '../../utils/userAgent.js'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../analytics/growthbook.js'
 import { logEvent } from '../analytics/index.js'
 import { getRetryDelay } from '../api/withRetry.js'
@@ -62,7 +62,7 @@ export async function uploadUserSettingsInBackground(): Promise<void> {
     if (
       !feature('UPLOAD_USER_SETTINGS') ||
       !getFeatureValue_CACHED_MAY_BE_STALE(
-        'tengu_enable_settings_sync_push',
+        'open_code_cli_enable_settings_sync_push',
         false,
       ) ||
       !getIsInteractive() ||
@@ -160,7 +160,7 @@ async function doDownloadUserSettings(
   if (feature('DOWNLOAD_USER_SETTINGS')) {
     try {
       if (
-        !getFeatureValue_CACHED_MAY_BE_STALE('tengu_strap_foyer', false) ||
+        !getFeatureValue_CACHED_MAY_BE_STALE('open_code_cli_strap_foyer', false) ||
         !isUsingOAuth()
       ) {
         logForDiagnosticsNoPII('info', 'settings_sync_download_skipped')
@@ -221,7 +221,7 @@ function isUsingOAuth(): boolean {
 }
 
 function getSettingsSyncEndpoint(): string {
-  return `${getOauthConfig().BASE_API_URL}/api/claude_code/user_settings`
+  return `${getOauthConfig().BASE_API_URL}/api/open_code_cli/user_settings`
 }
 
 function getSettingsSyncAuthHeaders(): {
@@ -259,7 +259,7 @@ async function fetchUserSettingsOnce(): Promise<SettingsSyncFetchResult> {
 
     const headers: Record<string, string> = {
       ...authHeaders.headers,
-      'User-Agent': getClaudeCodeUserAgent(),
+      'User-Agent': getOpenCodeCliUserAgent(),
     }
 
     const endpoint = getSettingsSyncEndpoint()
@@ -360,7 +360,7 @@ async function uploadUserSettings(
 
     const headers: Record<string, string> = {
       ...authHeaders.headers,
-      'User-Agent': getClaudeCodeUserAgent(),
+      'User-Agent': getOpenCodeCliUserAgent(),
       'Content-Type': 'application/json',
     }
 
@@ -483,7 +483,7 @@ async function writeFileForSync(
  *
  * After writing, invalidates relevant caches:
  * - resetSettingsCache() for settings files
- * - clearMemoryFileCaches() for memory files (CLAUDE.md)
+ * - clearMemoryFileCaches() for memory files (OPEN_CODE.md)
  */
 async function applyRemoteEntriesToLocal(
   entries: Record<string, string>,

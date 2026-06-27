@@ -311,7 +311,7 @@ export interface CompactionResult {
 
 /**
  * Diagnosis context passed from autoCompactIfNeeded into compactConversation.
- * Lets the tengu_compact event disambiguate same-chain loops (H2) from
+ * Lets the open_code_cli_compact event disambiguate same-chain loops (H2) from
  * cross-agent (H1/H5) and manual-vs-auto (H3) compactions without joins.
  */
 export type RecompactionInfo = {
@@ -433,7 +433,7 @@ export async function compactConversation(
     // fleet cache_creation (~38B tok/day), concentrated in ephemeral envs (CCR/GHA/SDK)
     // with cold GB cache and 3P providers where GB is disabled. GB gate kept as kill-switch.
     const promptCacheSharingEnabled = getFeatureValue_CACHED_MAY_BE_STALE(
-      'tengu_compact_cache_prefix',
+      'open_code_cli_compact_cache_prefix',
       true,
     )
 
@@ -1151,9 +1151,9 @@ async function streamCompactSummary({
   // When prompt cache sharing is enabled, use forked agent to reuse the
   // main conversation's cached prefix (system prompt, tools, context messages).
   // Falls back to regular streaming path on failure.
-  // 3P default: true — see comment at the other tengu_compact_cache_prefix read above.
+  // 3P default: true — see comment at the other open_code_cli_compact_cache_prefix read above.
   const promptCacheSharingEnabled = getFeatureValue_CACHED_MAY_BE_STALE(
-    'tengu_compact_cache_prefix',
+    'open_code_cli_compact_cache_prefix',
     true,
   )
   // Send keep-alive signals during compaction to prevent remote session
@@ -1249,7 +1249,7 @@ async function streamCompactSummary({
 
     // Regular streaming path (fallback when cache sharing fails or is disabled)
     const retryEnabled = getFeatureValue_CACHED_MAY_BE_STALE(
-      'tengu_compact_streaming_retry',
+      'open_code_cli_compact_streaming_retry',
       false,
     )
     const maxAttempts = retryEnabled ? MAX_COMPACT_STREAMING_RETRIES : 1
@@ -1441,8 +1441,8 @@ export async function createPostCompactFileAttachments(
             maxTokens: POST_COMPACT_MAX_TOKENS_PER_FILE,
           },
         },
-        'tengu_post_compact_file_restore_success',
-        'tengu_post_compact_file_restore_error',
+        'open_code_cli_post_compact_file_restore_success',
+        'open_code_cli_post_compact_file_restore_error',
         'compact',
       )
       return attachment ? createAttachmentMessage(attachment) : null
@@ -1688,7 +1688,7 @@ function shouldExcludeFromPostCompactRestore(
 
   // Exclude all types of claude.md files
   // TODO: Refactor to use isMemoryFilePath() from claudemd.ts for consistency
-  // and to also match child directory memory files (.claude/rules/*.md, etc.)
+  // and to also match child directory memory files (.open-code-cli/rules/*.md, etc.)
   try {
     const normalizedMemoryPaths = new Set(
       MEMORY_TYPE_VALUES.map(type => expandPath(getMemoryPath(type))),

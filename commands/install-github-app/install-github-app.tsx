@@ -39,7 +39,7 @@ const INITIAL_STATE: State = {
   secretName: 'ANTHROPIC_API_KEY',
   useExistingSecret: true,
   workflowExists: false,
-  selectedWorkflows: ['claude', 'claude-review'] as Workflow[],
+  selectedWorkflows: ['open-code-cli', 'open-code-cli-review'] as Workflow[],
   selectedApiKeyOption: 'new' as 'existing' | 'new' | 'oauth',
   authType: 'api_key'
 };
@@ -164,7 +164,7 @@ function InstallGitHubApp(props: {
           step: 'error',
           error: 'An Open Code CLI workflow file already exists in this repository.',
           errorReason: 'Workflow file conflict',
-          errorInstructions: ['The file .github/workflows/open-code-cli.yml already exists, or a legacy .github/workflows/claude.yml file was detected', 'You can either:', '  1. Delete the existing file and run this command again', '  2. Update the existing file manually using the template from:', `     ${GITHUB_ACTION_SETUP_DOCS_URL}`]
+          errorInstructions: ['The file .github/workflows/open-code-cli.yml already exists, or a legacy .github/workflows/open-code-cli.yml file was detected', 'You can either:', '  1. Delete the existing file and run this command again', '  2. Update the existing file manually using the template from:', `     ${GITHUB_ACTION_SETUP_DOCS_URL}`]
         }));
       } else {
         logEvent('open_code_cli_install_github_app_error', {
@@ -181,7 +181,7 @@ function InstallGitHubApp(props: {
     }
   }, [state.selectedRepoName, state.workflowAction, state.selectedWorkflows, state.useCurrentRepo, state.workflowExists, state.secretExists, state.authType]);
   async function openGitHubAppInstallation() {
-    const installUrl = 'https://github.com/apps/claude';
+    const installUrl = 'https://github.com/apps/open-code-cli';
     await openBrowser(installUrl);
   }
   async function checkRepositoryPermissions(repoName: string): Promise<{
@@ -216,8 +216,7 @@ function InstallGitHubApp(props: {
     if (primaryWorkflow.code === 0) {
       return true;
     }
-    const legacyWorkflow = await execFileNoThrow('gh', ['api', `repos/${repoName_0}/contents/.github/workflows/claude.yml`, '--jq', '.sha']);
-    return legacyWorkflow.code === 0;
+    return false;
   }
   async function checkExistingSecret() {
     const checkSecretsResult = await execFileNoThrow('gh', ['secret', 'list', '--app', 'actions', '--repo', state.selectedRepoName]);

@@ -36,7 +36,7 @@ export function getPromptVariant(): PromptVariant {
 
 export function shouldEnablePromptSuggestion(): boolean {
   // Env var overrides everything (for testing)
-  const envOverride = (process.env.OPEN_CODE_CLI_ENABLE_PROMPT_SUGGESTION ?? process.env.CLAUDE_CODE_ENABLE_PROMPT_SUGGESTION)
+  const envOverride = process.env.OPEN_CODE_CLI_ENABLE_PROMPT_SUGGESTION
   if (isEnvDefinedFalsy(envOverride)) {
     logEvent('open_code_cli_prompt_suggestion_init', {
       enabled: false,
@@ -55,7 +55,7 @@ export function shouldEnablePromptSuggestion(): boolean {
   }
 
   // Keep default in sync with Config.tsx (settings toggle visibility)
-  if (!getFeatureValue_CACHED_MAY_BE_STALE('tengu_chomp_inflection', false)) {
+  if (!getFeatureValue_CACHED_MAY_BE_STALE('open_code_cli_chomp_inflection', false)) {
     logEvent('open_code_cli_prompt_suggestion_init', {
       enabled: false,
       source:

@@ -288,7 +288,7 @@ export function useReplBridge(messages: Message[], setMessages: (action: React.S
                   // to put system/init on the REPL-bridge wire. Skills load is
                   // async (memoized, cheap after REPL startup); fire-and-forget
                   // so the connected-state transition isn't blocked.
-                  if (getFeatureValue_CACHED_MAY_BE_STALE('tengu_bridge_system_init', false)) {
+                  if (getFeatureValue_CACHED_MAY_BE_STALE('open_code_cli_bridge_system_init', false)) {
                     void (async () => {
                       try {
                         const skills = await getSlashCommandToolSkills(getCwd());
@@ -419,7 +419,7 @@ export function useReplBridge(messages: Message[], setMessages: (action: React.S
               // setAutoModeActive(true) side-effect BEFORE the throw) rather
               // than a graceful reject. Letting that throw escape would:
               // (1) leave STATE.autoModeActive=true while the mode is
-              //     unchanged (3-way invariant violation per src/CLAUDE.md)
+              //     unchanged (3-way invariant violation per src/OPEN_CODE.md)
               // (2) fail to send a control_response → server kills WS
               // These mirror print.ts handleSetPermissionMode; the bridge
               // can't import the checks directly (bootstrap-isolation), so

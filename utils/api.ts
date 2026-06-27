@@ -135,7 +135,7 @@ export async function toolToAPISchema(
 ): Promise<BetaToolUnion> {
   // Session-stable base schema: name, description, input_schema, strict,
   // eager_input_streaming. These are computed once per session and cached to
-  // prevent mid-session GrowthBook flips (tengu_tool_pear, tengu_fgts) or
+  // prevent mid-session GrowthBook flips (open_code_cli_tool_pear, open_code_cli_fgts) or
   // tool.prompt() drift from churning the serialized tool array bytes.
   // See toolSchemaCache.ts for rationale.
   //
@@ -152,7 +152,7 @@ export async function toolToAPISchema(
   let base = cache.get(cacheKey)
   if (!base) {
     const strictToolsEnabled =
-      checkStatsigFeatureGate_CACHED_MAY_BE_STALE('tengu_tool_pear')
+      checkStatsigFeatureGate_CACHED_MAY_BE_STALE('open_code_cli_tool_pear')
     // Use tool's JSON schema directly if provided, otherwise convert Zod schema
     let input_schema = (
       'inputJSONSchema' in tool && tool.inputJSONSchema
@@ -199,8 +199,8 @@ export async function toolToAPISchema(
     if (
       getAPIProvider() === 'firstParty' &&
       isFirstPartyAnthropicBaseUrl() &&
-      (getFeatureValue_CACHED_MAY_BE_STALE('tengu_fgts', false) ||
-        isEnvTruthy((process.env.OPEN_CODE_CLI_ENABLE_FINE_GRAINED_TOOL_STREAMING ?? process.env.CLAUDE_CODE_ENABLE_FINE_GRAINED_TOOL_STREAMING)))
+      (getFeatureValue_CACHED_MAY_BE_STALE('open_code_cli_fgts', false) ||
+        isEnvTruthy(process.env.OPEN_CODE_CLI_ENABLE_FINE_GRAINED_TOOL_STREAMING))
     ) {
       base.eager_input_streaming = true
     }
@@ -229,7 +229,7 @@ export async function toolToAPISchema(
     schema.cache_control = options.cacheControl
   }
 
-  // CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS is the kill switch for beta API
+  // OPEN_CODE_CLI_DISABLE_EXPERIMENTAL_BETAS is the kill switch for beta API
   // shapes. Proxy gateways (ANTHROPIC_BASE_URL → LiteLLM → Bedrock) reject
   // fields like defer_loading with "Extra inputs are not permitted". The gates
   // above each field are scattered and not all provider-aware, so this strips
@@ -240,7 +240,7 @@ export async function toolToAPISchema(
   // (scope, ttl) are already gated upstream by shouldIncludeFirstPartyOnlyBetas
   // which independently respects this kill switch.
   // github.com/anthropics/open-code-cli/issues/20031
-  if (isEnvTruthy((process.env.OPEN_CODE_CLI_DISABLE_EXPERIMENTAL_BETAS ?? process.env.CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS))) {
+  if (isEnvTruthy(process.env.OPEN_CODE_CLI_DISABLE_EXPERIMENTAL_BETAS)) {
     const allowed = new Set([
       'name',
       'description',
@@ -270,7 +270,7 @@ function logStripOnce(stripped: string[]): void {
   if (loggedStrip) return
   loggedStrip = true
   logForDebugging(
-    `[betas] Stripped from tool schemas: [${stripped.join(', ')}] (CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS=1)`,
+    `[betas] Stripped from tool schemas: [${stripped.join(', ')}] (OPEN_CODE_CLI_DISABLE_EXPERIMENTAL_BETAS=1)`,
   )
 }
 
@@ -493,7 +493,7 @@ export async function logContextMetrics(
     ])
   // Extract individual context sizes and calculate total
   const gitStatusSize = systemContext.gitStatus?.length ?? 0
-  const claudeMdSize = userContext.claudeMd?.length ?? 0
+  const claudeMdSize = userContext.open-code-cliMd?.length ?? 0
 
   // Calculate total context size
   const totalContextSize = gitStatusSize + claudeMdSize

@@ -124,7 +124,7 @@ export const DIRS_EXIST_GUIDANCE =
  * (once per session via systemPromptSection cache) so the model can always
  * write without checking existence first. FsOperations.mkdir is recursive
  * by default and already swallows EEXIST, so the full parent chain
- * (~/.claude/projects/<slug>/memory/) is created in one call with no
+ * (~/.open-code-cli/projects/<slug>/memory/) is created in one call with no
  * try/catch needed for the happy path.
  */
 export async function ensureMemoryDirExists(memoryDir: string): Promise<void> {
@@ -268,7 +268,7 @@ export function buildMemoryLines(
 
 /**
  * Build the typed-memory prompt with MEMORY.md content included.
- * Used by agent memory (which has no getClaudeMds() equivalent).
+ * Used by agent memory (which has no getOpenCodeMds() equivalent).
  */
 export function buildMemoryPrompt(params: {
   displayName: string
@@ -374,7 +374,7 @@ function buildAssistantDailyLogPrompt(skipIndex = false): string {
  * Build the "Searching past context" section if the feature gate is enabled.
  */
 export function buildSearchingPastContextSection(autoMemDir: string): string[] {
-  if (!getFeatureValue_CACHED_MAY_BE_STALE('tengu_coral_fern', false)) {
+  if (!getFeatureValue_CACHED_MAY_BE_STALE('open_code_cli_coral_fern', false)) {
     return []
   }
   const projectDir = getProjectDir(getOriginalCwd())
@@ -421,14 +421,14 @@ export async function loadMemoryPrompt(): Promise<string | null> {
   const autoEnabled = isAutoMemoryEnabled()
 
   const skipIndex = getFeatureValue_CACHED_MAY_BE_STALE(
-    'tengu_moth_copse',
+    'open_code_cli_moth_copse',
     false,
   )
 
   // KAIROS daily-log mode takes precedence over TEAMMEM: the append-only
   // log paradigm does not compose with team sync (which expects a shared
   // MEMORY.md that both sides read + write). Gating on `autoEnabled` here
-  // means the !autoEnabled case falls through to the tengu_memdir_disabled
+  // means the !autoEnabled case falls through to the open_code_cli_memdir_disabled
   // telemetry block below, matching the non-KAIROS path.
   if (feature('KAIROS') && autoEnabled && getKairosActive()) {
     logMemoryDirCounts(getAutoMemPath(), {
@@ -501,7 +501,7 @@ export async function loadMemoryPrompt(): Promise<string | null> {
   // Gate on the GB flag directly, not isTeamMemoryEnabled() — that function
   // checks isAutoMemoryEnabled() first, which is definitionally false in this
   // branch. We want "was this user in the team-memory cohort at all."
-  if (getFeatureValue_CACHED_MAY_BE_STALE('tengu_herring_clock', false)) {
+  if (getFeatureValue_CACHED_MAY_BE_STALE('open_code_cli_herring_clock', false)) {
     logEvent('open_code_cli_team_memdir_disabled', {})
   }
   return null

@@ -153,12 +153,12 @@ export function clearClaudeAIMcpConfigsCache(): void {
  */
 export function markClaudeAiMcpConnected(name: string): void {
   saveGlobalConfig(current => {
-    const seen = current.claudeAiMcpEverConnected ?? []
+    const seen = current.open-code-cliAiMcpEverConnected ?? []
     if (seen.includes(name)) return current
     return { ...current, claudeAiMcpEverConnected: [...seen, name] }
   })
 }
 
 export function hasClaudeAiMcpEverConnected(name: string): boolean {
-  return (getGlobalConfig().claudeAiMcpEverConnected ?? []).includes(name)
+  return (getGlobalConfig().open-code-cliAiMcpEverConnected ?? []).includes(name)
 }

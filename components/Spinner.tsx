@@ -69,12 +69,12 @@ export function SpinnerWithVerb(props: Props): React.ReactNode {
   // Hoisted to mount-time — this component re-renders at animation framerate.
   const briefEnvEnabled = feature('KAIROS') || feature('KAIROS_BRIEF') ?
   // biome-ignore lint/correctness/useHookAtTopLevel: feature() is a compile-time constant
-  useMemo(() => isEnvTruthy((process.env.OPEN_CODE_CLI_BRIEF ?? process.env.CLAUDE_CODE_BRIEF)), []) : false;
+  useMemo(() => isEnvTruthy(process.env.OPEN_CODE_CLI_BRIEF), []) : false;
 
   // Runtime gate mirrors isBriefEnabled() but inlined — importing from
   // BriefTool.ts would leak tool-name strings into external builds. Single
   // spinner instance → hooks stay unconditional (two subs, negligible).
-  if ((feature('KAIROS') || feature('KAIROS_BRIEF')) && (getKairosActive() || getUserMsgOptIn() && (briefEnvEnabled || getFeatureValue_CACHED_MAY_BE_STALE('tengu_kairos_brief', false))) && isBriefOnly && !viewingAgentTaskId) {
+  if ((feature('KAIROS') || feature('KAIROS_BRIEF')) && (getKairosActive() || getUserMsgOptIn() && (briefEnvEnabled || getFeatureValue_CACHED_MAY_BE_STALE('open_code_cli_kairos_brief', false))) && isBriefOnly && !viewingAgentTaskId) {
     return <BriefSpinner mode={props.mode} overrideMessage={props.overrideMessage} />;
   }
   return <SpinnerWithVerbInner {...props} />;

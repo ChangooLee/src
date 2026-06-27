@@ -526,7 +526,7 @@ export const FileEditTool = buildTool({
     })
 
     // 7. Log events
-    if (absoluteFilePath.endsWith(`${sep}CLAUDE.md`)) {
+    if (absoluteFilePath.endsWith(`${sep}OPEN_CODE.md`)) {
       logEvent('open_code_cli_write_claudemd', {})
     }
     countLinesChanged(patch)
@@ -546,7 +546,7 @@ export const FileEditTool = buildTool({
     let gitDiff: ToolUseDiff | undefined
     if (
       isEnvTruthy(getOpenCodeCliEnv('REMOTE')) &&
-      getFeatureValue_CACHED_MAY_BE_STALE('tengu_quartz_lantern', false)
+      getFeatureValue_CACHED_MAY_BE_STALE('open_code_cli_quartz_lantern', false)
     ) {
       const startTime = Date.now()
       const diff = await fetchSingleFileGitDiff(absoluteFilePath)

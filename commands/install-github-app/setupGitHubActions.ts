@@ -42,10 +42,10 @@ async function createWorkflowFile(
 
   let content = workflowContent
   if (secretName === 'OPEN_CODE_CLI_OAUTH_TOKEN') {
-    // For OAuth tokens, use the claude_code_oauth_token parameter
+    // For OAuth tokens, use the open_code_cli_oauth_token parameter
     content = workflowContent.replace(
       /anthropic_api_key: \$\{\{ secrets\.ANTHROPIC_API_KEY \}\}/g,
-      `claude_code_oauth_token: \${{ secrets.OPEN_CODE_CLI_OAUTH_TOKEN }}`,
+      `open_code_cli_oauth_token: \${{ secrets.OPEN_CODE_CLI_OAUTH_TOKEN }}`,
     )
   } else if (secretName !== 'ANTHROPIC_API_KEY') {
     // For other custom secret names, keep using anthropic_api_key parameter
@@ -128,9 +128,9 @@ export async function setupGitHubActions(
       skip_workflow: skipWorkflow,
       has_api_key: !!apiKeyOrOAuthToken,
       using_default_secret_name: secretName === 'ANTHROPIC_API_KEY',
-      selected_claude_workflow: selectedWorkflows.includes('claude'),
-      selected_claude_review_workflow:
-        selectedWorkflows.includes('claude-review'),
+      selected_open_code_cli_workflow: selectedWorkflows.includes('open-code-cli'),
+      selected_open_code_cli_review_workflow:
+        selectedWorkflows.includes('open-code-cli-review'),
       ...context,
     })
 
@@ -221,7 +221,7 @@ export async function setupGitHubActions(
       // Create selected workflow files
       const workflows = []
 
-      if (selectedWorkflows.includes('claude')) {
+      if (selectedWorkflows.includes('open-code-cli')) {
         workflows.push({
           path: '.github/workflows/open-code-cli.yml',
           content: WORKFLOW_CONTENT,
@@ -229,7 +229,7 @@ export async function setupGitHubActions(
         })
       }
 
-      if (selectedWorkflows.includes('claude-review')) {
+      if (selectedWorkflows.includes('open-code-cli-review')) {
         workflows.push({
           path: '.github/workflows/open-code-cli-review.yml',
           content: CODE_REVIEW_PLUGIN_WORKFLOW_CONTENT,
@@ -296,9 +296,9 @@ export async function setupGitHubActions(
       auth_type:
         authType as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
       using_default_secret_name: secretName === 'ANTHROPIC_API_KEY',
-      selected_claude_workflow: selectedWorkflows.includes('claude'),
-      selected_claude_review_workflow:
-        selectedWorkflows.includes('claude-review'),
+      selected_open_code_cli_workflow: selectedWorkflows.includes('open-code-cli'),
+      selected_open_code_cli_review_workflow:
+        selectedWorkflows.includes('open-code-cli-review'),
       ...context,
     })
     saveGlobalConfig(current => ({

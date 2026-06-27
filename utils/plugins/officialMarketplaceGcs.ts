@@ -26,7 +26,7 @@ type SafeString = AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS
 // `latest` has Cache-Control: max-age=300 so CDN staleness is bounded.
 // Backend (anthropic#317037) populates this prefix.
 const GCS_BASE =
-  'https://downloads.claude.ai/open-code-cli-releases/plugins/claude-plugins-official'
+  'https://downloads.open-code-cli.ai/open-code-cli-releases/plugins/claude-plugins-official'
 
 // Zip arc paths are seed-dir-relative (marketplaces/claude-plugins-official/…)
 // so the titanium seed machinery can use the same zip. Strip this prefix when
@@ -153,12 +153,12 @@ export async function fetchOfficialMarketplaceFromGcs(
     )
     return null
   } finally {
-    // tengu_plugin_remote_fetch schema shared with the telemetry PR
+    // open_code_cli_plugin_remote_fetch schema shared with the telemetry PR
     // (.daisy/inc-5046/index.md) — adds source:'marketplace_gcs'. All string
     // values below are static enums or a git SHA — not code/filepaths/PII.
     logEvent('open_code_cli_plugin_remote_fetch', {
       source: 'marketplace_gcs' as SafeString,
-      host: 'downloads.claude.ai' as SafeString,
+      host: 'downloads.open-code-cli.ai' as SafeString,
       is_official: true,
       outcome: outcome as SafeString,
       duration_ms: Math.round(performance.now() - start),

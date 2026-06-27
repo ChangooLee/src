@@ -16,8 +16,8 @@ import type { TranscriptShareResponse } from './TranscriptSharePrompt.js';
 import { useSurveyState } from './useSurveyState.js';
 import type { FeedbackSurveyResponse } from './utils.js';
 const HIDE_THANKS_AFTER_MS = 3000;
-const MEMORY_SURVEY_GATE = 'tengu_dunwich_bell';
-const MEMORY_SURVEY_EVENT = 'tengu_memory_survey_event';
+const MEMORY_SURVEY_GATE = 'open_code_cli_dunwich_bell';
+const MEMORY_SURVEY_EVENT = 'open_code_cli_memory_survey_event';
 const SURVEY_PROBABILITY = 0.2;
 const TRANSCRIPT_SHARE_TRIGGER = 'memory_survey';
 const MEMORY_WORD_RE = /\bmemor(?:y|ies)\b/i;
@@ -178,7 +178,7 @@ export function useMemorySurvey(messages: Message[], isLoading: boolean, hasActi
     if (!isPolicyAllowed('allow_product_feedback')) {
       return;
     }
-    if (isEnvTruthy((process.env.OPEN_CODE_CLI_DISABLE_FEEDBACK_SURVEY ?? process.env.CLAUDE_CODE_DISABLE_FEEDBACK_SURVEY))) {
+    if (isEnvTruthy(process.env.OPEN_CODE_CLI_DISABLE_FEEDBACK_SURVEY)) {
       return;
     }
     if (!lastAssistant || seenAssistantUuids.current.has(lastAssistant.uuid)) {

@@ -214,10 +214,10 @@ export type ToolUseContext = {
   }) => void
   nestedMemoryAttachmentTriggers?: Set<string>
   /**
-   * CLAUDE.md paths already injected as nested_memory attachments this
+   * OPEN_CODE.md paths already injected as nested_memory attachments this
    * session. Dedup for memoryFilesToAttachments — readFileState is an LRU
    * that evicts entries in busy sessions, so its .has() check alone can
-   * re-inject the same CLAUDE.md dozens of times.
+   * re-inject the same OPEN_CODE.md dozens of times.
    */
   loadedNestedMemoryPaths?: Set<string>
   dynamicSkillDirTriggers?: Set<string>
@@ -467,7 +467,7 @@ export type Tool<
   /**
    * When true, enables strict mode for this tool, which causes the API to
    * more strictly adhere to tool instructions and parameter schemas.
-   * Only applied when the tengu_tool_pear is enabled.
+   * Only applied when the open_code_cli_tool_pear is enabled.
    */
   readonly strict?: boolean
 

@@ -17,7 +17,7 @@ import {
 } from '../services/analytics/index.js'
 import { logForDebugging } from './debug.js'
 import {
-  getClaudeConfigHomeDir,
+  getOpenCodeCliConfigHomeDir,
   getOpenCodeCliEnv,
   isEnvTruthy,
 } from './envUtils.js'
@@ -153,7 +153,7 @@ export function isDetailedProfilingEnabled(): boolean {
 }
 
 export function getStartupPerfLogPath(): string {
-  return join(getClaudeConfigHomeDir(), 'startup-perf', `${getSessionId()}.txt`)
+  return join(getOpenCodeCliConfigHomeDir(), 'startup-perf', `${getSessionId()}.txt`)
 }
 
 /**

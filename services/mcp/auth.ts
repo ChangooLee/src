@@ -33,7 +33,7 @@ import { parse } from 'url'
 import xss from 'xss'
 import { MCP_CLIENT_METADATA_URL } from '../../constants/oauth.js'
 import { openBrowser } from '../../utils/browser.js'
-import { getClaudeConfigHomeDir } from '../../utils/envUtils.js'
+import { getOpenCodeCliConfigHomeDir } from '../../utils/envUtils.js'
 import { errorMessage, getErrnoCode } from '../../utils/errors.js'
 import * as lockfile from '../../utils/lockfile.js'
 import { logMCPDebug } from '../../utils/log.js'
@@ -65,7 +65,7 @@ import {
 const AUTH_REQUEST_TIMEOUT_MS = 30000
 
 /**
- * Failure reasons for the `tengu_mcp_oauth_refresh_failure` event. Values
+ * Failure reasons for the `open_code_cli_mcp_oauth_refresh_failure` event. Values
  * are emitted to analytics — keep them stable (do not rename; add new ones).
  */
 type MCPRefreshFailureReason =
@@ -77,7 +77,7 @@ type MCPRefreshFailureReason =
   | 'request_failed'
 
 /**
- * Failure reasons for the `tengu_mcp_oauth_flow_error` event. Values are
+ * Failure reasons for the `open_code_cli_mcp_oauth_flow_error` event. Values are
  * emitted to analytics for attribution in BigQuery. Keep stable (do not
  * rename; add new ones).
  */
@@ -871,7 +871,7 @@ export async function performMCPOAuthFlow(
   if (serverConfig.oauth?.xaa) {
     if (!isXaaEnabled()) {
       throw new Error(
-        `XAA is not enabled (set OPEN_CODE_CLI_ENABLE_XAA=1; legacy: CLAUDE_CODE_ENABLE_XAA=1). Remove 'oauth.xaa' from server '${serverName}' to use the standard consent flow.`,
+        `XAA is not enabled (set OPEN_CODE_CLI_ENABLE_XAA=1; legacy: OPEN_CODE_CLI_ENABLE_XAA=1). Remove 'oauth.xaa' from server '${serverName}' to use the standard consent flow.`,
       )
     }
     logEvent('open_code_cli_mcp_oauth_flow_start', {
@@ -1745,7 +1745,7 @@ export class ClaudeAuthProvider implements OAuthClientProvider {
    * both fire the full 4-request XAA chain and race on storage.update().
    * Unlike inc-4829 the id_token is not single-use so both access_tokens
    * stay valid (wasted round-trips + keychain write race, not brickage),
-   * but this is the shape CLAUDE.md flags under "Token/auth caching across
+   * but this is the shape OPEN_CODE.md flags under "Token/auth caching across
    * process boundaries". Mirror refreshAuthorization()'s lockfile pattern.
    */
   private async xaaRefresh(): Promise<OAuthTokens | undefined> {
@@ -2091,7 +2091,7 @@ export class ClaudeAuthProvider implements OAuthClientProvider {
     refreshToken: string,
   ): Promise<OAuthTokens | undefined> {
     const serverKey = getServerKey(this.serverName, this.serverConfig)
-    const claudeDir = getClaudeConfigHomeDir()
+    const claudeDir = getOpenCodeCliConfigHomeDir()
     await mkdir(claudeDir, { recursive: true })
     const sanitizedKey = serverKey.replace(/[^a-zA-Z0-9]/g, '_')
     const lockfilePath = join(claudeDir, `mcp-refresh-${sanitizedKey}.lock`)
