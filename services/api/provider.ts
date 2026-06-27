@@ -384,15 +384,6 @@ export function getCacheControl({
  * TTLs when GrowthBook's disk cache updates mid-request.
  */
 function should1hCacheTTL(querySource?: QuerySource): boolean {
-  // 3P OpenAI-compatible provider users get 1h TTL when opted in via env var — they manage their own billing
-  // No GrowthBook gating needed since 3P users don't have GrowthBook configured
-  if (
-    false &&
-    isEnvTruthy(process.env.ENABLE_PROMPT_CACHING_1H_BEDROCK)
-  ) {
-    return true
-  }
-
   // Latch eligibility in bootstrap state for session stability — prevents
   // mid-session overage flips from changing the cache_control TTL, which
   // would bust the server-side prompt cache (~20K tokens per flip).
