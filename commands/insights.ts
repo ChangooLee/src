@@ -317,7 +317,7 @@ type AggregatedData = {
   days_active: number
   messages_per_day: number
   message_hours: number[] // Hour of day for each user message (for time of day chart)
-  // Multi-clauding stats (matching Python reference)
+  // Multi-session stats (matching Python reference)
   multi_clauding: {
     overlap_events: number
     sessions_involved: number
@@ -1185,7 +1185,7 @@ function aggregateData(
     days_active: 0,
     messages_per_day: 0,
     message_hours: [],
-    // Multi-clauding stats (matching Python reference)
+    // Multi-session stats (matching Python reference)
     multi_clauding: {
       overlap_events: 0,
       sessions_involved: 0,
@@ -1406,8 +1406,8 @@ Include 3 friction categories with 2 examples each.`,
    - How to use: Add to \`.claude/settings.json\` under "hooks" key.
    - Good for: auto-formatting code, running type checks, enforcing conventions
 
-4. **Headless Mode**: Run Claude non-interactively from scripts and CI/CD.
-   - How to use: \`claude -p "fix lint errors" --allowedTools "Edit,Read,Bash"\`
+4. **Headless Mode**: Run Open Code CLI non-interactively from scripts and CI/CD.
+   - How to use: \`open-code-cli -p "fix lint errors" --allowedTools "Edit,Read,Bash"\`
    - Good for: CI/CD integration, batch code fixes, automated reviews
 
 5. **Task Agents**: Claude spawns focused sub-agents for complex exploration or parallel work.
@@ -2550,9 +2550,9 @@ function generateHtmlReport(
       </div>
     </div>
 
-    <!-- Multi-clauding Section (matching Python reference) -->
+    <!-- Multi-session Section (matching Python reference) -->
     <div class="chart-card" style="margin: 24px 0;">
-      <div class="chart-title">Multi-Clauding (Parallel Sessions)</div>
+      <div class="chart-title">Multi-Session Usage (Parallel Sessions)</div>
       ${
         data.multi_clauding.overlap_events === 0
           ? `
@@ -2576,8 +2576,8 @@ function generateHtmlReport(
           </div>
         </div>
         <p style="font-size: 13px; color: #475569; margin-top: 12px;">
-          You run multiple Open Code CLI sessions simultaneously. Multi-clauding is detected when sessions
-          overlap in time, suggesting parallel workflows.
+          You run multiple Open Code CLI sessions simultaneously. Multi-session usage is detected when
+          sessions overlap in time, suggesting parallel workflows.
         </p>
       `
       }

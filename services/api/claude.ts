@@ -2270,7 +2270,7 @@ async function* queryModel(
               yield createAssistantAPIErrorMessage({
                 content: `${API_ERROR_MESSAGE_PREFIX}: Claude's response exceeded the ${
                   maxOutputTokens
-                } output token maximum. To configure this behavior, set the CLAUDE_CODE_MAX_OUTPUT_TOKENS environment variable.`,
+                } output token maximum. To configure this behavior, set the OPEN_CODE_CLI_MAX_OUTPUT_TOKENS environment variable.`,
                 apiError: 'max_output_tokens',
                 error: 'max_output_tokens',
               })

@@ -211,7 +211,7 @@ async function handleBroadcast(
     getAgentName() || (isTeammate() ? 'teammate' : TEAM_LEAD_NAME)
   if (!senderName) {
     throw new Error(
-      'Cannot broadcast: sender name is required. Set CLAUDE_CODE_AGENT_NAME.',
+      'Cannot broadcast: sender name is required. Set OPEN_CODE_CLI_AGENT_NAME.',
     )
   }
 

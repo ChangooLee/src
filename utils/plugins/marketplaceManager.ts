@@ -662,7 +662,7 @@ function enhanceGitPullErrorMessages(result: {
     const timeoutSec = Math.round(getPluginGitTimeoutMs() / 1000)
     return {
       ...result,
-      stderr: `Git pull timed out after ${timeoutSec}s. Try increasing the timeout via CLAUDE_CODE_PLUGIN_GIT_TIMEOUT_MS environment variable.\n\nOriginal error: ${result.stderr}`,
+      stderr: `Git pull timed out after ${timeoutSec}s. Try increasing the timeout via OPEN_CODE_CLI_PLUGIN_GIT_TIMEOUT_MS environment variable.\n\nOriginal error: ${result.stderr}`,
     }
   }
 
@@ -911,7 +911,7 @@ export async function gitClone(
   if (result.error?.includes('timed out')) {
     return {
       ...result,
-      stderr: `Git clone timed out after ${Math.round(timeoutMs / 1000)}s. The repository may be too large for the current timeout. Set CLAUDE_CODE_PLUGIN_GIT_TIMEOUT_MS to increase it (e.g., 300000 for 5 minutes).\n\nOriginal error: ${result.stderr}`,
+      stderr: `Git clone timed out after ${Math.round(timeoutMs / 1000)}s. The repository may be too large for the current timeout. Set OPEN_CODE_CLI_PLUGIN_GIT_TIMEOUT_MS to increase it (e.g., 300000 for 5 minutes).\n\nOriginal error: ${result.stderr}`,
     }
   }
 

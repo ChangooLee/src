@@ -156,7 +156,7 @@ const externalTips: Tip[] = [
     },
   },
   {
-    id: 'color-when-running multiple Open Code CLI sessions',
+    id: 'color-when-running-multiple-open-code-cli-sessions',
     content: async () =>
       'Running multiple Open Code CLI sessions? Use /color and /rename to tell them apart at a glance.',
     cooldownSessions: 10,
@@ -239,7 +239,7 @@ const externalTips: Tip[] = [
   {
     id: 'powershell-tool-env',
     content: async () =>
-      'Set CLAUDE_CODE_USE_POWERSHELL_TOOL=1 to enable the PowerShell tool (preview)',
+      'Set OPEN_CODE_CLI_USE_POWERSHELL_TOOL=1 to enable the PowerShell tool (preview)',
     cooldownSessions: 10,
     isRelevant: async () =>
       getPlatform() === 'windows' &&
@@ -255,7 +255,7 @@ const externalTips: Tip[] = [
   {
     id: 'prompt-queue',
     content: async () =>
-      'Hit Enter to queue up additional messages while Claude is working.',
+      'Hit Enter to queue up additional messages while Open Code CLI is working.',
     cooldownSessions: 5,
     async isRelevant() {
       const config = getGlobalConfig()
@@ -376,7 +376,7 @@ const externalTips: Tip[] = [
   {
     id: 'continue',
     content: async () =>
-      'Run claude --continue or claude --resume to resume a conversation',
+      'Run open-code-cli --continue or open-code-cli --resume to resume a conversation',
     cooldownSessions: 10,
     isRelevant: async () => true,
   },
