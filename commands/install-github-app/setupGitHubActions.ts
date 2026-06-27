@@ -86,7 +86,7 @@ async function createWorkflowFile(
         ...context,
       })
       throw new Error(
-        `Failed to create workflow file ${workflowPath}: A Claude workflow file already exists in this repository. Please remove it first or update it manually.`,
+        `Failed to create workflow file ${workflowPath}: an Open Code CLI workflow file already exists in this repository. Please remove it first or update it manually.`,
       )
     }
 
@@ -196,7 +196,7 @@ export async function setupGitHubActions(
     if (!skipWorkflow) {
       updateProgress()
       // Create new branch
-      branchName = `add-claude-github-actions-${Date.now()}`
+      branchName = `add-open-code-cli-github-actions-${Date.now()}`
       const createBranchResult = await execFileNoThrow('gh', [
         'api',
         '--method',
@@ -223,9 +223,9 @@ export async function setupGitHubActions(
 
       if (selectedWorkflows.includes('claude')) {
         workflows.push({
-          path: '.github/workflows/claude.yml',
+          path: '.github/workflows/open-code-cli.yml',
           content: WORKFLOW_CONTENT,
-          message: 'Claude PR Assistant workflow',
+          message: 'Open Code CLI PR Assistant workflow',
         })
       }
 
