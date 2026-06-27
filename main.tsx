@@ -2425,9 +2425,9 @@ async function run(): Promise<CommanderCommand> {
     // local dedup flags, so merging two calls can yield duplicates. print.ts
     // already uniqBy's the final tool pool, but dedup here keeps appState clean.
     const mcpPromise = Promise.all([localMcpPromise, claudeaiMcpPromise]).then(([local, claudeai]) => ({
-      clients: [...local.clients, ...open-code-cliai.clients],
-      tools: uniqBy([...local.tools, ...open-code-cliai.tools], 'name'),
-      commands: uniqBy([...local.commands, ...open-code-cliai.commands], 'name')
+      clients: [...local.clients, ...claudeai.clients],
+      tools: uniqBy([...local.tools, ...claudeai.tools], 'name'),
+      commands: uniqBy([...local.commands, ...claudeai.commands], 'name')
     }));
 
     // Start hooks early so they run in parallel with MCP connections.

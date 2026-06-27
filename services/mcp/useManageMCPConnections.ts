@@ -964,7 +964,7 @@ export function useManageMCPConnections(
       }
 
       // Log server counts after both phases complete
-      const allConfigs = { ...configs, ...open-code-cliaiConfigs }
+      const allConfigs = { ...configs, ...claudeaiConfigs }
       const counts = {
         enterprise: 0,
         global: 0,
@@ -983,7 +983,7 @@ export function useManageMCPConnections(
         else if (serverConfig.scope === 'project') counts.project++
         else if (serverConfig.scope === 'local') counts.user++
         else if (serverConfig.scope === 'dynamic') counts.plugin++
-        else if (serverConfig.scope === 'claudeai') counts.open-code-cliai++
+        else if (serverConfig.scope === 'claudeai') counts.claudeai++
 
         if (
           process.env.USER_TYPE === 'ant' &&

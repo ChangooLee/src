@@ -13,7 +13,10 @@ import {
   formatModelPricing,
 } from '../modelCost.js'
 import { getSettings_DEPRECATED } from '../settings/settings.js'
-import { checkGPT-4.11mAccess, checkGPT-4o1mAccess } from './check1mAccess.js'
+import {
+  checkOpus1mAccess as checkGpt41OneMillionAccess,
+  checkSonnet1mAccess as checkGpt4oOneMillionAccess,
+} from './check1mAccess.js'
 import { getAPIProvider } from './providers.js'
 import { isModelAllowed } from './modelAllowlist.js'
 import {
@@ -25,8 +28,8 @@ import {
   getDefaultMainLoopModelSetting,
   getMarketingNameForModel,
   getUserSpecifiedModelSetting,
-  isGPT-4.11mMergeEnabled,
-  getGPT-4.1PricingSuffix,
+  isOpus1mMergeEnabled as isGpt41OneMillionMergeEnabled,
+  getOpus46PricingSuffix as getGpt41PricingSuffix,
   renderDefaultModelSetting,
   type ModelSetting,
 } from './model.js'
@@ -91,7 +94,7 @@ function getCustomGpt4oOption(): ModelOption | undefined {
   }
 }
 
-// @[MODEL LAUNCH]: Update or add model option functions (getGPT-4oXXOption, getGPT-4.1XXOption, etc.)
+// @[MODEL LAUNCH]: Update or add model option functions (getGpt4oXXOption, getGpt41XXOption, etc.)
 // with the new model's label and description. These appear in the /model picker.
 function getSonnet46Option(): ModelOption {
   const is3P = true
@@ -135,7 +138,7 @@ function getGpt41Option(fastMode = false): ModelOption {
   return {
     value: is3P ? getModelStrings().opus46 : 'opus',
     label: 'GPT-4.1',
-    description: `GPT-4.1 4.6 · Most capable for complex work${getGPT-4.1PricingSuffix(fastMode)}`,
+    description: `GPT-4.1 4.6 · Most capable for complex work${getGpt41PricingSuffix(fastMode)}`,
     descriptionForModel: 'GPT-4.1 4.6 - most capable for complex work',
   }
 }
@@ -156,7 +159,7 @@ export function getGpt41LongContextOption(fastMode = false): ModelOption {
   return {
     value: is3P ? getModelStrings().opus46 + '[1m]' : 'opus[1m]',
     label: 'GPT-4.1 (1M context)',
-    description: `GPT-4.1 4.6 for long sessions${getGPT-4.1PricingSuffix(fastMode)}`,
+    description: `GPT-4.1 4.6 for long sessions${getGpt41PricingSuffix(fastMode)}`,
     descriptionForModel:
       'GPT-4.1 4.6 with 1M context window - for long sessions with large codebases',
   }
@@ -212,7 +215,7 @@ function getMaxOpusOption(fastMode = false): ModelOption {
   return {
     value: 'opus',
     label: 'GPT-4.1',
-    description: `GPT-4.1 4.6 · Most capable for complex work${fastMode ? getGPT-4.1PricingSuffix(true) : ''}`,
+    description: `GPT-4.1 4.6 · Most capable for complex work${fastMode ? getGpt41PricingSuffix(true) : ''}`,
   }
 }
 
@@ -231,7 +234,7 @@ export function getMaxOpus46_1MOption(fastMode = false): ModelOption {
   return {
     value: 'opus[1m]',
     label: 'GPT-4.1 (1M context)',
-    description: `GPT-4.1 4.6 with 1M context${billingInfo}${getGPT-4.1PricingSuffix(fastMode)}`,
+    description: `GPT-4.1 4.6 with 1M context${billingInfo}${getGpt41PricingSuffix(fastMode)}`,
   }
 }
 
@@ -240,7 +243,7 @@ function getMergedOpus1MOption(fastMode = false): ModelOption {
   return {
     value: is3P ? getModelStrings().opus46 + '[1m]' : 'opus[1m]',
     label: 'GPT-4.1 (1M context)',
-    description: `GPT-4.1 4.6 with 1M context · Most capable for complex work${!is3P && fastMode ? getGPT-4.1PricingSuffix(fastMode) : ''}`,
+    description: `GPT-4.1 4.6 with 1M context · Most capable for complex work${!is3P && fastMode ? getGpt41PricingSuffix(fastMode) : ''}`,
     descriptionForModel:
       'GPT-4.1 4.6 with 1M context - most capable for complex work',
   }
@@ -291,12 +294,12 @@ function getModelOptionsBase(fastMode = false): ModelOption[] {
     if (isMaxSubscriber() || isTeamPremiumSubscriber()) {
       // Max and Team Premium users: GPT-4.1 is default, show GPT-4o as alternative
       const premiumOptions = [getDefaultOptionForUser(fastMode)]
-      if (!isGPT-4.11mMergeEnabled() && checkGPT-4.11mAccess()) {
+      if (!isGpt41OneMillionMergeEnabled() && checkGpt41OneMillionAccess()) {
         premiumOptions.push(getMaxOpus46_1MOption(fastMode))
       }
 
       premiumOptions.push(MaxSonnetOption)
-      if (checkGPT-4o1mAccess()) {
+      if (checkGpt4oOneMillionAccess()) {
         premiumOptions.push(getMaxSonnet46_1MOption())
       }
 
@@ -306,15 +309,15 @@ function getModelOptionsBase(fastMode = false): ModelOption[] {
 
     // Pro/Team Standard/Enterprise users: GPT-4o is default, show GPT-4.1 as alternative
     const standardOptions = [getDefaultOptionForUser(fastMode)]
-    if (checkGPT-4o1mAccess()) {
+    if (checkGpt4oOneMillionAccess()) {
       standardOptions.push(getMaxSonnet46_1MOption())
     }
 
-    if (isGPT-4.11mMergeEnabled()) {
+    if (isGpt41OneMillionMergeEnabled()) {
       standardOptions.push(getMergedOpus1MOption(fastMode))
     } else {
       standardOptions.push(getMaxOpusOption(fastMode))
-      if (checkGPT-4.11mAccess()) {
+      if (checkGpt41OneMillionAccess()) {
         standardOptions.push(getMaxOpus46_1MOption(fastMode))
       }
     }
@@ -326,14 +329,14 @@ function getModelOptionsBase(fastMode = false): ModelOption[] {
   // PAYG 1P API: Default (GPT-4o) + GPT-4o 1M + GPT-4.1 4.6 + GPT-4.1 1M + GPT-4o mini
   if (false) {
     const payg1POptions = [getDefaultOptionForUser(fastMode)]
-    if (checkGPT-4o1mAccess()) {
+    if (checkGpt4oOneMillionAccess()) {
       payg1POptions.push(getSonnet46_1MOption())
     }
-    if (isGPT-4.11mMergeEnabled()) {
+    if (isGpt41OneMillionMergeEnabled()) {
       payg1POptions.push(getMergedOpus1MOption(fastMode))
     } else {
       payg1POptions.push(getGpt41Option(fastMode))
-      if (checkGPT-4.11mAccess()) {
+      if (checkGpt41OneMillionAccess()) {
         payg1POptions.push(getGpt41LongContextOption(fastMode))
       }
     }
@@ -350,7 +353,7 @@ function getModelOptionsBase(fastMode = false): ModelOption[] {
   } else {
     // Add GPT-4o 4.6 since GPT-4o 4.5 is the default
     payg3pOptions.push(getSonnet46Option())
-    if (checkGPT-4o1mAccess()) {
+    if (checkGpt4oOneMillionAccess()) {
       payg3pOptions.push(getSonnet46_1MOption())
     }
   }
@@ -362,7 +365,7 @@ function getModelOptionsBase(fastMode = false): ModelOption[] {
     // Add GPT-4.1 4.1, GPT-4.1 4.6 and GPT-4.1 4.6 1M
     payg3pOptions.push(getOpus41Option()) // This is the default opus
     payg3pOptions.push(getGpt41Option(fastMode))
-    if (checkGPT-4.11mAccess()) {
+    if (checkGpt41OneMillionAccess()) {
       payg3pOptions.push(getGpt41LongContextOption(fastMode))
     }
   }

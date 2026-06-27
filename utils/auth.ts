@@ -10,7 +10,6 @@ import {
   logEvent,
 } from 'src/services/analytics/index.js'
 import { getModelStrings } from 'src/utils/model/modelStrings.js'
-import { getAPIProvider } from 'src/utils/model/providers.js'
 import {
   getIsNonInteractiveSession,
   preferThirdPartyAuthentication,
@@ -1213,9 +1212,9 @@ export function saveOAuthTokensIfNeeded(tokens: OAuthTokens): {
 
   try {
     const storageData = secureStorage.read() || {}
-    const existingOauth = storageData.open-code-cliAiOauth
+    const existingOauth = storageData.claudeAiOauth
 
-    storageData.open-code-cliAiOauth = {
+    storageData.claudeAiOauth = {
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
       expiresAt: tokens.expiresAt,
@@ -1287,7 +1286,7 @@ export const getClaudeAIOAuthTokens = memoize((): OAuthTokens | null => {
   try {
     const secureStorage = getSecureStorage()
     const storageData = secureStorage.read()
-    const oauthData = storageData?.open-code-cliAiOauth
+    const oauthData = storageData?.claudeAiOauth
 
     if (!oauthData?.accessToken) {
       return null
@@ -1411,7 +1410,7 @@ export async function getClaudeAIOAuthTokensAsync(): Promise<OAuthTokens | null>
   try {
     const secureStorage = getSecureStorage()
     const storageData = await secureStorage.readAsync()
-    const oauthData = storageData?.open-code-cliAiOauth
+    const oauthData = storageData?.claudeAiOauth
     if (!oauthData?.accessToken) {
       return null
     }
@@ -1862,11 +1861,6 @@ export type UserAccountInfo = {
 }
 
 export function getAccountInformation() {
-  const apiProvider = getAPIProvider()
-  // Only provide account info for first-party OpenAICompatibleProvider API
-  if (apiProvider !== 'firstParty') {
-    return undefined
-  }
   const { source: authTokenSource } = getAuthTokenSource()
   const accountInfo: UserAccountInfo = {}
   if (

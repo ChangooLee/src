@@ -6,12 +6,10 @@ import type { MCPServerConnection } from '../services/mcp/types.js';
 import { getAccountInformation, isClaudeAISubscriber } from './auth.js';
 import { getLargeMemoryFiles, getMemoryFiles, MAX_MEMORY_CHARACTER_COUNT } from './claudemd.js';
 import { getDoctorDiagnostic } from './doctorDiagnostic.js';
-import { getAWSRegion, getDefaultOpenAICompatibleProviderRegion, isEnvTruthy } from './envUtils.js';
 import { getDisplayPath } from './file.js';
 import { formatNumber } from './format.js';
 import { getIdeClientName, type IDEExtensionInstallationStatus, isJetBrainsIde, toIDEDisplayName } from './ide.js';
 import { getClaudeAiUserDefaultModelDescription, modelDisplayString } from './model/model.js';
-import { getAPIProvider } from './model/providers.js';
 import { getMTLSConfig } from './mtls.js';
 import { checkInstall } from './nativeInstaller/index.js';
 import { getProxyUrl } from './proxy.js';
@@ -238,88 +236,17 @@ export function buildAccountProperties(): Property[] {
   return properties;
 }
 export function buildAPIProviderProperties(): Property[] {
-  const apiProvider = getAPIProvider();
   const properties: Property[] = [];
-  if (apiProvider !== 'firstParty') {
-    const providerLabel = {
-      openaiCompatible: 'AWS OpenAICompatibleProvider',
-      openaiCompatible: 'Google OpenAICompatibleProvider AI',
-      openaiCompatible: 'Microsoft OpenAICompatibleProvider'
-    }[apiProvider];
+  properties.push({
+    label: 'API provider',
+    value: 'OpenAI-compatible provider'
+  });
+  const openaiCompatibleBaseUrl = process.env.OPEN_CODE_CLI_PROVIDER_BASE_URL ?? process.env.OPEN_CODE_CLI_BASE_URL ?? process.env.OPEN_CODE_CLI_API_BASE_URL;
+  if (openaiCompatibleBaseUrl) {
     properties.push({
-      label: 'API provider',
-      value: providerLabel
+      label: 'OpenAI-compatible base URL',
+      value: openaiCompatibleBaseUrl
     });
-  }
-  if (apiProvider === 'firstParty') {
-    const openaiCompatibleBaseUrl = process.env.OPEN_CODE_CLI_BASE_URL;
-    if (openaiCompatibleBaseUrl) {
-      properties.push({
-        label: 'OpenAICompatibleProvider base URL',
-        value: openaiCompatibleBaseUrl
-      });
-    }
-  } else if (apiProvider === 'openaiCompatible') {
-    const openaiCompatibleBaseUrl = process.env.BEDROCK_BASE_URL;
-    if (openaiCompatibleBaseUrl) {
-      properties.push({
-        label: 'OpenAICompatibleProvider base URL',
-        value: openaiCompatibleBaseUrl
-      });
-    }
-    properties.push({
-      label: 'AWS region',
-      value: getAWSRegion()
-    });
-    if (isEnvTruthy(process.env.OPEN_CODE_CLI_SKIP_BEDROCK_AUTH)) {
-      properties.push({
-        value: 'AWS auth skipped'
-      });
-    }
-  } else if (apiProvider === 'openaiCompatible') {
-    const openaiCompatibleBaseUrl = process.env.VERTEX_BASE_URL;
-    if (openaiCompatibleBaseUrl) {
-      properties.push({
-        label: 'OpenAICompatibleProvider base URL',
-        value: openaiCompatibleBaseUrl
-      });
-    }
-    const gcpProject = process.env.OPEN_CODE_CLI_PROVIDER_PROJECT_ID;
-    if (gcpProject) {
-      properties.push({
-        label: 'GCP project',
-        value: gcpProject
-      });
-    }
-    properties.push({
-      label: 'Default region',
-      value: getDefaultOpenAICompatibleProviderRegion()
-    });
-    if (isEnvTruthy(process.env.OPEN_CODE_CLI_SKIP_VERTEX_AUTH)) {
-      properties.push({
-        value: 'GCP auth skipped'
-      });
-    }
-  } else if (apiProvider === 'openaiCompatible') {
-    const openaiCompatibleBaseUrl = process.env.OPEN_CODE_CLI_BASE_URL;
-    if (openaiCompatibleBaseUrl) {
-      properties.push({
-        label: 'Microsoft OpenAICompatibleProvider base URL',
-        value: openaiCompatibleBaseUrl
-      });
-    }
-    const openaiCompatibleResource = process.env.OPEN_CODE_CLI_PROVIDER_RESOURCE;
-    if (openaiCompatibleResource) {
-      properties.push({
-        label: 'Microsoft OpenAICompatibleProvider resource',
-        value: openaiCompatibleResource
-      });
-    }
-    if (isEnvTruthy(process.env.OPEN_CODE_CLI_SKIP_FOUNDRY_AUTH)) {
-      properties.push({
-        value: 'Microsoft OpenAICompatibleProvider auth skipped'
-      });
-    }
   }
   const proxyUrl = getProxyUrl();
   if (proxyUrl) {
