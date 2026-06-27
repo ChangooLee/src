@@ -122,7 +122,7 @@ async function main(): Promise<void> {
     return;
   }
 
-  // Fast-path for `claude remote-control` (also accepts legacy `claude remote` / `claude sync` / `claude bridge`):
+  // Fast-path for `open-code-cli remote-control` (also accepts legacy `open-code-cli remote` / `open-code-cli sync` / `open-code-cli bridge`):
   // serve local machine as bridge environment.
   // feature() must stay inline for build-time dead code elimination;
   // isBridgeEnabled() checks the runtime GrowthBook gate.
@@ -299,7 +299,7 @@ async function main(): Promise<void> {
   // option building (not just inside the action handler).
   if (args.includes('--bare')) {
     process.env.OPEN_CODE_CLI_SIMPLE = '1';
-    process.env.CLAUDE_CODE_SIMPLE = '1';
+    (process.env.OPEN_CODE_CLI_SIMPL ?? process.env.CLAUDE_CODE_SIMPL)E = '1';
   }
 
   // No special flags detected, load and run the full CLI

@@ -109,8 +109,8 @@ function pollSleepDetectionThresholdMs(backoff: BackoffConfig): number {
 }
 
 /**
- * Returns the args that must precede CLI flags when spawning a child claude
- * process. In compiled binaries, process.execPath is the claude binary itself
+ * Returns the args that must precede CLI flags when spawning a child Open Code CLI
+ * process. In compiled binaries, process.execPath is the open-code-cli binary itself
  * and args go directly to it. In npm installs (node running cli.js),
  * process.execPath is the node runtime — the child spawn must pass the script
  * path as the first arg, otherwise node interprets --sdk-url as a node option
@@ -219,7 +219,7 @@ export async function runBridgeLoop(
           `[bridge:heartbeat] Failed for sessionId=${sessionId} workId=${workId}: ${errorMessage(err)}`,
         )
         if (err instanceof BridgeFatalError) {
-          logEvent('tengu_bridge_heartbeat_error', {
+          logEvent('open_code_cli_bridge_heartbeat_error', {
             status:
               err.status as unknown as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
             error_type: (err.status === 401 || err.status === 403
@@ -349,7 +349,7 @@ export async function runBridgeLoop(
           ? `${config.debugFile.slice(0, ext)}-*${config.debugFile.slice(ext)}`
           : `${config.debugFile}-*`
     } else {
-      debugGlob = join(tmpdir(), 'claude', 'bridge-session-*.log')
+      debugGlob = join(tmpdir(), 'open-code-cli', 'bridge-session-*.log')
     }
     logger.setDebugLogPath(debugGlob)
   }
@@ -477,7 +477,7 @@ export async function runBridgeLoop(
       logForDebugging(
         `[bridge:session] sessionId=${sessionId} workId=${workId ?? 'unknown'} exited status=${status} duration=${formatDuration(durationMs)}`,
       )
-      logEvent('tengu_bridge_session_done', {
+      logEvent('open_code_cli_bridge_session_done', {
         status:
           status as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
         duration_ms: durationMs,
@@ -621,7 +621,7 @@ export async function runBridgeLoop(
         logForDebugging(
           `[bridge:poll] Reconnected after ${formatDuration(disconnectedMs)}`,
         )
-        logEvent('tengu_bridge_reconnected', {
+        logEvent('open_code_cli_bridge_reconnected', {
           disconnected_ms: disconnectedMs,
         })
       }
@@ -648,7 +648,7 @@ export async function runBridgeLoop(
           //   - Capacity wake fires (session ended → poll for new work)
           //   - Loop aborted (shutdown)
           if (pollConfig.non_exclusive_heartbeat_interval_ms > 0) {
-            logEvent('tengu_bridge_heartbeat_mode_entered', {
+            logEvent('open_code_cli_bridge_heartbeat_mode_entered', {
               active_sessions: activeSessions.size,
               heartbeat_interval_ms:
                 pollConfig.non_exclusive_heartbeat_interval_ms,
@@ -697,7 +697,7 @@ export async function runBridgeLoop(
                     : pollDeadline !== null && Date.now() >= pollDeadline
                       ? 'poll_due'
                       : 'config_disabled'
-            logEvent('tengu_bridge_heartbeat_mode_exited', {
+            logEvent('open_code_cli_bridge_heartbeat_mode_exited', {
               reason:
                 exitReason as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
               heartbeat_cycles: hbCycles,
@@ -793,7 +793,7 @@ export async function runBridgeLoop(
         logger.logError(
           `Failed to decode work secret for workId=${work.id}: ${errMsg}`,
         )
-        logEvent('tengu_bridge_work_secret_failed', {})
+        logEvent('open_code_cli_bridge_work_secret_failed', {})
         // Can't ack (needs the JWT we failed to decode). stopWork uses OAuth,
         // so it's callable here — prevents XAUTOCLAIM from re-delivering this
         // poisoned item every reclaim_older_than_ms cycle.
@@ -1095,7 +1095,7 @@ export async function runBridgeLoop(
           const handle = spawnResult
 
           const spawnDurationMs = Date.now() - spawnStartTime
-          logEvent('tengu_bridge_session_started', {
+          logEvent('open_code_cli_bridge_session_started', {
             active_sessions: activeSessions.size,
             spawn_mode:
               spawnModeAtDecision as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
@@ -1135,7 +1135,7 @@ export async function runBridgeLoop(
           } else if (config.verbose || process.env.USER_TYPE === 'ant') {
             sessionDebugFile = join(
               tmpdir(),
-              'claude',
+              'open-code-cli',
               `bridge-session-${safeId}.log`,
             )
           }
@@ -1252,7 +1252,7 @@ export async function runBridgeLoop(
           logger.logError(err.message)
           logError(err)
         }
-        logEvent('tengu_bridge_fatal_error', {
+        logEvent('open_code_cli_bridge_fatal_error', {
           status: err.status,
           error_type:
             err.errorType as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
@@ -1298,7 +1298,7 @@ export async function runBridgeLoop(
           logger.logError(
             `Server unreachable for ${Math.round(elapsed / 60_000)} minutes, giving up.`,
           )
-          logEvent('tengu_bridge_poll_give_up', {
+          logEvent('open_code_cli_bridge_poll_give_up', {
             error_type:
               'connection' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
             elapsed_ms: elapsed,
@@ -1364,7 +1364,7 @@ export async function runBridgeLoop(
           logger.logError(
             `Persistent errors for ${Math.round(elapsed / 60_000)} minutes, giving up.`,
           )
-          logEvent('tengu_bridge_poll_give_up', {
+          logEvent('open_code_cli_bridge_poll_give_up', {
             error_type:
               'general' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
             elapsed_ms: elapsed,
@@ -1405,7 +1405,7 @@ export async function runBridgeLoop(
   logger.clearStatus()
 
   const loopDurationMs = Date.now() - loopStartTime
-  logEvent('tengu_bridge_shutdown', {
+  logEvent('open_code_cli_bridge_shutdown', {
     active_sessions: activeSessions.size,
     loop_duration_ms: loopDurationMs,
   })
@@ -1513,7 +1513,7 @@ export async function runBridgeLoop(
   }
 
   // In single-session mode with a known session, leave the session and
-  // environment alive so `claude remote-control --session-id=<id>` can resume.
+  // environment alive so `open-code-cli remote-control --session-id=<id>` can resume.
   // The backend GCs stale environments via a 4h TTL (BRIDGE_LAST_POLL_TTL).
   // Archiving the session or deregistering the environment would make the
   // printed resume command a lie — deregister deletes Firestore + Redis stream.
@@ -1529,7 +1529,7 @@ export async function runBridgeLoop(
     !fatalExit
   ) {
     logger.logStatus(
-      `Resume this session by running \`claude remote-control --continue\``,
+      `Resume this session by running \`open-code-cli remote-control --continue\``,
     )
     logForDebugging(
       `[bridge:shutdown] Skipping archive+deregister to allow resume of session ${initialSessionId}`,
@@ -1685,7 +1685,7 @@ function onSessionTimeout(
   logForDebugging(
     `[bridge:session] sessionId=${sessionId} timed out after ${formatDuration(timeoutMs)}`,
   )
-  logEvent('tengu_bridge_session_timeout', {
+  logEvent('open_code_cli_bridge_session_timeout', {
     timeout_ms: timeoutMs,
   })
   logger.logSessionFailed(
@@ -1820,7 +1820,7 @@ export function parseArgs(args: string[]): ParsedArgs {
       createSessionInDir = false
     } else {
       return makeError(
-        `Unknown argument: ${arg}\nRun 'claude remote-control --help' for usage.`,
+        `Unknown argument: ${arg}\nRun 'open-code-cli remote-control --help' for usage.`,
       )
     }
   }
@@ -1921,7 +1921,7 @@ async function printHelp(): Promise<void> {
 Remote Control - Connect your local environment to open-code-cli.dev/code
 
 USAGE
-  claude remote-control [options]
+  open-code-cli remote-control [options]
 OPTIONS
   --name <name>                    Name for the session (shown in open-code-cli.dev/code)
 ${
@@ -1944,7 +1944,7 @@ DESCRIPTION
 ${serverDescription}
 NOTES
   - You must be logged in with a Claude account that has a subscription
-  - Run \`claude\` first in the directory to accept the workspace trust dialog
+  - Run \`open-code-cli\` first in the directory to accept the workspace trust dialog
 ${serverNote}`
   // biome-ignore lint/suspicious/noConsole: intentional help output
   console.log(help)
@@ -2082,11 +2082,11 @@ export async function bridgeMain(args: string[]): Promise<void> {
   setCwdState(dir)
 
   // The bridge bypasses main.tsx (which renders the interactive TrustDialog via showSetupScreens),
-  // so we must verify trust was previously established by a normal `claude` session.
+  // so we must verify trust was previously established by a normal `open-code-cli` session.
   if (!checkHasTrustDialogAccepted()) {
     // biome-ignore lint/suspicious/noConsole:: intentional console output
     console.error(
-      `Error: Workspace not trusted. Please run \`claude\` in ${dir} first to review and accept the workspace trust dialog.`,
+      `Error: Workspace not trusted. Please run \`open-code-cli\` in ${dir} first to review and accept the workspace trust dialog.`,
     )
     // eslint-disable-next-line custom-rules/no-process-exit
     process.exit(1)
@@ -2154,7 +2154,7 @@ export async function bridgeMain(args: string[]): Promise<void> {
     if (!found) {
       // biome-ignore lint/suspicious/noConsole: intentional error output
       console.error(
-        `Error: No recent session found in this directory or its worktrees. Run \`claude remote-control\` to start a new one.`,
+        `Error: No recent session found in this directory or its worktrees. Run \`open-code-cli remote-control\` to start a new one.`,
       )
       // eslint-disable-next-line custom-rules/no-process-exit
       process.exit(1)
@@ -2252,7 +2252,7 @@ export async function bridgeMain(args: string[]): Promise<void> {
     })
     // biome-ignore lint/suspicious/noConsole: intentional dialog output
     console.log(
-      `\nClaude Remote Control is launching in spawn mode which lets you create new sessions in this project from Open Code CLI on Web or your Mobile app. Learn more here: https://open-code-cli.dev/docs/remote-control\n\n` +
+      `\nOpen Code CLI Remote Control is launching in spawn mode which lets you create new sessions in this project from Open Code CLI on Web or your Mobile app. Learn more here: https://open-code-cli.dev/docs/remote-control\n\n` +
         `Spawn mode for this project:\n` +
         `  [1] same-dir \u2014 sessions share the current directory (default)\n` +
         `  [2] worktree \u2014 each session gets an isolated git worktree\n\n` +
@@ -2265,7 +2265,7 @@ export async function bridgeMain(args: string[]): Promise<void> {
     const chosen: 'same-dir' | 'worktree' =
       answer.trim() === '2' ? 'worktree' : 'same-dir'
     savedSpawnMode = chosen
-    logEvent('tengu_bridge_spawn_mode_chosen', {
+    logEvent('open_code_cli_bridge_spawn_mode_chosen', {
       spawn_mode:
         chosen as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
     })
@@ -2392,7 +2392,7 @@ export async function bridgeMain(args: string[]): Promise<void> {
       }
       // biome-ignore lint/suspicious/noConsole: intentional error output
       console.error(
-        `Error: Session ${resumeSessionId} not found. It may have been archived or expired, or your login may have lapsed (run \`claude /login\`).`,
+        `Error: Session ${resumeSessionId} not found. It may have been archived or expired, or your login may have lapsed (run \`open-code-cli /login\`).`,
       )
       // eslint-disable-next-line custom-rules/no-process-exit
       process.exit(1)
@@ -2452,7 +2452,7 @@ export async function bridgeMain(args: string[]): Promise<void> {
     environmentId = reg.environment_id
     environmentSecret = reg.environment_secret
   } catch (err) {
-    logEvent('tengu_bridge_registration_failed', {
+    logEvent('open_code_cli_bridge_registration_failed', {
       status: err instanceof BridgeFatalError ? err.status : undefined,
     })
     // Registration failures are fatal — print a clean message instead of a stack trace.
@@ -2548,7 +2548,7 @@ export async function bridgeMain(args: string[]): Promise<void> {
     `[bridge:init] Registered, server environmentId=${environmentId}`,
   )
   const startupPollConfig = getPollIntervalConfig()
-  logEvent('tengu_bridge_started', {
+  logEvent('open_code_cli_bridge_started', {
     max_sessions: config.maxSessions,
     has_debug_file: !!config.debugFile,
     sandbox: config.sandbox,
@@ -2623,7 +2623,7 @@ export async function bridgeMain(args: string[]): Promise<void> {
       const newMode: 'same-dir' | 'worktree' =
         config.spawnMode === 'same-dir' ? 'worktree' : 'same-dir'
       config.spawnMode = newMode
-      logEvent('tengu_bridge_spawn_mode_toggled', {
+      logEvent('open_code_cli_bridge_spawn_mode_toggled', {
         spawn_mode:
           newMode as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
       })
@@ -2830,7 +2830,7 @@ export async function runBridgeHeadless(
 
   if (!checkHasTrustDialogAccepted()) {
     throw new BridgeHeadlessPermanentError(
-      `Workspace not trusted: ${dir}. Run \`claude\` in that directory first to accept the trust dialog.`,
+      `Workspace not trusted: ${dir}. Run \`open-code-cli\` in that directory first to accept the trust dialog.`,
     )
   }
 

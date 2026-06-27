@@ -200,7 +200,7 @@ export async function toolToAPISchema(
       getAPIProvider() === 'firstParty' &&
       isFirstPartyAnthropicBaseUrl() &&
       (getFeatureValue_CACHED_MAY_BE_STALE('tengu_fgts', false) ||
-        isEnvTruthy(process.env.CLAUDE_CODE_ENABLE_FINE_GRAINED_TOOL_STREAMING))
+        isEnvTruthy((process.env.OPEN_CODE_CLI_ENABLE_FINE_GRAINED_TOOL_STREAMING ?? process.env.CLAUDE_CODE_ENABLE_FINE_GRAINED_TOOL_STREAMING)))
     ) {
       base.eager_input_streaming = true
     }
@@ -240,7 +240,7 @@ export async function toolToAPISchema(
   // (scope, ttl) are already gated upstream by shouldIncludeFirstPartyOnlyBetas
   // which independently respects this kill switch.
   // github.com/anthropics/open-code-cli/issues/20031
-  if (isEnvTruthy(process.env.CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS)) {
+  if (isEnvTruthy((process.env.OPEN_CODE_CLI_DISABLE_EXPERIMENTAL_BETAS ?? process.env.CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS))) {
     const allowed = new Set([
       'name',
       'description',
@@ -281,7 +281,7 @@ function logStripOnce(stripped: string[]): void {
 export function logAPIPrefix(systemPrompt: SystemPrompt): void {
   const [firstSyspromptBlock] = splitSysPromptPrefix(systemPrompt)
   const firstSystemPrompt = firstSyspromptBlock?.text
-  logEvent('tengu_sysprompt_block', {
+  logEvent('open_code_cli_sysprompt_block', {
     snippet: firstSystemPrompt?.slice(
       0,
       20,
@@ -324,7 +324,7 @@ export function splitSysPromptPrefix(
 ): SystemPromptBlock[] {
   const useGlobalCacheFeature = shouldUseGlobalCacheScope()
   if (useGlobalCacheFeature && options?.skipGlobalCacheForSystemPrompt) {
-    logEvent('tengu_sysprompt_using_tool_based_cache', {
+    logEvent('open_code_cli_sysprompt_using_tool_based_cache', {
       promptBlockCount: systemPrompt.length,
     })
 
@@ -395,7 +395,7 @@ export function splitSysPromptPrefix(
       const dynamicJoined = dynamicBlocks.join('\n\n')
       if (dynamicJoined) result.push({ text: dynamicJoined, cacheScope: null })
 
-      logEvent('tengu_sysprompt_boundary_found', {
+      logEvent('open_code_cli_sysprompt_boundary_found', {
         blockCount: result.length,
         staticBlockLength: staticJoined.length,
         dynamicBlockLength: dynamicJoined.length,
@@ -403,7 +403,7 @@ export function splitSysPromptPrefix(
 
       return result
     } else {
-      logEvent('tengu_sysprompt_missing_boundary_marker', {
+      logEvent('open_code_cli_sysprompt_missing_boundary_marker', {
         promptBlockCount: systemPrompt.length,
       })
     }
@@ -549,7 +549,7 @@ export async function logContextMetrics(
     nonMcpToolsTokens += roughTokenCountEstimation(jsonStringify(schema))
   }
 
-  logEvent('tengu_context_size', {
+  logEvent('open_code_cli_context_size', {
     git_status_size: gitStatusSize,
     claude_md_size: claudeMdSize,
     total_context_size: totalContextSize,
@@ -596,7 +596,7 @@ export function normalizeToolInput<T extends Tool>(
 
       // Logging for commands that are only echoing a string. This is to help us understand how often  Claude talks via bash
       if (/^echo\s+["']?[^|&;><]*["']?$/i.test(normalizedCommand.trim())) {
-        logEvent('tengu_bash_tool_simple_echo', {})
+        logEvent('open_code_cli_bash_tool_simple_echo', {})
       }
 
       // Check for run_in_background (may not exist in schema if OPEN_CODE_CLI_DISABLE_BACKGROUND_TASKS is set)

@@ -268,7 +268,7 @@ export function dedupPluginMcpServers(
 /**
  * Filter claude.ai connectors, dropping any whose signature matches an enabled
  * manually-configured server. Manual wins: a user who wrote .mcp.json or ran
- * `claude mcp add` expressed higher intent than a connector toggled in the web UI.
+ * `open-code-cli mcp add` expressed higher intent than a connector toggled in the web UI.
  *
  * Connector keys are `claude.ai <DisplayName>` so they never key-collide with
  * manual servers in the merge — this content-based check catches the case where
@@ -1569,7 +1569,7 @@ export function setMcpServerEnabled(name: string, enabled: boolean): void {
   })
 
   if (isBuiltinStateChange) {
-    logEvent('tengu_builtin_mcp_toggle', {
+    logEvent('open_code_cli_builtin_mcp_toggle', {
       serverName:
         name as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
       enabled,

@@ -408,7 +408,7 @@ function handleMemoryFileReadError(error: unknown, filePath: string): void {
   // Log permission errors (EACCES) as they're actionable
   if (code === 'EACCES') {
     // Don't log the full file path to avoid PII/security issues
-    logEvent('tengu_claude_md_permission_error', {
+    logEvent('open_code_cli_claude_md_permission_error', {
       is_access_error: 1,
       has_home_dir: filePath.includes(getClaudeConfigHomeDir()) ? 1 : 0,
     })
@@ -778,7 +778,7 @@ export async function processMdRules({
     return result
   } catch (error) {
     if (error instanceof Error && error.message.includes('EACCES')) {
-      logEvent('tengu_claude_rules_md_permission_error', {
+      logEvent('open_code_cli_claude_rules_md_permission_error', {
         is_access_error: 1,
         has_home_dir: rulesDir.includes(getClaudeConfigHomeDir()) ? 1 : 0,
       })
@@ -937,7 +937,7 @@ export const getMemoryFiles = memoize(
     // This is controlled by CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD and defaults to off
     // Note: we don't check isSettingSourceEnabled('projectSettings') here because --add-dir
     // is an explicit user action and the SDK defaults settingSources to [] when not specified
-    if (isEnvTruthy(process.env.CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD)) {
+    if (isEnvTruthy((process.env.OPEN_CODE_CLI_ADDITIONAL_DIRECTORIES_CLAUDE_MD ?? process.env.CLAUDE_CODE_ADDITIONAL_DIRECTORIES_CLAUDE_MD))) {
       const additionalDirs = getAdditionalDirectoriesForClaudeMd()
       for (const dir of additionalDirs) {
         // Try reading CLAUDE.md from the additional directory
@@ -1024,7 +1024,7 @@ export const getMemoryFiles = memoize(
 
     if (!hasLoggedInitialLoad) {
       hasLoggedInitialLoad = true
-      logEvent('tengu_claudemd__initial_load', {
+      logEvent('open_code_cli_claudemd__initial_load', {
         file_count: result.length,
         total_content_length: totalContentLength,
         user_count: typeCounts['User'] ?? 0,

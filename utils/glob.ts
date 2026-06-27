@@ -95,8 +95,8 @@ export async function glob(
   // --no-ignore: don't respect .gitignore (default true, set CLAUDE_CODE_GLOB_NO_IGNORE=false to respect .gitignore)
   // --hidden: include hidden files (default true, set CLAUDE_CODE_GLOB_HIDDEN=false to exclude)
   // Note: use || instead of ?? to treat empty string as unset (defaulting to true)
-  const noIgnore = isEnvTruthy(process.env.CLAUDE_CODE_GLOB_NO_IGNORE || 'true')
-  const hidden = isEnvTruthy(process.env.CLAUDE_CODE_GLOB_HIDDEN || 'true')
+  const noIgnore = isEnvTruthy((process.env.OPEN_CODE_CLI_GLOB_NO_IGNORE ?? process.env.CLAUDE_CODE_GLOB_NO_IGNORE) || 'true')
+  const hidden = isEnvTruthy((process.env.OPEN_CODE_CLI_GLOB_HIDDEN ?? process.env.CLAUDE_CODE_GLOB_HIDDEN) || 'true')
   const args = [
     '--files',
     '--glob',

@@ -23,7 +23,7 @@ function getTokenFromFileDescriptor(): string | null {
     return cachedToken
   }
 
-  const fdEnv = process.env.CLAUDE_CODE_WEBSOCKET_AUTH_FILE_DESCRIPTOR
+  const fdEnv = (process.env.OPEN_CODE_CLI_WEBSOCKET_AUTH_FILE_DESCRIPTOR ?? process.env.CLAUDE_CODE_WEBSOCKET_AUTH_FILE_DESCRIPTOR)
   if (!fdEnv) {
     // No FD env var — either we're not in CCR, or we're a subprocess whose
     // parent stripped the (useless) FD env var. Try the well-known file.
@@ -101,7 +101,7 @@ function getTokenFromFileDescriptor(): string | null {
  */
 export function getSessionIngressAuthToken(): string | null {
   // 1. Check environment variable
-  const envToken = process.env.CLAUDE_CODE_SESSION_ACCESS_TOKEN
+  const envToken = (process.env.OPEN_CODE_CLI_SESSION_ACCESS_TOKEN ?? process.env.CLAUDE_CODE_SESSION_ACCESS_TOKEN)
   if (envToken) {
     return envToken
   }
@@ -122,7 +122,7 @@ export function getSessionIngressAuthHeaders(): Record<string, string> {
     const headers: Record<string, string> = {
       Cookie: `sessionKey=${token}`,
     }
-    const orgUuid = process.env.CLAUDE_CODE_ORGANIZATION_UUID
+    const orgUuid = (process.env.OPEN_CODE_CLI_ORGANIZATION_UUID ?? process.env.CLAUDE_CODE_ORGANIZATION_UUID)
     if (orgUuid) {
       headers['X-Organization-Uuid'] = orgUuid
     }

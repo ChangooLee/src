@@ -16,11 +16,11 @@ import { TEAM_CREATE_TOOL_NAME } from '../tools/TeamCreateTool/constants.js'
 import { TEAM_DELETE_TOOL_NAME } from '../tools/TeamDeleteTool/constants.js'
 import {
   deleteOpenCodeCliEnv,
+  getOpenCodeCliEnv,
   isEnvTruthy,
   setOpenCodeCliEnv,
 } from '../utils/envUtils.js'
 
-import { getOpenCodeCliEnv } from '../utils/envUtils.js';
 // Checks the same gate as isScratchpadEnabled() in
 // utils/permissions/filesystem.ts. Duplicated here because importing
 // filesystem.ts creates a circular dependency (filesystem -> permissions
@@ -40,7 +40,7 @@ const INTERNAL_WORKER_TOOLS = new Set([
 
 export function isCoordinatorMode(): boolean {
   if (feature('COORDINATOR_MODE')) {
-    return isEnvTruthy(process.env.CLAUDE_CODE_COORDINATOR_MODE)
+    return isEnvTruthy(getOpenCodeCliEnv('COORDINATOR_MODE'))
   }
   return false
 }
@@ -73,7 +73,7 @@ export function matchSessionMode(
     deleteOpenCodeCliEnv('COORDINATOR_MODE')
   }
 
-  logEvent('tengu_coordinator_mode_switched', {
+  logEvent('open_code_cli_coordinator_mode_switched', {
     to: sessionMode as unknown as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
   })
 

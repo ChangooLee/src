@@ -110,13 +110,13 @@ export function isAnthropicAuthEnabled(): boolean {
   // flip this — they'd cause a header mismatch with the proxy and a bogus
   // "invalid x-api-key" from the API. See src/ssh/sshAuthProxy.ts.
   if (process.env.ANTHROPIC_UNIX_SOCKET) {
-    return !!process.env.CLAUDE_CODE_OAUTH_TOKEN
+    return !!(process.env.OPEN_CODE_CLI_OAUTH_TOKEN ?? process.env.CLAUDE_CODE_OAUTH_TOKEN)
   }
 
   const is3P =
-    isEnvTruthy(process.env.CLAUDE_CODE_USE_BEDROCK) ||
-    isEnvTruthy(process.env.CLAUDE_CODE_USE_VERTEX) ||
-    isEnvTruthy(process.env.CLAUDE_CODE_USE_FOUNDRY)
+    isEnvTruthy((process.env.OPEN_CODE_CLI_USE_BEDROCK ?? process.env.CLAUDE_CODE_USE_BEDROCK)) ||
+    isEnvTruthy((process.env.OPEN_CODE_CLI_USE_VERTEX ?? process.env.CLAUDE_CODE_USE_VERTEX)) ||
+    isEnvTruthy((process.env.OPEN_CODE_CLI_USE_FOUNDRY ?? process.env.CLAUDE_CODE_USE_FOUNDRY))
 
   // Check if user has configured an external API key source
   // This allows externally-provided API keys to work (without requiring proxy configuration)
@@ -125,7 +125,7 @@ export function isAnthropicAuthEnabled(): boolean {
   const hasExternalAuthToken =
     process.env.ANTHROPIC_AUTH_TOKEN ||
     apiKeyHelper ||
-    process.env.CLAUDE_CODE_API_KEY_FILE_DESCRIPTOR
+    (process.env.OPEN_CODE_CLI_API_KEY_FILE_DESCRIPTOR ?? process.env.CLAUDE_CODE_API_KEY_FILE_DESCRIPTOR)
 
   // Check if API key is from an external source (not managed by /login)
   const { source: apiKeySource } = getAnthropicApiKeyWithSource({
@@ -166,7 +166,7 @@ export function getAuthTokenSource() {
     return { source: 'ANTHROPIC_AUTH_TOKEN' as const, hasToken: true }
   }
 
-  if (process.env.CLAUDE_CODE_OAUTH_TOKEN) {
+  if ((process.env.OPEN_CODE_CLI_OAUTH_TOKEN ?? process.env.CLAUDE_CODE_OAUTH_TOKEN)) {
     return { source: 'CLAUDE_CODE_OAUTH_TOKEN' as const, hasToken: true }
   }
 
@@ -179,7 +179,7 @@ export function getAuthTokenSource() {
     // doesn't exist. Call sites fall through correctly — the new source is
     // !== 'none' (cli/handlers/auth.ts → oauth_token) and not in the
     // isEnvVarToken set (auth.ts:1844 → generic re-login message).
-    if (process.env.CLAUDE_CODE_OAUTH_TOKEN_FILE_DESCRIPTOR) {
+    if ((process.env.OPEN_CODE_CLI_OAUTH_TOKEN_FILE_DESCRIPTOR ?? process.env.CLAUDE_CODE_OAUTH_TOKEN_FILE_DESCRIPTOR)) {
       return {
         source: 'CLAUDE_CODE_OAUTH_TOKEN_FILE_DESCRIPTOR' as const,
         hasToken: true,
@@ -275,8 +275,8 @@ export function getAnthropicApiKeyWithSource(
 
     if (
       !apiKeyEnv &&
-      !process.env.CLAUDE_CODE_OAUTH_TOKEN &&
-      !process.env.CLAUDE_CODE_OAUTH_TOKEN_FILE_DESCRIPTOR
+      !(process.env.OPEN_CODE_CLI_OAUTH_TOKEN ?? process.env.CLAUDE_CODE_OAUTH_TOKEN) &&
+      !(process.env.OPEN_CODE_CLI_OAUTH_TOKEN_FILE_DESCRIPTOR ?? process.env.CLAUDE_CODE_OAUTH_TOKEN_FILE_DESCRIPTOR)
     ) {
       throw new Error(
         'ANTHROPIC_API_KEY or CLAUDE_CODE_OAUTH_TOKEN env var is required',
@@ -434,7 +434,7 @@ export function isAwsCredentialExportFromProjectSettings(): boolean {
  * otherwise defaults to 5 minutes
  */
 export function calculateApiKeyHelperTTL(): number {
-  const envTtl = process.env.CLAUDE_CODE_API_KEY_HELPER_TTL_MS
+  const envTtl = (process.env.OPEN_CODE_CLI_API_KEY_HELPER_TTL_MS ?? process.env.CLAUDE_CODE_API_KEY_HELPER_TTL_MS)
 
   if (envTtl) {
     const parsed = parseInt(envTtl, 10)
@@ -551,7 +551,7 @@ async function _executeApiKeyHelper(
         `Security: apiKeyHelper executed before workspace trust is confirmed. If you see this message, post in ${MACRO.FEEDBACK_CHANNEL}.`,
       )
       logAntError('apiKeyHelper invoked before trust check', error)
-      logEvent('tengu_apiKeyHelper_missing_trust11', {})
+      logEvent('open_code_cli_apiKeyHelper_missing_trust11', {})
       return null
     }
   }
@@ -626,7 +626,7 @@ async function runAwsAuthRefresh(): Promise<boolean> {
         `Security: awsAuthRefresh executed before workspace trust is confirmed. If you see this message, post in ${MACRO.FEEDBACK_CHANNEL}.`,
       )
       logAntError('awsAuthRefresh invoked before trust check', error)
-      logEvent('tengu_awsAuthRefresh_missing_trust', {})
+      logEvent('open_code_cli_awsAuthRefresh_missing_trust', {})
       return false
     }
   }
@@ -723,7 +723,7 @@ async function getAwsCredsFromCredentialExport(): Promise<{
         `Security: awsCredentialExport executed before workspace trust is confirmed. If you see this message, post in ${MACRO.FEEDBACK_CHANNEL}.`,
       )
       logAntError('awsCredentialExport invoked before trust check', error)
-      logEvent('tengu_awsCredentialExport_missing_trust', {})
+      logEvent('open_code_cli_awsCredentialExport_missing_trust', {})
       return null
     }
   }
@@ -890,7 +890,7 @@ async function runGcpAuthRefresh(): Promise<boolean> {
         `Security: gcpAuthRefresh executed before workspace trust is confirmed. If you see this message, post in ${MACRO.FEEDBACK_CHANNEL}.`,
       )
       logAntError('gcpAuthRefresh invoked before trust check', error)
-      logEvent('tengu_gcpAuthRefresh_missing_trust', {})
+      logEvent('open_code_cli_gcpAuthRefresh_missing_trust', {})
       return false
     }
   }
@@ -1121,19 +1121,19 @@ export async function saveApiKey(apiKey: string): Promise<void> {
         reject: false,
       })
 
-      logEvent('tengu_api_key_saved_to_keychain', {})
+      logEvent('open_code_cli_api_key_saved_to_keychain', {})
       savedToKeychain = true
     } catch (e) {
       logError(e)
-      logEvent('tengu_api_key_keychain_error', {
+      logEvent('open_code_cli_api_key_keychain_error', {
         error: errorMessage(
           e,
         ) as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
       })
-      logEvent('tengu_api_key_saved_to_config', {})
+      logEvent('open_code_cli_api_key_saved_to_config', {})
     }
   } else {
-    logEvent('tengu_api_key_saved_to_config', {})
+    logEvent('open_code_cli_api_key_saved_to_config', {})
   }
 
   const normalizedKey = normalizeApiKeyForConfig(apiKey)
@@ -1197,13 +1197,13 @@ export function saveOAuthTokensIfNeeded(tokens: OAuthTokens): {
   warning?: string
 } {
   if (!shouldUseClaudeAIAuth(tokens.scopes)) {
-    logEvent('tengu_oauth_tokens_not_claude_ai', {})
+    logEvent('open_code_cli_oauth_tokens_not_claude_ai', {})
     return { success: true }
   }
 
   // Skip saving inference-only tokens (they come from env vars)
   if (!tokens.refreshToken || !tokens.expiresAt) {
-    logEvent('tengu_oauth_tokens_inference_only', {})
+    logEvent('open_code_cli_oauth_tokens_inference_only', {})
     return { success: true }
   }
 
@@ -1232,9 +1232,9 @@ export function saveOAuthTokensIfNeeded(tokens: OAuthTokens): {
     const updateStatus = secureStorage.update(storageData)
 
     if (updateStatus.success) {
-      logEvent('tengu_oauth_tokens_saved', { storageBackend })
+      logEvent('open_code_cli_oauth_tokens_saved', { storageBackend })
     } else {
-      logEvent('tengu_oauth_tokens_save_failed', { storageBackend })
+      logEvent('open_code_cli_oauth_tokens_save_failed', { storageBackend })
     }
 
     getClaudeAIOAuthTokens.cache?.clear?.()
@@ -1243,7 +1243,7 @@ export function saveOAuthTokensIfNeeded(tokens: OAuthTokens): {
     return updateStatus
   } catch (error) {
     logError(error)
-    logEvent('tengu_oauth_tokens_save_exception', {
+    logEvent('open_code_cli_oauth_tokens_save_exception', {
       storageBackend,
       error: errorMessage(
         error,
@@ -1258,10 +1258,10 @@ export const getClaudeAIOAuthTokens = memoize((): OAuthTokens | null => {
   if (isBareMode()) return null
 
   // Check for force-set OAuth token from environment variable
-  if (process.env.CLAUDE_CODE_OAUTH_TOKEN) {
+  if ((process.env.OPEN_CODE_CLI_OAUTH_TOKEN ?? process.env.CLAUDE_CODE_OAUTH_TOKEN)) {
     // Return an inference-only token (unknown refresh and expiry)
     return {
-      accessToken: process.env.CLAUDE_CODE_OAUTH_TOKEN,
+      accessToken: (process.env.OPEN_CODE_CLI_OAUTH_TOKEN ?? process.env.CLAUDE_CODE_OAUTH_TOKEN),
       refreshToken: null,
       expiresAt: null,
       scopes: ['user:inference'],
@@ -1384,7 +1384,7 @@ async function handleOAuth401ErrorImpl(
 
   // If keychain has a different token, another tab already refreshed - use it
   if (currentTokens.accessToken !== failedAccessToken) {
-    logEvent('tengu_oauth_401_recovered_from_keychain', {})
+    logEvent('open_code_cli_oauth_401_recovered_from_keychain', {})
     return true
   }
 
@@ -1402,7 +1402,7 @@ export async function getClaudeAIOAuthTokensAsync(): Promise<OAuthTokens | null>
 
   // Env var and FD tokens are sync and don't hit the keychain
   if (
-    process.env.CLAUDE_CODE_OAUTH_TOKEN ||
+    (process.env.OPEN_CODE_CLI_OAUTH_TOKEN ?? process.env.CLAUDE_CODE_OAUTH_TOKEN) ||
     getOAuthTokenFromFileDescriptor()
   ) {
     return getClaudeAIOAuthTokens()
@@ -1488,27 +1488,27 @@ async function checkAndRefreshOAuthTokenIfNeededImpl(
 
   let release
   try {
-    logEvent('tengu_oauth_token_refresh_lock_acquiring', {})
+    logEvent('open_code_cli_oauth_token_refresh_lock_acquiring', {})
     release = await lockfile.lock(claudeDir)
-    logEvent('tengu_oauth_token_refresh_lock_acquired', {})
+    logEvent('open_code_cli_oauth_token_refresh_lock_acquired', {})
   } catch (err) {
     if ((err as { code?: string }).code === 'ELOCKED') {
       // Another process has the lock, let's retry if we haven't exceeded max retries
       if (retryCount < MAX_RETRIES) {
-        logEvent('tengu_oauth_token_refresh_lock_retry', {
+        logEvent('open_code_cli_oauth_token_refresh_lock_retry', {
           retryCount: retryCount + 1,
         })
         // Wait a bit before retrying
         await sleep(1000 + Math.random() * 1000)
         return checkAndRefreshOAuthTokenIfNeededImpl(retryCount + 1, force)
       }
-      logEvent('tengu_oauth_token_refresh_lock_retry_limit_reached', {
+      logEvent('open_code_cli_oauth_token_refresh_lock_retry_limit_reached', {
         maxRetries: MAX_RETRIES,
       })
       return false
     }
     logError(err)
-    logEvent('tengu_oauth_token_refresh_lock_error', {
+    logEvent('open_code_cli_oauth_token_refresh_lock_error', {
       error: errorMessage(
         err,
       ) as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
@@ -1524,11 +1524,11 @@ async function checkAndRefreshOAuthTokenIfNeededImpl(
       !lockedTokens?.refreshToken ||
       !isOAuthTokenExpired(lockedTokens.expiresAt)
     ) {
-      logEvent('tengu_oauth_token_refresh_race_resolved', {})
+      logEvent('open_code_cli_oauth_token_refresh_race_resolved', {})
       return false
     }
 
-    logEvent('tengu_oauth_token_refresh_starting', {})
+    logEvent('open_code_cli_oauth_token_refresh_starting', {})
     const refreshedTokens = await refreshOAuthToken(lockedTokens.refreshToken, {
       // For Claude.ai subscribers, omit scopes so the default
       // CLAUDE_AI_OAUTH_SCOPES applies — this allows scope expansion
@@ -1550,15 +1550,15 @@ async function checkAndRefreshOAuthTokenIfNeededImpl(
     clearKeychainCache()
     const currentTokens = await getClaudeAIOAuthTokensAsync()
     if (currentTokens && !isOAuthTokenExpired(currentTokens.expiresAt)) {
-      logEvent('tengu_oauth_token_refresh_race_recovered', {})
+      logEvent('open_code_cli_oauth_token_refresh_race_recovered', {})
       return true
     }
 
     return false
   } finally {
-    logEvent('tengu_oauth_token_refresh_lock_releasing', {})
+    logEvent('open_code_cli_oauth_token_refresh_lock_releasing', {})
     await release()
-    logEvent('tengu_oauth_token_refresh_lock_released', {})
+    logEvent('open_code_cli_oauth_token_refresh_lock_released', {})
   }
 }
 
@@ -1593,9 +1593,9 @@ export function is1PApiCustomer(): boolean {
 
   // Exclude Vertex, Bedrock, and Foundry customers
   if (
-    isEnvTruthy(process.env.CLAUDE_CODE_USE_BEDROCK) ||
-    isEnvTruthy(process.env.CLAUDE_CODE_USE_VERTEX) ||
-    isEnvTruthy(process.env.CLAUDE_CODE_USE_FOUNDRY)
+    isEnvTruthy((process.env.OPEN_CODE_CLI_USE_BEDROCK ?? process.env.CLAUDE_CODE_USE_BEDROCK)) ||
+    isEnvTruthy((process.env.OPEN_CODE_CLI_USE_VERTEX ?? process.env.CLAUDE_CODE_USE_VERTEX)) ||
+    isEnvTruthy((process.env.OPEN_CODE_CLI_USE_FOUNDRY ?? process.env.CLAUDE_CODE_USE_FOUNDRY))
   ) {
     return false
   }
@@ -1732,9 +1732,9 @@ export function getSubscriptionName(): string {
 /** Check if using third-party services (Bedrock or Vertex or Foundry) */
 export function isUsing3PServices(): boolean {
   return !!(
-    isEnvTruthy(process.env.CLAUDE_CODE_USE_BEDROCK) ||
-    isEnvTruthy(process.env.CLAUDE_CODE_USE_VERTEX) ||
-    isEnvTruthy(process.env.CLAUDE_CODE_USE_FOUNDRY)
+    isEnvTruthy((process.env.OPEN_CODE_CLI_USE_BEDROCK ?? process.env.CLAUDE_CODE_USE_BEDROCK)) ||
+    isEnvTruthy((process.env.OPEN_CODE_CLI_USE_VERTEX ?? process.env.CLAUDE_CODE_USE_VERTEX)) ||
+    isEnvTruthy((process.env.OPEN_CODE_CLI_USE_FOUNDRY ?? process.env.CLAUDE_CODE_USE_FOUNDRY))
   )
 }
 
@@ -1777,7 +1777,7 @@ export function getOtelHeadersFromHelper(): Record<string, string> {
 
   // Return cached headers if still valid (debounce)
   const debounceMs = parseInt(
-    process.env.CLAUDE_CODE_OTEL_HEADERS_HELPER_DEBOUNCE_MS ||
+    (process.env.OPEN_CODE_CLI_OTEL_HEADERS_HELPER_DEBOUNCE_MS ?? process.env.CLAUDE_CODE_OTEL_HEADERS_HELPER_DEBOUNCE_MS) ||
       DEFAULT_OTEL_HEADERS_DEBOUNCE_MS.toString(),
   )
   if (
@@ -1922,7 +1922,7 @@ export type OrgValidationResult =
  * token's org (network error, missing profile data), validation fails.
  */
 export async function validateForceLoginOrg(): Promise<OrgValidationResult> {
-  // `claude ssh` remote: real auth lives on the local machine and is injected
+  // `open-code-cli ssh` remote: real auth lives on the local machine and is injected
   // by the proxy. The placeholder token can't be validated against the profile
   // endpoint. The local side already ran this check before establishing the session.
   if (process.env.ANTHROPIC_UNIX_SOCKET) {

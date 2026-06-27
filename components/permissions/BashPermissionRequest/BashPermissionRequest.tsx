@@ -334,7 +334,7 @@ function BashPermissionRequestInner({
         no: 4
       };
     }
-    logEvent('tengu_permission_request_option_selected', {
+    logEvent('open_code_cli_permission_request_option_selected', {
       option_index: optionIndex[value_0],
       explainer_visible: explainerState.visible
     });
@@ -385,7 +385,7 @@ function BashPermissionRequestInner({
           const trimmedFeedback_0 = acceptFeedback.trim();
           logUnaryPermissionEvent('tool_use_single', toolUseConfirm, 'accept');
           // Log accept submission with feedback context
-          logEvent('tengu_accept_submitted', {
+          logEvent('open_code_cli_accept_submitted', {
             toolName: toolNameForAnalytics,
             isMcp: toolUseConfirm.tool.isMcp ?? false,
             has_instructions: !!trimmedFeedback_0,
@@ -410,7 +410,7 @@ function BashPermissionRequestInner({
           const trimmedFeedback = rejectFeedback.trim();
 
           // Log reject submission with feedback context
-          logEvent('tengu_reject_submitted', {
+          logEvent('open_code_cli_reject_submitted', {
             toolName: toolNameForAnalytics,
             isMcp: toolUseConfirm.tool.isMcp ?? false,
             has_instructions: !!trimmedFeedback,

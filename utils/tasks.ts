@@ -132,7 +132,7 @@ async function writeHighWaterMark(
 
 export function isTodoV2Enabled(): boolean {
   // Force-enable tasks in non-interactive mode (e.g. SDK users who want Task tools over TodoWrite)
-  if (isEnvTruthy(process.env.CLAUDE_CODE_ENABLE_TASKS)) {
+  if (isEnvTruthy((process.env.OPEN_CODE_CLI_ENABLE_TASKS ?? process.env.CLAUDE_CODE_ENABLE_TASKS))) {
     return true
   }
   return !getIsNonInteractiveSession()
@@ -197,8 +197,8 @@ export async function resetTaskList(taskListId: string): Promise<void> {
  * 5. Session ID - fallback for standalone sessions
  */
 export function getTaskListId(): string {
-  if (process.env.CLAUDE_CODE_TASK_LIST_ID) {
-    return process.env.CLAUDE_CODE_TASK_LIST_ID
+  if ((process.env.OPEN_CODE_CLI_TASK_LIST_ID ?? process.env.CLAUDE_CODE_TASK_LIST_ID)) {
+    return (process.env.OPEN_CODE_CLI_TASK_LIST_ID ?? process.env.CLAUDE_CODE_TASK_LIST_ID)
   }
   // In-process teammates use the leader's team name so they share the same
   // task list that tmux/iTerm2 teammates also resolve to.

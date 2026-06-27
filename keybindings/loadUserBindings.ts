@@ -84,7 +84,7 @@ function logCustomBindingsLoadedOncePerDay(userBindingCount: number): void {
   const today = new Date().toISOString().slice(0, 10)
   if (lastCustomBindingsLogDate === today) return
   lastCustomBindingsLogDate = today
-  logEvent('tengu_custom_keybindings_loaded', {
+  logEvent('open_code_cli_custom_keybindings_loaded', {
     user_binding_count: userBindingCount,
   })
 }

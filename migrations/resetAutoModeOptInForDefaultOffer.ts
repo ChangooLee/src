@@ -37,7 +37,7 @@ export function resetAutoModeOptInForDefaultOffer(): void {
         updateSettingsForSource('userSettings', {
           skipAutoPermissionPrompt: undefined,
         })
-        logEvent('tengu_migrate_reset_auto_opt_in_for_default_offer', {})
+        logEvent('open_code_cli_migrate_reset_auto_opt_in_for_default_offer', {})
       }
 
       saveGlobalConfig(c => {

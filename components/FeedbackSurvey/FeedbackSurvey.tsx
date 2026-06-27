@@ -121,7 +121,7 @@ function FeedbackSurveyThanks(t0) {
   let t2;
   if ($[0] !== lastResponse || $[1] !== onRequestFeedback) {
     t2 = () => {
-      logEvent("tengu_feedback_survey_event", {
+      logEvent("open_code_cli_feedback_survey_event", {
         event_type: "followup_accepted" as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
         response: lastResponse as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS
       });

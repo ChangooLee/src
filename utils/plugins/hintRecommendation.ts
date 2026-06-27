@@ -5,7 +5,7 @@
  * by file edits, plugin hints are triggered by CLIs/SDKs emitting a
  * `<open-code-cli-hint />` tag to stderr (detected by the Bash/PowerShell tools).
  *
- * State persists in GlobalConfig.claudeCodeHints — a show-once record per
+ * State persists in GlobalConfig.openCodeCliHints — a show-once record per
  * plugin and a disabled flag (user picked "don't show again"). Official-
  * marketplace filtering is hardcoded for v1.
  */
@@ -17,10 +17,10 @@ import {
   logEvent,
 } from '../../services/analytics/index.js'
 import {
-  type ClaudeCodeHint,
+  type OpenCodeCliHint,
   hasShownHintThisSession,
   setPendingHint,
-} from '../claudeCodeHints.js'
+} from '../openCodeCliHints.js'
 import { getGlobalConfig, saveGlobalConfig } from '../config.js'
 import { logForDebugging } from '../debug.js'
 import { isPluginInstalled } from './installedPluginsManager.js'
@@ -32,7 +32,7 @@ import {
 import { isPluginBlockedByPolicy } from './pluginPolicy.js'
 
 /**
- * Hard cap on `claudeCodeHints.plugin[]` — bounds config growth. Each shown
+ * Hard cap on `openCodeCliHints.plugin[]` — bounds config growth. Each shown
  * plugin appends one slug; past this point we stop prompting (and stop
  * appending) rather than let the config grow without limit.
  */
@@ -62,11 +62,12 @@ export type PluginHintRecommendation = {
  * just to strip a stderr line. The async marketplace-cache check happens
  * later in resolvePluginHint (hook side).
  */
-export function maybeRecordPluginHint(hint: ClaudeCodeHint): void {
+export function maybeRecordPluginHint(hint: OpenCodeCliHint): void {
   if (!getFeatureValue_CACHED_MAY_BE_STALE('tengu_lapis_finch', false)) return
   if (hasShownHintThisSession()) return
 
-  const state = getGlobalConfig().claudeCodeHints
+  const config = getGlobalConfig()
+  const state = config.openCodeCliHints ?? config.claudeCodeHints
   if (state?.disabled) return
 
   const shown = state?.plugin ?? []
@@ -101,14 +102,14 @@ export function _resetHintRecommendationForTesting(): void {
  * the plugin isn't in the marketplace cache — the hint is discarded.
  */
 export async function resolvePluginHint(
-  hint: ClaudeCodeHint,
+  hint: OpenCodeCliHint,
 ): Promise<PluginHintRecommendation | null> {
   const pluginId = hint.value
   const { name, marketplace } = parsePluginIdentifier(pluginId)
 
   const pluginData = await getPluginById(pluginId)
 
-  logEvent('tengu_plugin_hint_detected', {
+  logEvent('open_code_cli_plugin_hint_detected', {
     _PROTO_plugin_name: (name ??
       '') as AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED,
     _PROTO_marketplace_name: (marketplace ??
@@ -140,12 +141,14 @@ export async function resolvePluginHint(
  */
 export function markHintPluginShown(pluginId: string): void {
   saveGlobalConfig(current => {
-    const existing = current.claudeCodeHints?.plugin ?? []
+    const existing =
+      current.openCodeCliHints?.plugin ?? current.claudeCodeHints?.plugin ?? []
     if (existing.includes(pluginId)) return current
     return {
       ...current,
-      claudeCodeHints: {
+      openCodeCliHints: {
         ...current.claudeCodeHints,
+        ...current.openCodeCliHints,
         plugin: [...existing, pluginId],
       },
     }
@@ -155,10 +158,14 @@ export function markHintPluginShown(pluginId: string): void {
 /** Called when the user picks "don't show plugin installation hints again". */
 export function disableHintRecommendations(): void {
   saveGlobalConfig(current => {
-    if (current.claudeCodeHints?.disabled) return current
+    if (current.openCodeCliHints?.disabled) return current
     return {
       ...current,
-      claudeCodeHints: { ...current.claudeCodeHints, disabled: true },
+      openCodeCliHints: {
+        ...current.claudeCodeHints,
+        ...current.openCodeCliHints,
+        disabled: true,
+      },
     }
   })
 }

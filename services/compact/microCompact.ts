@@ -343,7 +343,7 @@ async function cachedMicrocompactPath(
     )
 
     // Log the event
-    logEvent('tengu_cached_microcompact', {
+    logEvent('open_code_cli_cached_microcompact', {
       toolsDeleted: toolsToDelete.length,
       deletedToolIds: toolsToDelete.join(
         ',',
@@ -495,7 +495,7 @@ function maybeTimeBasedMicrocompact(
     return null
   }
 
-  logEvent('tengu_time_based_microcompact', {
+  logEvent('open_code_cli_time_based_microcompact', {
     gapMinutes: Math.round(gapMinutes),
     gapThresholdMinutes: config.gapThresholdMinutes,
     toolsCleared: clearSet.size,

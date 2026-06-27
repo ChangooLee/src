@@ -153,7 +153,7 @@ function hasMemoryWritesSince(
 
 function denyAutoMemTool(tool: Tool, reason: string) {
   logForDebugging(`[autoMem] denied ${tool.name}: ${reason}`)
-  logEvent('tengu_auto_mem_tool_denied', {
+  logEvent('open_code_cli_auto_mem_tool_denied', {
     tool_name: sanitizeToolNameForAnalytics(tool.name),
   })
   return {
@@ -353,7 +353,7 @@ export function initExtractMemories(): void {
       if (lastMessage?.uuid) {
         lastMemoryMessageUuid = lastMessage.uuid
       }
-      logEvent('tengu_extract_memories_skipped_direct_write', {
+      logEvent('open_code_cli_extract_memories_skipped_direct_write', {
         message_count: newMessageCount,
       })
       return
@@ -470,7 +470,7 @@ export function initExtractMemories(): void {
         : 0
 
       // Log extraction event with usage from the forked agent
-      logEvent('tengu_extract_memories_extraction', {
+      logEvent('open_code_cli_extract_memories_extraction', {
         input_tokens: result.totalUsage.input_tokens,
         output_tokens: result.totalUsage.output_tokens,
         cache_read_input_tokens: result.totalUsage.cache_read_input_tokens,
@@ -497,7 +497,7 @@ export function initExtractMemories(): void {
     } catch (error) {
       // Extraction is best-effort — log but don't notify on error
       logForDebugging(`[extractMemories] error: ${error}`)
-      logEvent('tengu_extract_memories_error', {
+      logEvent('open_code_cli_extract_memories_error', {
         duration_ms: Date.now() - startTime,
       })
     } finally {
@@ -536,7 +536,7 @@ export function initExtractMemories(): void {
     if (!getFeatureValue_CACHED_MAY_BE_STALE('tengu_passport_quail', false)) {
       if (process.env.USER_TYPE === 'ant' && !hasLoggedGateFailure) {
         hasLoggedGateFailure = true
-        logEvent('tengu_extract_memories_gate_disabled', {})
+        logEvent('open_code_cli_extract_memories_gate_disabled', {})
       }
       return
     }
@@ -558,7 +558,7 @@ export function initExtractMemories(): void {
       logForDebugging(
         '[extractMemories] extraction in progress — stashing for trailing run',
       )
-      logEvent('tengu_extract_memories_coalesced', {})
+      logEvent('open_code_cli_extract_memories_coalesced', {})
       pendingContext = { context, appendSystemMessage }
       return
     }

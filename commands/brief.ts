@@ -67,7 +67,7 @@ const brief = {
         // Entitlement check only gates the on-transition — off is always
         // allowed so a user whose GB gate flipped mid-session isn't stuck.
         if (newState && !isBriefEntitled()) {
-          logEvent('tengu_brief_mode_toggled', {
+          logEvent('open_code_cli_brief_mode_toggled', {
             enabled: false,
             gated: true,
             source:
@@ -91,7 +91,7 @@ const brief = {
           return { ...prev, isBriefOnly: newState }
         })
 
-        logEvent('tengu_brief_mode_toggled', {
+        logEvent('open_code_cli_brief_mode_toggled', {
           enabled: newState,
           gated: false,
           source:

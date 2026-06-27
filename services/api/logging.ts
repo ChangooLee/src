@@ -193,7 +193,7 @@ export function logAPIQuery({
   fastMode?: boolean
   previousRequestId?: string | null
 }): void {
-  logEvent('tengu_api_query', {
+  logEvent('open_code_cli_api_query', {
     model: model as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
     messagesLength,
     temperature: temperature,
@@ -301,7 +301,7 @@ export function logAPIError({
   }
 
   logError(error as Error)
-  logEvent('tengu_api_error', {
+  logEvent('open_code_cli_api_error', {
     model: model as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
     error: errStr as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
     status:
@@ -385,7 +385,7 @@ export function logAPIError({
   // Log first error for teleported sessions (reliability tracking)
   const teleportInfo = getTeleportedSessionInfo()
   if (teleportInfo?.isTeleported && !teleportInfo.hasLoggedFirstMessage) {
-    logEvent('tengu_teleport_first_message_error', {
+    logEvent('open_code_cli_teleport_first_message_error', {
       session_id:
         teleportInfo.sessionId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
       error_type:
@@ -460,7 +460,7 @@ function logAPISuccess({
 
   const invocation = consumeInvokingRequestId()
 
-  logEvent('tengu_api_success', {
+  logEvent('open_code_cli_api_success', {
     model: model as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
     ...(preNormalizedModel !== model
       ? {
@@ -779,7 +779,7 @@ export function logAPISuccessAndDuration({
   // Log first successful message for teleported sessions (reliability tracking)
   const teleportInfo = getTeleportedSessionInfo()
   if (teleportInfo?.isTeleported && !teleportInfo.hasLoggedFirstMessage) {
-    logEvent('tengu_teleport_first_message_success', {
+    logEvent('open_code_cli_teleport_first_message_success', {
       session_id:
         teleportInfo.sessionId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
     })

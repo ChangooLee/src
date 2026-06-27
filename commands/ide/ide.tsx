@@ -419,7 +419,7 @@ function InstallOnMount(t0) {
 export async function call(onDone: (result?: string, options?: {
   display?: CommandResultDisplay;
 }) => void, context: LocalJSXCommandContext, args: string): Promise<React.ReactNode | null> {
-  logEvent('tengu_ext_ide_command', {});
+  logEvent('open_code_cli_ext_ide_command', {});
   const {
     options: {
       dynamicMcpConfig

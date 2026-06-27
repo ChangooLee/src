@@ -390,7 +390,7 @@ export function useVoice({
           logForDebugging(
             `[voice] Silent-drop detected (no_data_timeout, ${String(fullAudioRef.current.length)} chunks); replaying on fresh connection`,
           )
-          logEvent('tengu_voice_silent_drop_replay', {
+          logEvent('open_code_cli_voice_silent_drop_replay', {
             recordingDurationMs,
             chunkCount: fullAudioRef.current.length,
           })
@@ -468,7 +468,7 @@ export function useVoice({
         // fallthrough and !conn (no-OAuth) paths bypass this → don't compute
         // COUNT(completed)/COUNT(started) as a success rate; the silent-drop
         // denominator (completed events only) is internally consistent.
-        logEvent('tengu_voice_recording_completed', {
+        logEvent('open_code_cli_voice_recording_completed', {
           transcriptChars: text.length + focusFlushedChars,
           recordingDurationMs,
           hadAudioSignal,
@@ -746,7 +746,7 @@ export function useVoice({
 
     const rawLanguage = getInitialSettings().language
     const stt = normalizeLanguageForSTT(rawLanguage)
-    logEvent('tengu_voice_recording_started', {
+    logEvent('open_code_cli_voice_recording_started', {
       focusTriggered: focusTriggeredRef.current,
       sttLanguage:
         stt.code as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
@@ -873,7 +873,7 @@ export function useVoice({
                 logForDebugging(
                   `[voice] early voice_stream error (pre-transcript), retrying once: ${error}`,
                 )
-                logEvent('tengu_voice_stream_early_retry', {})
+                logEvent('open_code_cli_voice_stream_early_retry', {})
                 connectionRef.current = null
                 attemptGenRef.current++
                 setTimeout(

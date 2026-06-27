@@ -467,7 +467,7 @@ export async function compactConversation(
           ? truncateHeadForPTLRetry(messagesToSummarize, summaryResponse)
           : null
       if (!truncated) {
-        logEvent('tengu_compact_failed', {
+        logEvent('open_code_cli_compact_failed', {
           reason:
             'prompt_too_long' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
           preCompactTokenCount,
@@ -476,7 +476,7 @@ export async function compactConversation(
         })
         throw new Error(ERROR_MESSAGE_PROMPT_TOO_LONG)
       }
-      logEvent('tengu_compact_ptl_retry', {
+      logEvent('open_code_cli_compact_ptl_retry', {
         attempt: ptlAttempts,
         droppedMessages: messagesToSummarize.length - truncated.length,
         remainingMessages: truncated.length,
@@ -495,7 +495,7 @@ export async function compactConversation(
         `Compact failed: no summary text in response. Response: ${jsonStringify(summaryResponse)}`,
         { level: 'error' },
       )
-      logEvent('tengu_compact_failed', {
+      logEvent('open_code_cli_compact_failed', {
         reason:
           'no_summary' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
         preCompactTokenCount,
@@ -505,7 +505,7 @@ export async function compactConversation(
         `Failed to generate conversation summary - response did not contain valid text content`,
       )
     } else if (startsWithApiErrorPrefix(summary)) {
-      logEvent('tengu_compact_failed', {
+      logEvent('open_code_cli_compact_failed', {
         reason:
           'api_error' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
         preCompactTokenCount,
@@ -647,7 +647,7 @@ export async function compactConversation(
     const querySourceForEvent =
       recompactionInfo?.querySource ?? context.options.querySource ?? 'unknown'
 
-    logEvent('tengu_compact', {
+    logEvent('open_code_cli_compact', {
       preCompactTokenCount,
       // Kept for continuity — semantically the compact API call's total usage
       postCompactTokenCount: compactionCallTotalTokens,
@@ -877,7 +877,7 @@ export async function partialCompactConversation(
           ? truncateHeadForPTLRetry(apiMessages, summaryResponse)
           : null
       if (!truncated) {
-        logEvent('tengu_partial_compact_failed', {
+        logEvent('open_code_cli_partial_compact_failed', {
           reason:
             'prompt_too_long' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
           ...failureMetadata,
@@ -885,7 +885,7 @@ export async function partialCompactConversation(
         })
         throw new Error(ERROR_MESSAGE_PROMPT_TOO_LONG)
       }
-      logEvent('tengu_compact_ptl_retry', {
+      logEvent('open_code_cli_compact_ptl_retry', {
         attempt: ptlAttempts,
         droppedMessages: apiMessages.length - truncated.length,
         remainingMessages: truncated.length,
@@ -898,7 +898,7 @@ export async function partialCompactConversation(
       }
     }
     if (!summary) {
-      logEvent('tengu_partial_compact_failed', {
+      logEvent('open_code_cli_partial_compact_failed', {
         reason:
           'no_summary' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
         ...failureMetadata,
@@ -907,7 +907,7 @@ export async function partialCompactConversation(
         'Failed to generate conversation summary - response did not contain valid text content',
       )
     } else if (startsWithApiErrorPrefix(summary)) {
-      logEvent('tengu_partial_compact_failed', {
+      logEvent('open_code_cli_partial_compact_failed', {
         reason:
           'api_error' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
         ...failureMetadata,
@@ -987,7 +987,7 @@ export async function partialCompactConversation(
     ])
     const compactionUsage = getTokenUsage(summaryResponse)
 
-    logEvent('tengu_partial_compact', {
+    logEvent('open_code_cli_partial_compact', {
       preCompactTokenCount,
       postCompactTokenCount,
       messagesKept: messagesToKeep.length,
@@ -1211,7 +1211,7 @@ async function streamCompactSummary({
           // Skip success logging for PTL error text — it's returned so the
           // caller's retry loop catches it, but it's not a successful summary.
           if (!assistantText.startsWith(PROMPT_TOO_LONG_ERROR_MESSAGE)) {
-            logEvent('tengu_compact_cache_sharing_success', {
+            logEvent('open_code_cli_compact_cache_sharing_success', {
               preCompactTokenCount,
               outputTokens: result.totalUsage.output_tokens,
               cacheReadInputTokens: result.totalUsage.cache_read_input_tokens,
@@ -1232,14 +1232,14 @@ async function streamCompactSummary({
           `Compact cache sharing: no text in response, falling back. Response: ${jsonStringify(assistantMsg)}`,
           { level: 'warn' },
         )
-        logEvent('tengu_compact_cache_sharing_fallback', {
+        logEvent('open_code_cli_compact_cache_sharing_fallback', {
           reason:
             'no_text_response' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
           preCompactTokenCount,
         })
       } catch (error) {
         logError(error)
-        logEvent('tengu_compact_cache_sharing_fallback', {
+        logEvent('open_code_cli_compact_cache_sharing_fallback', {
           reason:
             'error' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
           preCompactTokenCount,
@@ -1361,7 +1361,7 @@ async function streamCompactSummary({
       }
 
       if (attempt < maxAttempts) {
-        logEvent('tengu_compact_streaming_retry', {
+        logEvent('open_code_cli_compact_streaming_retry', {
           attempt,
           preCompactTokenCount,
           hasStartedStreaming,
@@ -1376,7 +1376,7 @@ async function streamCompactSummary({
         `Compact streaming failed after ${attempt} attempts. hasStartedStreaming=${hasStartedStreaming}`,
         { level: 'error' },
       )
-      logEvent('tengu_compact_failed', {
+      logEvent('open_code_cli_compact_failed', {
         reason:
           'no_streaming_response' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
         preCompactTokenCount,

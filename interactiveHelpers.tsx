@@ -194,7 +194,7 @@ export async function showSetupScreens(root: Root, permissionMode: PermissionMod
     } = await import('src/components/grove/Grove.js');
     const decision = await showSetupDialog<string>(root, done => <GroveDialog showIfAlreadyViewed={false} location={onboardingShown ? 'onboarding' : 'policy_update_modal'} onDone={done} />);
     if (decision === 'escape') {
-      logEvent('tengu_grove_policy_exited', {});
+      logEvent('open_code_cli_grove_policy_exited', {});
       gracefulShutdownSync(0);
       return false;
     }
@@ -306,7 +306,7 @@ export function getRenderContext(exitOnCtrlC: boolean): {
 
   // Log analytics event when stdin override is active
   if (baseOptions.stdin) {
-    logEvent('tengu_stdin_interactive', {});
+    logEvent('open_code_cli_stdin_interactive', {});
   }
   const fpsTracker = new FpsTracker();
   const stats = createStatsStore();
@@ -316,7 +316,7 @@ export function getRenderContext(exitOnCtrlC: boolean): {
   // offline analysis by bench/repl-scroll.ts. Captures the full TUI
   // render pipeline (yoga → screen buffer → diff → optimize → stdout)
   // so perf work on any phase can be validated against real user flows.
-  const frameTimingLogPath = process.env.CLAUDE_CODE_FRAME_TIMING_LOG;
+  const frameTimingLogPath = (process.env.OPEN_CODE_CLI_FRAME_TIMING_LOG ?? process.env.CLAUDE_CODE_FRAME_TIMING_LOG);
   return {
     getFpsMetrics: () => fpsTracker.getMetrics(),
     stats,
@@ -351,7 +351,7 @@ export function getRenderContext(exitOnCtrlC: boolean): {
           }
           const now = Date.now();
           if (now - lastFlickerTime < 1000) {
-            logEvent('tengu_flicker', {
+            logEvent('open_code_cli_flicker', {
               desiredHeight: flicker.desiredHeight,
               actualHeight: flicker.availableHeight,
               reason: flicker.reason

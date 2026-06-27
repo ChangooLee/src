@@ -73,7 +73,7 @@ export function FastModePicker(t0) {
         return;
       }
       applyFastMode(enableFastMode, setAppState);
-      logEvent("tengu_fast_mode_toggled", {
+      logEvent("open_code_cli_fast_mode_toggled", {
         enabled: enableFastMode,
         source: "picker" as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS
       });
@@ -232,7 +232,7 @@ async function handleFastModeShortcut(enable: boolean, getAppState: () => AppSta
     mainLoopModel
   } = getAppState();
   applyFastMode(enable, setAppState);
-  logEvent('tengu_fast_mode_toggled', {
+  logEvent('open_code_cli_fast_mode_toggled', {
     enabled: enable,
     source: 'shortcut' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS
   });
@@ -261,7 +261,7 @@ export async function call(onDone: LocalJSXCommandOnDone, context: LocalJSXComma
     return null;
   }
   const unavailableReason = getFastModeUnavailableReason();
-  logEvent('tengu_fast_mode_picker_shown', {
+  logEvent('open_code_cli_fast_mode_picker_shown', {
     unavailable_reason: (unavailableReason ?? '') as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS
   });
   return <FastModePicker onDone={onDone} unavailableReason={unavailableReason} />;

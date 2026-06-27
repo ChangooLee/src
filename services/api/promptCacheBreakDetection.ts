@@ -587,7 +587,7 @@ export async function checkResponseForCacheBreak(
       reason = 'unknown cause'
     }
 
-    logEvent('tengu_prompt_cache_break', {
+    logEvent('open_code_cli_prompt_cache_break', {
       systemPromptChanged: changes?.systemPromptChanged ?? false,
       toolSchemasChanged: changes?.toolSchemasChanged ?? false,
       modelChanged: changes?.modelChanged ?? false,

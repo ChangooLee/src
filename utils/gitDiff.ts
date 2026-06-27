@@ -489,7 +489,7 @@ function parseRawDiffToToolUseDiff(
  */
 async function getDiffRef(gitRoot: string): Promise<string> {
   const baseBranch =
-    process.env.CLAUDE_CODE_BASE_REF || (await getDefaultBranch())
+    (process.env.OPEN_CODE_CLI_BASE_REF ?? process.env.CLAUDE_CODE_BASE_REF) || (await getDefaultBranch())
   const { stdout, code } = await execFileNoThrowWithCwd(
     gitExe(),
     ['--no-optional-locks', 'merge-base', 'HEAD', baseBranch],

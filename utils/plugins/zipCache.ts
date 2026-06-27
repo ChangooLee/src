@@ -53,7 +53,7 @@ import type { MarketplaceSource } from './schemas.js'
  * Check if the plugin zip cache mode is enabled.
  */
 export function isPluginZipCacheEnabled(): boolean {
-  return isEnvTruthy(process.env.CLAUDE_CODE_PLUGIN_USE_ZIP_CACHE)
+  return isEnvTruthy((process.env.OPEN_CODE_CLI_PLUGIN_USE_ZIP_CACHE ?? process.env.CLAUDE_CODE_PLUGIN_USE_ZIP_CACHE))
 }
 
 /**
@@ -65,7 +65,7 @@ export function getPluginZipCachePath(): string | undefined {
   if (!isPluginZipCacheEnabled()) {
     return undefined
   }
-  const dir = process.env.CLAUDE_CODE_PLUGIN_CACHE_DIR
+  const dir = (process.env.OPEN_CODE_CLI_PLUGIN_CACHE_DIR ?? process.env.CLAUDE_CODE_PLUGIN_CACHE_DIR)
   return dir ? expandTilde(dir) : undefined
 }
 

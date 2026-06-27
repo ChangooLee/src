@@ -339,7 +339,7 @@ export const FileWriteTool = buildTool({
 
     // Log when writing to CLAUDE.md
     if (fullFilePath.endsWith(`${sep}CLAUDE.md`)) {
-      logEvent('tengu_write_claudemd', {})
+      logEvent('open_code_cli_write_claudemd', {})
     }
 
     let gitDiff: ToolUseDiff | undefined
@@ -350,7 +350,7 @@ export const FileWriteTool = buildTool({
       const startTime = Date.now()
       const diff = await fetchSingleFileGitDiff(fullFilePath)
       if (diff) gitDiff = diff
-      logEvent('tengu_tool_use_diff_computed', {
+      logEvent('open_code_cli_tool_use_diff_computed', {
         isWriteTool: true,
         durationMs: Date.now() - startTime,
         hasDiff: !!diff,

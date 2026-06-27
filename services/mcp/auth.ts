@@ -655,7 +655,7 @@ type XaaFailureStage =
  * 3. Save tokens to the same keychain slot as normal OAuth
  *
  * IdP connection details come from settings.xaaIdp (configured once via
- * `claude mcp xaa setup`). Per-server config is just `oauth.xaa: true`
+ * `open-code-cli mcp xaa setup`). Per-server config is just `oauth.xaa: true`
  * plus the AS clientId/clientSecret.
  *
  * No silent fallback: if `oauth.xaa` is set, XAA is the only path.
@@ -676,7 +676,7 @@ async function performMCPXaaAuth(
   const idp = getXaaIdpSettings()
   if (!idp) {
     throw new Error(
-      "XAA: no IdP connection configured. Run 'claude mcp xaa setup --issuer <url> --client-id <id> --client-secret' to configure.",
+      "XAA: no IdP connection configured. Run 'open-code-cli mcp xaa setup --issuer <url> --client-id <id> --client-secret' to configure.",
     )
   }
 
@@ -823,7 +823,7 @@ async function performMCPXaaAuth(
     })
 
     logMCPDebug(serverName, 'XAA: tokens saved')
-    logEvent('tengu_mcp_oauth_flow_success', {
+    logEvent('open_code_cli_mcp_oauth_flow_success', {
       authMethod:
         'xaa' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
       idTokenCacheHit,
@@ -833,7 +833,7 @@ async function performMCPXaaAuth(
     if (e instanceof AuthenticationCancelledError) {
       throw e
     }
-    logEvent('tengu_mcp_oauth_flow_failure', {
+    logEvent('open_code_cli_mcp_oauth_flow_failure', {
       authMethod:
         'xaa' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
       xaaFailureStage:
@@ -874,7 +874,7 @@ export async function performMCPOAuthFlow(
         `XAA is not enabled (set CLAUDE_CODE_ENABLE_XAA=1). Remove 'oauth.xaa' from server '${serverName}' to use the standard consent flow.`,
       )
     }
-    logEvent('tengu_mcp_oauth_flow_start', {
+    logEvent('open_code_cli_mcp_oauth_flow_start', {
       isOAuthFlow: true,
       authMethod:
         'xaa' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
@@ -936,7 +936,7 @@ export async function performMCPOAuthFlow(
 
   const flowAttemptId = randomUUID()
 
-  logEvent('tengu_mcp_oauth_flow_start', {
+  logEvent('open_code_cli_mcp_oauth_flow_start', {
     flowAttemptId:
       flowAttemptId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
     isOAuthFlow: true,
@@ -1240,7 +1240,7 @@ export async function performMCPOAuthFlow(
         logMCPDebug(serverName, `Token expires_in: ${savedTokens.expires_in}`)
       }
 
-      logEvent('tengu_mcp_oauth_flow_success', {
+      logEvent('open_code_cli_mcp_oauth_flow_success', {
         flowAttemptId:
           flowAttemptId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
         transportType:
@@ -1318,7 +1318,7 @@ export async function performMCPOAuthFlow(
       }
     }
 
-    logEvent('tengu_mcp_oauth_flow_error', {
+    logEvent('open_code_cli_mcp_oauth_flow_error', {
       flowAttemptId:
         flowAttemptId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
       reason:
@@ -2186,8 +2186,8 @@ export class ClaudeAuthProvider implements OAuthClientProvider {
     ): void => {
       logEvent(
         outcome === 'success'
-          ? 'tengu_mcp_oauth_refresh_success'
-          : 'tengu_mcp_oauth_refresh_failure',
+          ? 'open_code_cli_mcp_oauth_refresh_success'
+          : 'open_code_cli_mcp_oauth_refresh_failure',
         {
           transportType: this.serverConfig
             .type as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,

@@ -264,7 +264,7 @@ export function getSettingsRootPathForSource(source: SettingSource): string {
 function getUserSettingsFilePath(): string {
   if (
     getUseCoworkPlugins() ||
-    isEnvTruthy(process.env.CLAUDE_CODE_USE_COWORK_PLUGINS)
+    isEnvTruthy((process.env.OPEN_CODE_CLI_USE_COWORK_PLUGINS ?? process.env.CLAUDE_CODE_USE_COWORK_PLUGINS))
   ) {
     return 'cowork_settings.json'
   }

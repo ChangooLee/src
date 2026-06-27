@@ -164,7 +164,7 @@ function _temp() {
       desktopUpsellSeenCount: newCount
     };
   });
-  logEvent("tengu_desktop_upsell_shown", {
+  logEvent("open_code_cli_desktop_upsell_shown", {
     seen_count: newCount
   });
 }

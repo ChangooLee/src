@@ -72,7 +72,7 @@ function isExecutable(shellPath: string): boolean {
  */
 export async function findSuitableShell(): Promise<string> {
   // Check for explicit shell override first
-  const shellOverride = process.env.CLAUDE_CODE_SHELL
+  const shellOverride = (process.env.OPEN_CODE_CLI_SHELL ?? process.env.CLAUDE_CODE_SHELL)
   if (shellOverride) {
     // Validate it's a supported shell type
     const isSupported =
@@ -202,7 +202,7 @@ export async function exec(
 
   // Sandbox temp directory - use per-user directory name to prevent multi-user permission conflicts
   const sandboxTmpDir = posixJoin(
-    process.env.CLAUDE_CODE_TMPDIR || '/tmp',
+    (process.env.OPEN_CODE_CLI_TMPDIR ?? process.env.CLAUDE_CODE_TMPDIR) || '/tmp',
     getClaudeTempDirName(),
   )
 
@@ -409,7 +409,7 @@ export async function exec(
             void onCwdChangedForHooks(cwd, newCwd)
           }
         } catch {
-          logEvent('tengu_shell_set_cwd', { success: false })
+          logEvent('open_code_cli_shell_set_cwd', { success: false })
         }
       }
       // Clean up the temp file used for cwd tracking
@@ -464,7 +464,7 @@ export function setCwd(path: string, relativeTo?: string): void {
   setCwdState(physicalPath)
   if (process.env.NODE_ENV !== 'test') {
     try {
-      logEvent('tengu_shell_set_cwd', {
+      logEvent('open_code_cli_shell_set_cwd', {
         success: true,
       })
     } catch (_error) {

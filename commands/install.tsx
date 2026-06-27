@@ -158,7 +158,7 @@ function Install({
         }
 
         // Log success event
-        logEvent('tengu_claude_install_command', {
+        logEvent('open_code_cli_claude_install_command', {
           has_version: result.latestVersion ? 1 : 0,
           forced: force ? 1 : 0
         });

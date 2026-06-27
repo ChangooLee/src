@@ -343,7 +343,7 @@ export const ToolSearchTool = buildTool({
       matches: string[],
       queryType: 'select' | 'keyword',
     ): void {
-      logEvent('tengu_tool_search_outcome', {
+      logEvent('open_code_cli_tool_search_outcome', {
         query:
           query as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
         queryType:

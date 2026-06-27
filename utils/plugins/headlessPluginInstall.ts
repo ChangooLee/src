@@ -169,6 +169,6 @@ export async function installPluginsForHeadless(): Promise<boolean> {
     logError(error)
     return false
   } finally {
-    logEvent('tengu_headless_plugin_install', metrics)
+    logEvent('open_code_cli_headless_plugin_install', metrics)
   }
 }

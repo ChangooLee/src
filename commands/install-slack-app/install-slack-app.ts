@@ -6,7 +6,7 @@ import { saveGlobalConfig } from '../../utils/config.js'
 const SLACK_APP_URL = 'https://slack.com/marketplace/A08SF47R6P4-claude'
 
 export async function call(): Promise<LocalCommandResult> {
-  logEvent('tengu_install_slack_app_clicked', {})
+  logEvent('open_code_cli_install_slack_app_clicked', {})
 
   // Track that user has clicked to install
   saveGlobalConfig(current => ({

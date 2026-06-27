@@ -96,13 +96,13 @@ export function setShellIfWindows(): void {
  * Find the path where `bash.exe` included with git-bash exists, exiting the process if not found.
  */
 export const findGitBashPath = memoize((): string => {
-  if (process.env.CLAUDE_CODE_GIT_BASH_PATH) {
-    if (checkPathExists(process.env.CLAUDE_CODE_GIT_BASH_PATH)) {
-      return process.env.CLAUDE_CODE_GIT_BASH_PATH
+  if ((process.env.OPEN_CODE_CLI_GIT_BASH_PATH ?? process.env.CLAUDE_CODE_GIT_BASH_PATH)) {
+    if (checkPathExists((process.env.OPEN_CODE_CLI_GIT_BASH_PATH ?? process.env.CLAUDE_CODE_GIT_BASH_PATH))) {
+      return (process.env.OPEN_CODE_CLI_GIT_BASH_PATH ?? process.env.CLAUDE_CODE_GIT_BASH_PATH)
     }
     // biome-ignore lint/suspicious/noConsole:: intentional console output
     console.error(
-      `Open Code CLI was unable to find CLAUDE_CODE_GIT_BASH_PATH path "${process.env.CLAUDE_CODE_GIT_BASH_PATH}"`,
+      `Open Code CLI was unable to find CLAUDE_CODE_GIT_BASH_PATH path "${(process.env.OPEN_CODE_CLI_GIT_BASH_PATH ?? process.env.CLAUDE_CODE_GIT_BASH_PATH)}"`,
     )
     // eslint-disable-next-line custom-rules/no-process-exit
     process.exit(1)

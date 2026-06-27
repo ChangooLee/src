@@ -27,7 +27,7 @@ export function MCPServerMultiselectDialog(t0) {
       const enabledServers = currentSettings.enabledMcpjsonServers || [];
       const disabledServers = currentSettings.disabledMcpjsonServers || [];
       const [approvedServers, rejectedServers] = partition(serverNames, server => selectedServers.includes(server));
-      logEvent("tengu_mcp_multidialog_choice", {
+      logEvent("open_code_cli_mcp_multidialog_choice", {
         approved: approvedServers.length,
         rejected: rejectedServers.length
       });

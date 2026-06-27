@@ -12,16 +12,16 @@ import { c as _c } from "react/compiler-runtime";
 import * as React from 'react';
 import { useNotifications } from '../context/notifications.js';
 import { type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS, type AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED, logEvent } from '../services/analytics/index.js';
-import { clearPendingHint, getPendingHintSnapshot, markShownThisSession, subscribeToPendingHint } from '../utils/claudeCodeHints.js';
+import { clearPendingHint, getPendingHintSnapshot, markShownThisSession, subscribeToPendingHint } from '../utils/openCodeCliHints.js';
 import { logForDebugging } from '../utils/debug.js';
 import { disableHintRecommendations, markHintPluginShown, type PluginHintRecommendation, resolvePluginHint } from '../utils/plugins/hintRecommendation.js';
 import { installPluginFromMarketplace } from '../utils/plugins/pluginInstallationHelpers.js';
 import { installPluginAndNotify, usePluginRecommendationBase } from './usePluginRecommendationBase.js';
-type UseClaudeCodeHintRecommendationResult = {
+type UseOpenCodeCliHintRecommendationResult = {
   recommendation: PluginHintRecommendation | null;
   handleResponse: (response: 'yes' | 'no' | 'disable') => void;
 };
-export function useClaudeCodeHintRecommendation() {
+export function useOpenCodeCliHintRecommendation() {
   const $ = _c(11);
   const pendingHint = React.useSyncExternalStore(subscribeToPendingHint, getPendingHintSnapshot);
   const {
@@ -42,7 +42,7 @@ export function useClaudeCodeHintRecommendation() {
       tryResolve(async () => {
         const resolved = await resolvePluginHint(pendingHint);
         if (resolved) {
-          logForDebugging(`[useClaudeCodeHintRecommendation] surfacing ${resolved.pluginId} from ${resolved.sourceCommand}`);
+          logForDebugging(`[useOpenCodeCliHintRecommendation] surfacing ${resolved.pluginId} from ${resolved.sourceCommand}`);
           markShownThisSession();
         }
         if (getPendingHintSnapshot() === pendingHint) {
@@ -68,7 +68,7 @@ export function useClaudeCodeHintRecommendation() {
         return;
       }
       markHintPluginShown(recommendation.pluginId);
-      logEvent("tengu_plugin_hint_response", {
+      logEvent("open_code_cli_plugin_hint_response", {
         _PROTO_plugin_name: recommendation.pluginName as AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED,
         _PROTO_marketplace_name: recommendation.marketplaceName as AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED,
         response: response as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS

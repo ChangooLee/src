@@ -336,20 +336,20 @@ export async function checkGroveForNonInteractive(): Promise<void> {
   if (shouldShowGrove) {
     // shouldShowGrove is only true if both API calls succeeded
     const config = configResult.success ? configResult.data : null
-    logEvent('tengu_grove_print_viewed', {
+    logEvent('open_code_cli_grove_print_viewed', {
       dismissable:
         config?.notice_is_grace_period as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
     })
     if (config === null || config.notice_is_grace_period) {
       // Grace period is still active - show informational message and continue
       writeToStderr(
-        '\nAn update to our Consumer Terms and Privacy Policy will take effect on October 8, 2025. Run `claude` to review the updated terms.\n\n',
+        '\nAn update to our Consumer Terms and Privacy Policy will take effect on October 8, 2025. Run `open-code-cli` to review the updated terms.\n\n',
       )
       await markGroveNoticeViewed()
     } else {
       // Grace period has ended - show error message and exit
       writeToStderr(
-        '\n[ACTION REQUIRED] An update to our Consumer Terms and Privacy Policy has taken effect on October 8, 2025. You must run `claude` to review the updated terms.\n\n',
+        '\n[ACTION REQUIRED] An update to our Consumer Terms and Privacy Policy has taken effect on October 8, 2025. You must run `open-code-cli` to review the updated terms.\n\n',
       )
       await gracefulShutdown(1)
     }

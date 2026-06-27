@@ -266,7 +266,7 @@ function AskUserQuestionPermissionRequestBody(t0) {
   if ($[25] !== isInPlanMode || $[26] !== metadataSource || $[27] !== onDone || $[28] !== onReject || $[29] !== questions.length || $[30] !== toolUseConfirm) {
     t12 = () => {
       if (metadataSource) {
-        logEvent("tengu_ask_user_question_rejected", {
+        logEvent("open_code_cli_ask_user_question_rejected", {
           source: metadataSource as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
           questionCount: questions.length,
           isInPlanMode,
@@ -305,7 +305,7 @@ function AskUserQuestionPermissionRequestBody(t0) {
 
     Questions asked:\n${questionsWithAnswers}`;
       if (metadataSource) {
-        logEvent("tengu_ask_user_question_respond_to_claude", {
+        logEvent("open_code_cli_ask_user_question_respond_to_claude", {
           source: metadataSource as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
           questionCount: questions.length,
           isInPlanMode,
@@ -343,7 +343,7 @@ Stop asking clarifying questions and proceed to finish the plan with the informa
 
 Questions asked and answers provided:\n${questionsWithAnswers_0}`;
       if (metadataSource) {
-        logEvent("tengu_ask_user_question_finish_plan_interview", {
+        logEvent("open_code_cli_ask_user_question_finish_plan_interview", {
           source: metadataSource as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
           questionCount: questions.length,
           isInPlanMode,
@@ -370,7 +370,7 @@ Questions asked and answers provided:\n${questionsWithAnswers_0}`;
   if ($[48] !== allImageAttachments || $[49] !== isInPlanMode || $[50] !== metadataSource || $[51] !== onDone || $[52] !== questionStates || $[53] !== questions || $[54] !== toolUseConfirm) {
     t15 = async answersToSubmit => {
       if (metadataSource) {
-        logEvent("tengu_ask_user_question_accepted", {
+        logEvent("open_code_cli_ask_user_question_accepted", {
           source: metadataSource as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
           questionCount: questions.length,
           answerCount: Object.keys(answersToSubmit).length,

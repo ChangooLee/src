@@ -119,7 +119,7 @@ export function usePostCompactSurvey(messages, isLoading, t0, t1) {
       if (isFeedbackSurveyDisabled()) {
         return;
       }
-      if (isEnvTruthy(process.env.CLAUDE_CODE_DISABLE_FEEDBACK_SURVEY)) {
+      if (isEnvTruthy((process.env.OPEN_CODE_CLI_DISABLE_FEEDBACK_SURVEY ?? process.env.CLAUDE_CODE_DISABLE_FEEDBACK_SURVEY))) {
         return;
       }
       if (pendingCompactBoundaryUuid.current !== null) {
@@ -177,7 +177,7 @@ function _temp3(msg) {
 }
 function _temp2(appearanceId_0, selected) {
   const smCompactionEnabled_0 = shouldUseSessionMemoryCompaction();
-  logEvent("tengu_post_compact_survey_event", {
+  logEvent("open_code_cli_post_compact_survey_event", {
     event_type: "responded" as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
     appearance_id: appearanceId_0 as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
     response: selected as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
@@ -192,7 +192,7 @@ function _temp2(appearanceId_0, selected) {
 }
 function _temp(appearanceId) {
   const smCompactionEnabled = shouldUseSessionMemoryCompaction();
-  logEvent("tengu_post_compact_survey_event", {
+  logEvent("open_code_cli_post_compact_survey_event", {
     event_type: "appeared" as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
     appearance_id: appearanceId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
     session_memory_compaction_enabled: smCompactionEnabled as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS

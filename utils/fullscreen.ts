@@ -111,9 +111,9 @@ export function _resetTmuxControlModeProbeForTesting(): void {
  */
 export function isFullscreenEnvEnabled(): boolean {
   // Explicit user opt-out always wins.
-  if (isEnvDefinedFalsy(process.env.CLAUDE_CODE_NO_FLICKER)) return false
+  if (isEnvDefinedFalsy((process.env.OPEN_CODE_CLI_NO_FLICKER ?? process.env.CLAUDE_CODE_NO_FLICKER))) return false
   // Explicit opt-in overrides auto-detection (escape hatch).
-  if (isEnvTruthy(process.env.CLAUDE_CODE_NO_FLICKER)) return true
+  if (isEnvTruthy((process.env.OPEN_CODE_CLI_NO_FLICKER ?? process.env.CLAUDE_CODE_NO_FLICKER))) return true
   // Auto-disable under tmux -CC: alt-screen + mouse tracking corrupts
   // terminal state on double-click and mouse wheel is dead.
   if (isTmuxControlMode()) {
@@ -138,7 +138,7 @@ export function isFullscreenEnvEnabled(): boolean {
  * disables alt-screen and virtualized scrollback.
  */
 export function isMouseTrackingEnabled(): boolean {
-  return !isEnvTruthy(process.env.CLAUDE_CODE_DISABLE_MOUSE)
+  return !isEnvTruthy((process.env.OPEN_CODE_CLI_DISABLE_MOUSE ?? process.env.CLAUDE_CODE_DISABLE_MOUSE))
 }
 
 /**
@@ -149,7 +149,7 @@ export function isMouseTrackingEnabled(): boolean {
  * Fullscreen-specific — only reachable when CLAUDE_CODE_NO_FLICKER is active.
  */
 export function isMouseClicksDisabled(): boolean {
-  return isEnvTruthy(process.env.CLAUDE_CODE_DISABLE_MOUSE_CLICKS)
+  return isEnvTruthy((process.env.OPEN_CODE_CLI_DISABLE_MOUSE_CLICKS ?? process.env.CLAUDE_CODE_DISABLE_MOUSE_CLICKS))
 }
 
 /**

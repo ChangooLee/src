@@ -94,9 +94,9 @@ export function ConsoleOAuthFlow({
   // Log forced login method on mount
   useEffect(() => {
     if (forceLoginMethod === 'claudeai') {
-      logEvent('tengu_oauth_claudeai_forced', {});
+      logEvent('open_code_cli_oauth_claudeai_forced', {});
     } else if (forceLoginMethod === 'console') {
-      logEvent('tengu_oauth_console_forced', {});
+      logEvent('open_code_cli_oauth_console_forced', {});
     }
   }, [forceLoginMethod]);
 
@@ -110,7 +110,7 @@ export function ConsoleOAuthFlow({
 
   // Handle Enter to continue on success state
   useKeybinding('confirm:yes', () => {
-    logEvent('tengu_oauth_success', {
+    logEvent('open_code_cli_oauth_success', {
       loginWithClaudeAi
     });
     onDone();
@@ -169,7 +169,7 @@ export function ConsoleOAuthFlow({
       }
 
       // Track which path the user is taking (manual code entry)
-      logEvent('tengu_oauth_manual_entry', {});
+      logEvent('open_code_cli_oauth_manual_entry', {});
       oauthService.handleManualAuthCodeInput({
         authorizationCode,
         state
@@ -188,7 +188,7 @@ export function ConsoleOAuthFlow({
   }
   const startOAuth = useCallback(async () => {
     try {
-      logEvent('tengu_oauth_flow_start', {
+      logEvent('open_code_cli_oauth_flow_start', {
         loginWithClaudeAi
       });
       const result = await oauthService.startOAuthFlow(async url_0 => {
@@ -218,7 +218,7 @@ export function ConsoleOAuthFlow({
             state: 'idle'
           }
         });
-        logEvent('tengu_oauth_token_exchange_error', {
+        logEvent('open_code_cli_oauth_token_exchange_error', {
           error: err_1.message,
           ssl_error: sslHint_0 !== null
         });
@@ -255,7 +255,7 @@ export function ConsoleOAuthFlow({
           state: mode === 'setup-token' ? 'ready_to_start' : 'idle'
         }
       });
-      logEvent('tengu_oauth_error', {
+      logEvent('open_code_cli_oauth_error', {
         error: errorMessage as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
         ssl_error: sslHint !== null
       });
@@ -277,7 +277,7 @@ export function ConsoleOAuthFlow({
     if (mode === 'setup-token' && oauthStatus.state === 'success') {
       // Delay to ensure static content is fully rendered before exiting
       const timer_0 = setTimeout((loginWithClaudeAi_0, onDone_0) => {
-        logEvent('tengu_oauth_success', {
+        logEvent('open_code_cli_oauth_success', {
           loginWithClaudeAi: loginWithClaudeAi_0
         });
         // Don't clear terminal so the token remains visible
@@ -414,7 +414,7 @@ function OAuthStatusMessage(t0) {
         if ($[6] !== setLoginWithClaudeAi || $[7] !== setOAuthStatus) {
           t7 = <Box><Select options={t6} onChange={value_0 => {
               if (value_0 === "platform") {
-                logEvent("tengu_oauth_platform_selected", {});
+                logEvent("open_code_cli_oauth_platform_selected", {});
                 setOAuthStatus({
                   state: "platform_setup"
                 });
@@ -423,10 +423,10 @@ function OAuthStatusMessage(t0) {
                   state: "ready_to_start"
                 });
                 if (value_0 === "claudeai") {
-                  logEvent("tengu_oauth_claudeai_selected", {});
+                  logEvent("open_code_cli_oauth_claudeai_selected", {});
                   setLoginWithClaudeAi(true);
                 } else {
-                  logEvent("tengu_oauth_console_selected", {});
+                  logEvent("open_code_cli_oauth_console_selected", {});
                   setLoginWithClaudeAi(false);
                 }
               }

@@ -87,7 +87,7 @@ export class OAuthService {
 
     // Check if the automatic flow is still active (has a pending response)
     const isAutomaticFlow = this.authCodeListener?.hasPendingResponse() ?? false
-    logEvent('tengu_oauth_auth_code_received', { automatic: isAutomaticFlow })
+    logEvent('open_code_cli_oauth_auth_code_received', { automatic: isAutomaticFlow })
 
     try {
       // Exchange authorization code for tokens

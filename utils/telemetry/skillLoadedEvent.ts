@@ -20,7 +20,7 @@ export async function logSkillsLoaded(
   for (const skill of skills) {
     if (skill.type !== 'prompt') continue
 
-    logEvent('tengu_skill_loaded', {
+    logEvent('open_code_cli_skill_loaded', {
       // _PROTO_skill_name routes to the privileged skill_name BQ column.
       // Unredacted names don't go in additional_metadata.
       _PROTO_skill_name:

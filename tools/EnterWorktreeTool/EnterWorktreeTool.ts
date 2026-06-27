@@ -101,7 +101,7 @@ export const EnterWorktreeTool: Tool<InputSchema, Output> = buildTool({
     clearMemoryFileCaches()
     getPlansDirectory.cache.clear?.()
 
-    logEvent('tengu_worktree_created', {
+    logEvent('open_code_cli_worktree_created', {
       mid_session: true,
     })
 

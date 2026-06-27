@@ -177,7 +177,7 @@ export async function createAndUploadGitBundle(
     { cwd: gitRoot },
   )
   if (refCheck.code === 0 && refCheck.stdout.trim() === '') {
-    logEvent('tengu_ccr_bundle_upload', {
+    logEvent('open_code_cli_ccr_bundle_upload', {
       outcome:
         'empty_repo' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
     })
@@ -232,7 +232,7 @@ export async function createAndUploadGitBundle(
 
     if (!bundle.ok) {
       logForDebugging(`[gitBundle] ${bundle.error}`)
-      logEvent('tengu_ccr_bundle_upload', {
+      logEvent('open_code_cli_ccr_bundle_upload', {
         outcome:
           bundle.failReason as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
         max_bytes: maxBytes,
@@ -250,7 +250,7 @@ export async function createAndUploadGitBundle(
     })
 
     if (!upload.success) {
-      logEvent('tengu_ccr_bundle_upload', {
+      logEvent('open_code_cli_ccr_bundle_upload', {
         outcome:
           'failed' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
       })
@@ -260,7 +260,7 @@ export async function createAndUploadGitBundle(
     logForDebugging(
       `[gitBundle] Uploaded ${upload.size} bytes as file_id ${upload.fileId}`,
     )
-    logEvent('tengu_ccr_bundle_upload', {
+    logEvent('open_code_cli_ccr_bundle_upload', {
       outcome:
         'success' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
       size_bytes: upload.size,

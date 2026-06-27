@@ -124,7 +124,7 @@ function logClassifierResultForAnts(
     return
   }
 
-  logEvent('tengu_internal_bash_classifier_result', {
+  logEvent('open_code_cli_internal_bash_classifier_result', {
     behavior:
       behavior as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
     descriptions: jsonStringify(
@@ -1216,7 +1216,7 @@ export async function checkCommandAndSuggestRules(
   // validators (backslash-escaped operators, etc.) would only add FPs.
   if (
     !astParseSucceeded &&
-    !isEnvTruthy(process.env.CLAUDE_CODE_DISABLE_COMMAND_INJECTION_CHECK)
+    !isEnvTruthy((process.env.OPEN_CODE_CLI_DISABLE_COMMAND_INJECTION_CHECK ?? process.env.CLAUDE_CODE_DISABLE_COMMAND_INJECTION_CHECK))
   ) {
     const safetyResult = await bashCommandIsSafeAsync(input.command)
 
@@ -1676,7 +1676,7 @@ export async function bashToolHasPermission(
   // When tree-sitter WASM is unavailable OR the injection check is disabled
   // via env var, we fall back to the old path (legacy gate at ~1370 runs).
   const injectionCheckDisabled = isEnvTruthy(
-    process.env.CLAUDE_CODE_DISABLE_COMMAND_INJECTION_CHECK,
+    (process.env.OPEN_CODE_CLI_DISABLE_COMMAND_INJECTION_CHECK ?? process.env.CLAUDE_CODE_DISABLE_COMMAND_INJECTION_CHECK),
   )
   // GrowthBook killswitch for shadow mode — when off, skip the native parse
   // entirely. Computed once; feature() must stay inline in the ternary below.
@@ -1724,7 +1724,7 @@ export async function bashToolHasPermission(
         (tsSubs.length !== legacySubs.length ||
           tsSubs.some((s, i) => s !== legacySubs[i]))
     }
-    logEvent('tengu_tree_sitter_shadow', {
+    logEvent('open_code_cli_tree_sitter_shadow', {
       available,
       astTooComplex: tooComplex,
       astSemanticFail: semanticFail,
@@ -1749,7 +1749,7 @@ export async function bashToolHasPermission(
       type: 'other' as const,
       reason: astResult.reason,
     }
-    logEvent('tengu_bash_ast_too_complex', {
+    logEvent('open_code_cli_bash_ast_too_complex', {
       nodeTypeId: nodeTypeId(astResult.nodeType),
     })
     return {
@@ -2084,7 +2084,7 @@ export async function bashToolHasPermission(
   // same question: "can splitCommand be trusted on this input?"
   if (
     astSubcommands === null &&
-    !isEnvTruthy(process.env.CLAUDE_CODE_DISABLE_COMMAND_INJECTION_CHECK)
+    !isEnvTruthy((process.env.OPEN_CODE_CLI_DISABLE_COMMAND_INJECTION_CHECK ?? process.env.CLAUDE_CODE_DISABLE_COMMAND_INJECTION_CHECK))
   ) {
     const originalCommandSafetyResult = await bashCommandIsSafeAsync(
       input.command,
@@ -2343,7 +2343,7 @@ export async function bashToolHasPermission(
   let hasPossibleCommandInjection = false
   if (
     astSubcommands === null &&
-    !isEnvTruthy(process.env.CLAUDE_CODE_DISABLE_COMMAND_INJECTION_CHECK)
+    !isEnvTruthy((process.env.OPEN_CODE_CLI_DISABLE_COMMAND_INJECTION_CHECK ?? process.env.CLAUDE_CODE_DISABLE_COMMAND_INJECTION_CHECK))
   ) {
     // CC-643: Batch divergence telemetry into a single logEvent. The per-sub
     // logEvent was the hot-path syscall driver (each call → /proc/self/stat
@@ -2359,7 +2359,7 @@ export async function bashToolHasPermission(
       r => r.behavior !== 'passthrough',
     )
     if (divergenceCount > 0) {
-      logEvent('tengu_tree_sitter_security_divergence', {
+      logEvent('open_code_cli_tree_sitter_security_divergence', {
         quoteContextDivergence: true,
         count: divergenceCount,
       })

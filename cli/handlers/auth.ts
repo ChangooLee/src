@@ -80,7 +80,7 @@ export async function installOAuthTokens(tokens: OAuthTokens): Promise<void> {
   clearOAuthTokenCache()
 
   if (storageResult.warning) {
-    logEvent('tengu_oauth_storage_warning', {
+    logEvent('open_code_cli_oauth_storage_warning', {
       warning:
         storageResult.warning as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
     })
@@ -137,9 +137,9 @@ export async function authLogin({
 
   // Fast path: if a refresh token is provided via env var, skip the browser
   // OAuth flow and exchange it directly for tokens.
-  const envRefreshToken = process.env.CLAUDE_CODE_OAUTH_REFRESH_TOKEN
+  const envRefreshToken = (process.env.OPEN_CODE_CLI_OAUTH_REFRESH_TOKEN ?? process.env.CLAUDE_CODE_OAUTH_REFRESH_TOKEN)
   if (envRefreshToken) {
-    const envScopes = process.env.CLAUDE_CODE_OAUTH_SCOPES
+    const envScopes = (process.env.OPEN_CODE_CLI_OAUTH_SCOPES ?? process.env.CLAUDE_CODE_OAUTH_SCOPES)
     if (!envScopes) {
       process.stderr.write(
         'CLAUDE_CODE_OAUTH_SCOPES is required when using CLAUDE_CODE_OAUTH_REFRESH_TOKEN.\n' +
@@ -152,7 +152,7 @@ export async function authLogin({
     const scopes = envScopes.split(/\s+/).filter(Boolean)
 
     try {
-      logEvent('tengu_login_from_refresh_token', {})
+      logEvent('open_code_cli_login_from_refresh_token', {})
 
       const tokens = await refreshOAuthToken(envRefreshToken, { scopes })
       await installOAuthTokens(tokens)
@@ -170,7 +170,7 @@ export async function authLogin({
         return { ...current, hasCompletedOnboarding: true }
       })
 
-      logEvent('tengu_oauth_success', {
+      logEvent('open_code_cli_oauth_success', {
         loginWithClaudeAi: shouldUseClaudeAIAuth(tokens.scopes),
       })
       process.stdout.write('Login successful.\n')
@@ -190,7 +190,7 @@ export async function authLogin({
   const oauthService = new OAuthService()
 
   try {
-    logEvent('tengu_oauth_flow_start', { loginWithClaudeAi })
+    logEvent('open_code_cli_oauth_flow_start', { loginWithClaudeAi })
 
     const result = await oauthService.startOAuthFlow(
       async url => {
@@ -213,7 +213,7 @@ export async function authLogin({
       process.exit(1)
     }
 
-    logEvent('tengu_oauth_success', { loginWithClaudeAi })
+    logEvent('open_code_cli_oauth_success', { loginWithClaudeAi })
 
     process.stdout.write('Login successful.\n')
     process.exit(0)

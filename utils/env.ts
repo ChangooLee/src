@@ -339,7 +339,7 @@ export const env = {
  * process.platform reports the container OS but the actual host platform differs.
  */
 export function getHostPlatformForAnalytics(): Platform {
-  const override = process.env.CLAUDE_CODE_HOST_PLATFORM
+  const override = (process.env.OPEN_CODE_CLI_HOST_PLATFORM ?? process.env.CLAUDE_CODE_HOST_PLATFORM)
   if (override === 'win32' || override === 'darwin' || override === 'linux') {
     return override
   }

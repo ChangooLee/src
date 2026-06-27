@@ -150,21 +150,21 @@ export function PermissionPrompt(t0) {
       if (type_0 === "accept") {
         if (acceptInputMode) {
           setAcceptInputMode(false);
-          logEvent("tengu_accept_feedback_mode_collapsed", analyticsProps);
+          logEvent("open_code_cli_accept_feedback_mode_collapsed", analyticsProps);
         } else {
           setAcceptInputMode(true);
           setAcceptFeedbackModeEntered(true);
-          logEvent("tengu_accept_feedback_mode_entered", analyticsProps);
+          logEvent("open_code_cli_accept_feedback_mode_entered", analyticsProps);
         }
       } else {
         if (type_0 === "reject") {
           if (rejectInputMode) {
             setRejectInputMode(false);
-            logEvent("tengu_reject_feedback_mode_collapsed", analyticsProps);
+            logEvent("open_code_cli_reject_feedback_mode_collapsed", analyticsProps);
           } else {
             setRejectInputMode(true);
             setRejectFeedbackModeEntered(true);
-            logEvent("tengu_reject_feedback_mode_entered", analyticsProps);
+            logEvent("open_code_cli_reject_feedback_mode_entered", analyticsProps);
           }
         }
       }
@@ -201,10 +201,10 @@ export function PermissionPrompt(t0) {
           entered_feedback_mode: option_0.feedbackConfig.type === "accept" ? acceptFeedbackModeEntered : rejectFeedbackModeEntered
         };
         if (option_0.feedbackConfig.type === "accept") {
-          logEvent("tengu_accept_submitted", analyticsProps_0);
+          logEvent("open_code_cli_accept_submitted", analyticsProps_0);
         } else {
           if (option_0.feedbackConfig.type === "reject") {
-            logEvent("tengu_reject_submitted", analyticsProps_0);
+            logEvent("open_code_cli_reject_submitted", analyticsProps_0);
           }
         }
       }
@@ -251,7 +251,7 @@ export function PermissionPrompt(t0) {
   let t7;
   if ($[31] !== onCancel || $[32] !== setAppState) {
     t7 = () => {
-      logEvent("tengu_permission_request_escape", {});
+      logEvent("open_code_cli_permission_request_escape", {});
       setAppState(_temp);
       onCancel?.();
     };

@@ -35,8 +35,8 @@ export type ClientSideInstruction = {
  * wins over both ant bypass and the GrowthBook gate.
  */
 export function isMcpInstructionsDeltaEnabled(): boolean {
-  if (isEnvTruthy(process.env.CLAUDE_CODE_MCP_INSTR_DELTA)) return true
-  if (isEnvDefinedFalsy(process.env.CLAUDE_CODE_MCP_INSTR_DELTA)) return false
+  if (isEnvTruthy((process.env.OPEN_CODE_CLI_MCP_INSTR_DELTA ?? process.env.CLAUDE_CODE_MCP_INSTR_DELTA))) return true
+  if (isEnvDefinedFalsy((process.env.OPEN_CODE_CLI_MCP_INSTR_DELTA ?? process.env.CLAUDE_CODE_MCP_INSTR_DELTA))) return false
   return (
     process.env.USER_TYPE === 'ant' ||
     getFeatureValue_CACHED_MAY_BE_STALE('tengu_basalt_3kr', false)
@@ -111,7 +111,7 @@ export function getMcpInstructionsDelta(
 
   // Same diagnostic fields as tengu_deferred_tools_pool_change — same
   // scan-fails-in-prod bug, same attachment persistence path.
-  logEvent('tengu_mcp_instructions_pool_change', {
+  logEvent('open_code_cli_mcp_instructions_pool_change', {
     addedCount: added.length,
     removedCount: removed.length,
     priorAnnouncedCount: announced.size,

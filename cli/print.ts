@@ -494,7 +494,7 @@ export async function runHeadless(
 ): Promise<void> {
   if (
     process.env.USER_TYPE === 'ant' &&
-    isEnvTruthy(process.env.CLAUDE_CODE_EXIT_AFTER_FIRST_RENDER)
+    isEnvTruthy((process.env.OPEN_CODE_CLI_EXIT_AFTER_FIRST_RENDER ?? process.env.CLAUDE_CODE_EXIT_AFTER_FIRST_RENDER))
   ) {
     process.stderr.write(
       `\nStartup time: ${Math.round(process.uptime() * 1000)}ms\n`,
@@ -540,7 +540,7 @@ export async function runHeadless(
     (feature('PROACTIVE') || feature('KAIROS')) &&
     proactiveModule &&
     !proactiveModule.isProactiveActive() &&
-    isEnvTruthy(process.env.CLAUDE_CODE_PROACTIVE)
+    isEnvTruthy((process.env.OPEN_CODE_CLI_PROACTIVE ?? process.env.CLAUDE_CODE_PROACTIVE))
   ) {
     proactiveModule.activateProactive('command')
   }
@@ -856,7 +856,7 @@ export async function runHeadless(
   // Build flag gates this out of external builds; env var is the runtime opt-in for ant builds
   const transformToStreamlined =
     feature('STREAMLINED_OUTPUT') &&
-    isEnvTruthy(process.env.CLAUDE_CODE_STREAMLINED_OUTPUT) &&
+    isEnvTruthy((process.env.OPEN_CODE_CLI_STREAMLINED_OUTPUT ?? process.env.CLAUDE_CODE_STREAMLINED_OUTPUT)) &&
     options.outputFormat === 'stream-json'
       ? createStreamlinedTransformer()
       : null
@@ -1170,7 +1170,7 @@ function runHeadlessStreaming(
   // Auto-resume interrupted turns on restart so CC continues from where it
   // left off without requiring the SDK to re-send the prompt.
   const resumeInterruptedTurnEnv =
-    process.env.CLAUDE_CODE_RESUME_INTERRUPTED_TURN
+    (process.env.OPEN_CODE_CLI_RESUME_INTERRUPTED_TURN ?? process.env.CLAUDE_CODE_RESUME_INTERRUPTED_TURN)
   if (
     turnInterruptionState &&
     turnInterruptionState.kind !== 'none' &&
@@ -1288,7 +1288,7 @@ function runHeadlessStreaming(
 
             const mode = request.params.mode === 'url' ? 'url' : 'form'
 
-            logEvent('tengu_mcp_elicitation_shown', {
+            logEvent('open_code_cli_mcp_elicitation_shown', {
               mode: mode as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
             })
 
@@ -1303,7 +1303,7 @@ function runHeadlessStreaming(
                 serverName,
                 `Elicitation resolved by hook: ${jsonStringify(hookResponse)}`,
               )
-              logEvent('tengu_mcp_elicitation_response', {
+              logEvent('open_code_cli_mcp_elicitation_response', {
                 mode: mode as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
                 action:
                   hookResponse.action as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
@@ -1346,7 +1346,7 @@ function runHeadlessStreaming(
               elicitationId,
             )
 
-            logEvent('tengu_mcp_elicitation_response', {
+            logEvent('open_code_cli_mcp_elicitation_response', {
               mode: mode as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
               action:
                 result.action as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
@@ -1737,7 +1737,7 @@ function runHeadlessStreaming(
   // --bare / SIMPLE: skip plugin install. Scripted calls don't add plugins
   // mid-session; the next interactive run reconciles.
   if (!isBareMode()) {
-    if (isEnvTruthy(process.env.CLAUDE_CODE_SYNC_PLUGIN_INSTALL)) {
+    if (isEnvTruthy((process.env.OPEN_CODE_CLI_SYNC_PLUGIN_INSTALL ?? process.env.CLAUDE_CODE_SYNC_PLUGIN_INSTALL))) {
       pluginInstallPromise = installPluginsAndApplyMcpInBackground()
     } else {
       void installPluginsAndApplyMcpInBackground()
@@ -1886,7 +1886,7 @@ function runHeadlessStreaming(
     // deadline and proceeds without plugins on timeout (logging an error).
     if (pluginInstallPromise) {
       const timeoutMs = parseInt(
-        process.env.CLAUDE_CODE_SYNC_PLUGIN_INSTALL_TIMEOUT_MS || '',
+        (process.env.OPEN_CODE_CLI_SYNC_PLUGIN_INSTALL_TIMEOUT_MS ?? process.env.CLAUDE_CODE_SYNC_PLUGIN_INSTALL_TIMEOUT_MS) || '',
         10,
       )
       if (timeoutMs > 0) {
@@ -1898,7 +1898,7 @@ function runHeadlessStreaming(
               `CLAUDE_CODE_SYNC_PLUGIN_INSTALL: plugin installation timed out after ${timeoutMs}ms`,
             ),
           )
-          logEvent('tengu_sync_plugin_install_timeout', {
+          logEvent('open_code_cli_sync_plugin_install_timeout', {
             timeout_ms: timeoutMs,
           })
         }
@@ -2097,7 +2097,7 @@ function runHeadlessStreaming(
           const input = command.value
 
           if (structuredIO instanceof RemoteIO && command.mode === 'prompt') {
-            logEvent('tengu_bridge_message_received', {
+            logEvent('open_code_cli_bridge_message_received', {
               is_repl: false,
             })
           }
@@ -2275,7 +2275,7 @@ function runHeadlessStreaming(
           // Generate and emit prompt suggestion for SDK consumers
           if (
             options.promptSuggestions &&
-            !isEnvDefinedFalsy(process.env.CLAUDE_CODE_ENABLE_PROMPT_SUGGESTION)
+            !isEnvDefinedFalsy((process.env.OPEN_CODE_CLI_ENABLE_PROMPT_SUGGESTION ?? process.env.CLAUDE_CODE_ENABLE_PROMPT_SUGGESTION))
           ) {
             // TS narrows suggestionState to never in the while loop body;
             // cast via unknown to reset narrowing.
@@ -3527,7 +3527,7 @@ function runHeadlessStreaming(
           // is GC'd — no fd or port is held.
           claudeOAuth?.service.cleanup()
 
-          logEvent('tengu_oauth_flow_start', {
+          logEvent('open_code_cli_oauth_flow_start', {
             loginWithClaudeAi: loginWithClaudeAi ?? true,
           })
 
@@ -3562,7 +3562,7 @@ function runHeadlessStreaming(
               // getClaudeAIOAuthTokens in this process is invalidated; the
               // next API call re-reads keychain/file and works. No respawn.
               await installOAuthTokens(tokens)
-              logEvent('tengu_oauth_success', {
+              logEvent('open_code_cli_oauth_success', {
                 loginWithClaudeAi: loginWithClaudeAi ?? true,
               })
             })
@@ -4725,7 +4725,7 @@ function handleChannelEnable(
   const pluginId =
     `${entry.name}@${entry.marketplace}` as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS
   logMCPDebug(serverName, 'Channel notifications registered')
-  logEvent('tengu_mcp_channel_enable', { plugin: pluginId })
+  logEvent('open_code_cli_mcp_channel_enable', { plugin: pluginId })
 
   // Identical enqueue shape to the interactive register block in
   // useManageMCPConnections. drainCommandQueue processes it between turns —
@@ -4739,7 +4739,7 @@ function handleChannelEnable(
         serverName,
         `notifications/claude/channel: ${content.slice(0, 80)}`,
       )
-      logEvent('tengu_mcp_channel_message', {
+      logEvent('open_code_cli_mcp_channel_message', {
         content_length: content.length,
         meta_key_count: Object.keys(meta ?? {}).length,
         entry_kind:
@@ -4815,7 +4815,7 @@ function reregisterChannelHandlerAfterReconnect(
         connection.name,
         `notifications/claude/channel: ${content.slice(0, 80)}`,
       )
-      logEvent('tengu_mcp_channel_message', {
+      logEvent('open_code_cli_mcp_channel_message', {
         content_length: content.length,
         meta_key_count: Object.keys(meta ?? {}).length,
         entry_kind:
@@ -4908,7 +4908,7 @@ async function loadInitialMessages(
   // Handle continue in print mode
   if (options.continue) {
     try {
-      logEvent('tengu_continue_print', {})
+      logEvent('open_code_cli_continue_print', {})
 
       const result = await loadConversationForResume(
         undefined /* sessionId */,
@@ -4995,7 +4995,7 @@ async function loadInitialMessages(
         )
       }
 
-      logEvent('tengu_teleport_print', {})
+      logEvent('open_code_cli_teleport_print', {})
 
       if (typeof options.teleport !== 'string') {
         throw new Error('No session ID provided for teleport')
@@ -5029,7 +5029,7 @@ async function loadInitialMessages(
   // URLs are [ANT-ONLY]
   if (options.resume) {
     try {
-      logEvent('tengu_resume_print', {})
+      logEvent('open_code_cli_resume_print', {})
 
       // In print mode - we require a valid session ID, JSONL file or URL
       const parsedSessionId = parseSessionIdentifier(
@@ -5047,7 +5047,7 @@ async function loadInitialMessages(
       }
 
       // Hydrate local transcript from remote before loading
-      if (isEnvTruthy(process.env.CLAUDE_CODE_USE_CCR_V2)) {
+      if (isEnvTruthy((process.env.OPEN_CODE_CLI_USE_CCR_V2 ?? process.env.CLAUDE_CODE_USE_CCR_V2))) {
         // Await restore alongside hydration so SSE catchup lands on
         // restored state, not a fresh default.
         const [, metadata] = await Promise.all([
@@ -5086,7 +5086,7 @@ async function loadInitialMessages(
         // For URL-based or CCR v2 resume, start with empty session (it was hydrated but empty)
         if (
           parsedSessionId.isUrl ||
-          isEnvTruthy(process.env.CLAUDE_CODE_USE_CCR_V2)
+          isEnvTruthy((process.env.OPEN_CODE_CLI_USE_CCR_V2 ?? process.env.CLAUDE_CODE_USE_CCR_V2))
         ) {
           // Execute SessionStart hooks for startup since we're starting a new session
           return {

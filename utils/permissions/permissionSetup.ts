@@ -752,7 +752,7 @@ export function initialPermissionModeFromCLI({
         `settings defaultMode "${settingsMode}" is not supported in OPEN_CODE_CLI_REMOTE — only acceptEdits and plan are allowed`,
         { level: 'warn' },
       )
-      logEvent('tengu_ccr_unsupported_default_mode_ignored', {
+      logEvent('open_code_cli_ccr_unsupported_default_mode_ignored', {
         mode: settingsMode as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
       })
     }

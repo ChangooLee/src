@@ -285,7 +285,7 @@ async function maybePersistLargeToolResult(
   // shell commands, MCP servers returning content:[], REPL statements, etc.).
   // Inject a short marker so the model always has something to react to.
   if (isToolResultContentEmpty(content)) {
-    logEvent('tengu_tool_empty_result', {
+    logEvent('open_code_cli_tool_empty_result', {
       toolName: sanitizeToolNameForAnalytics(toolName),
     })
     return {
@@ -321,7 +321,7 @@ async function maybePersistLargeToolResult(
   const message = buildLargeToolResultMessage(result)
 
   // Log analytics
-  logEvent('tengu_tool_result_persisted', {
+  logEvent('open_code_cli_tool_result_persisted', {
     toolName: sanitizeToolNameForAnalytics(toolName),
     originalSizeBytes: result.originalSize,
     persistedSizeBytes: message.length,
@@ -872,7 +872,7 @@ export async function enforceToolResultBudget(
       toolUseId: candidate.toolUseId,
       replacement: replacement.content,
     })
-    logEvent('tengu_tool_result_persisted_message_budget', {
+    logEvent('open_code_cli_tool_result_persisted_message_budget', {
       originalSizeBytes: replacement.originalSize,
       persistedSizeBytes: replacement.content.length,
       estimatedOriginalTokens: Math.ceil(
@@ -894,7 +894,7 @@ export async function enforceToolResultBudget(
         `across ${messagesOverBudget} over-budget message(s), ` +
         `shed ~${formatFileSize(replacedSize)}, ${reappliedCount} re-applied`,
     )
-    logEvent('tengu_message_level_tool_result_budget_enforced', {
+    logEvent('open_code_cli_message_level_tool_result_budget_enforced', {
       resultsPersisted: newlyReplaced.length,
       messagesOverBudget,
       replacedSizeBytes: replacedSize,

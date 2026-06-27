@@ -159,7 +159,7 @@ export function GlobalSearchDialog(t0) {
   if ($[7] !== matches.length || $[8] !== onDone) {
     t7 = m_3 => {
       const opened = openFileInExternalEditor(resolvePath(getCwd(), m_3.file), m_3.line);
-      logEvent("tengu_global_search_select", {
+      logEvent("open_code_cli_global_search_select", {
         result_count: matches.length,
         opened_editor: opened
       });
@@ -176,7 +176,7 @@ export function GlobalSearchDialog(t0) {
   if ($[10] !== matches.length || $[11] !== onDone || $[12] !== onInsert) {
     t8 = (m_4, mention) => {
       onInsert(mention ? `@${m_4.file}#L${m_4.line} ` : `${m_4.file}:${m_4.line} `);
-      logEvent("tengu_global_search_insert", {
+      logEvent("open_code_cli_global_search_insert", {
         result_count: matches.length,
         mention
       });

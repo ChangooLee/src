@@ -202,7 +202,7 @@ export function createCronScheduler(
         // removeCronTasks + chokidar reload chain is in progress.
         nextFireAt.set(t.id, Infinity)
       }
-      logEvent('tengu_scheduled_task_missed', {
+      logEvent('open_code_cli_scheduled_task_missed', {
         count: missed.length,
         taskIds: missed
           .map(t => t.id)
@@ -285,7 +285,7 @@ export function createCronScheduler(
       logForDebugging(
         `[ScheduledTasks] firing ${t.id}${t.recurring ? ' (recurring)' : ''}`,
       )
-      logEvent('tengu_scheduled_task_fire', {
+      logEvent('open_code_cli_scheduled_task_fire', {
         recurring: t.recurring ?? false,
         taskId:
           t.id as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
@@ -305,7 +305,7 @@ export function createCronScheduler(
         logForDebugging(
           `[ScheduledTasks] recurring task ${t.id} aged out (${ageHours}h since creation), deleting after final fire`,
         )
-        logEvent('tengu_scheduled_task_expired', {
+        logEvent('open_code_cli_scheduled_task_expired', {
           taskId:
             t.id as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
           ageHours,

@@ -172,7 +172,7 @@ function logMemoryDirCounts(
           subdirCount++
         }
       }
-      logEvent('tengu_memdir_loaded', {
+      logEvent('open_code_cli_memdir_loaded', {
         ...baseMetadata,
         total_file_count: fileCount,
         total_subdir_count: subdirCount,
@@ -180,7 +180,7 @@ function logMemoryDirCounts(
     },
     () => {
       // Directory unreadable — log without counts
-      logEvent('tengu_memdir_loaded', baseMetadata)
+      logEvent('open_code_cli_memdir_loaded', baseMetadata)
     },
   )
 }
@@ -490,7 +490,7 @@ export async function loadMemoryPrompt(): Promise<string | null> {
     ).join('\n')
   }
 
-  logEvent('tengu_memdir_disabled', {
+  logEvent('open_code_cli_memdir_disabled', {
     disabled_by_env_var: isEnvTruthy(
       getOpenCodeCliEnv('DISABLE_AUTO_MEMORY'),
     ),
@@ -502,7 +502,7 @@ export async function loadMemoryPrompt(): Promise<string | null> {
   // checks isAutoMemoryEnabled() first, which is definitionally false in this
   // branch. We want "was this user in the team-memory cohort at all."
   if (getFeatureValue_CACHED_MAY_BE_STALE('tengu_herring_clock', false)) {
-    logEvent('tengu_team_memdir_disabled', {})
+    logEvent('open_code_cli_team_memdir_disabled', {})
   }
   return null
 }

@@ -1,6 +1,6 @@
 /**
  * MCP subcommand handlers — extracted from main.tsx for lazy loading.
- * These are dynamically imported only when the corresponding `claude mcp *` command runs.
+ * These are dynamically imported only when the corresponding `open-code-cli mcp *` command runs.
  */
 
 import { stat } from 'fs/promises';
@@ -47,7 +47,7 @@ export async function mcpServeHandler({
   verbose?: boolean;
 }): Promise<void> {
   const providedCwd = cwd();
-  logEvent('tengu_mcp_start', {});
+  logEvent('open_code_cli_mcp_start', {});
   try {
     await stat(providedCwd);
   } catch (error) {
@@ -85,7 +85,7 @@ export async function mcpRemoveHandler(name: string, options: {
   try {
     if (options.scope) {
       const scope = ensureConfigScope(options.scope);
-      logEvent('tengu_mcp_delete', {
+      logEvent('open_code_cli_mcp_delete', {
         name: name as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
         scope: scope as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS
       });
@@ -115,7 +115,7 @@ export async function mcpRemoveHandler(name: string, options: {
     } else if (scopes.length === 1) {
       // Server exists in only one scope, remove it
       const scope = scopes[0]!;
-      logEvent('tengu_mcp_delete', {
+      logEvent('open_code_cli_mcp_delete', {
         name: name as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
         scope: scope as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS
       });
@@ -131,7 +131,7 @@ export async function mcpRemoveHandler(name: string, options: {
       });
       process.stderr.write('\nTo remove from a specific scope, use:\n');
       scopes.forEach(scope => {
-        process.stderr.write(`  claude mcp remove "${name}" -s ${scope}\n`);
+        process.stderr.write(`  open-code-cli mcp remove "${name}" -s ${scope}\n`);
       });
       cliError();
     }
@@ -142,13 +142,13 @@ export async function mcpRemoveHandler(name: string, options: {
 
 // mcp list (lines 4641–4688)
 export async function mcpListHandler(): Promise<void> {
-  logEvent('tengu_mcp_list', {});
+  logEvent('open_code_cli_mcp_list', {});
   const {
     servers: configs
   } = await getAllMcpConfigs();
   if (Object.keys(configs).length === 0) {
     // biome-ignore lint/suspicious/noConsole:: intentional console output
-    console.log('No MCP servers configured. Use `claude mcp add` to add a server.');
+    console.log('No MCP servers configured. Use `open-code-cli mcp add` to add a server.');
   } else {
     // biome-ignore lint/suspicious/noConsole:: intentional console output
     console.log('Checking MCP server health...\n');
@@ -191,7 +191,7 @@ export async function mcpListHandler(): Promise<void> {
 
 // mcp get (lines 4694–4786)
 export async function mcpGetHandler(name: string): Promise<void> {
-  logEvent('tengu_mcp_get', {
+  logEvent('open_code_cli_mcp_get', {
     name: name as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS
   });
   const server = getMcpConfigByName(name);
@@ -276,7 +276,7 @@ export async function mcpGetHandler(name: string): Promise<void> {
     }
   }
   // biome-ignore lint/suspicious/noConsole:: intentional console output
-  console.log(`\nTo remove this server, run: claude mcp remove "${name}" -s ${server.scope}`);
+  console.log(`\nTo remove this server, run: open-code-cli mcp remove "${name}" -s ${server.scope}`);
   // Use gracefulShutdown to properly clean up MCP server connections
   // (process.exit bypasses cleanup handlers, leaving child processes orphaned)
   await gracefulShutdown(0);
@@ -302,7 +302,7 @@ export async function mcpAddJsonHandler(name: string, json: string, options: {
         url: parsedJson.url
       }, clientSecret);
     }
-    logEvent('tengu_mcp_add', {
+    logEvent('open_code_cli_mcp_add', {
       scope: scope as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
       source: 'json' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
       type: transportType as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS
@@ -320,7 +320,7 @@ export async function mcpAddFromDesktopHandler(options: {
   try {
     const scope = ensureConfigScope(options.scope);
     const platform = getPlatform();
-    logEvent('tengu_mcp_add', {
+    logEvent('open_code_cli_mcp_add', {
       scope: scope as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
       platform: platform as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
       source: 'desktop' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS
@@ -350,7 +350,7 @@ export async function mcpAddFromDesktopHandler(options: {
 
 // mcp reset-project-choices (lines 4935–4952)
 export async function mcpResetChoicesHandler(): Promise<void> {
-  logEvent('tengu_mcp_reset_mcpjson_choices', {});
+  logEvent('open_code_cli_mcp_reset_mcpjson_choices', {});
   saveCurrentProjectConfig(current => ({
     ...current,
     enabledMcpjsonServers: [],

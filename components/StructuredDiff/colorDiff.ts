@@ -16,7 +16,7 @@ export type ColorModuleUnavailableReason = 'env'
  * disable it is via the env var.
  */
 export function getColorModuleUnavailableReason(): ColorModuleUnavailableReason | null {
-  if (isEnvDefinedFalsy(process.env.CLAUDE_CODE_SYNTAX_HIGHLIGHT)) {
+  if (isEnvDefinedFalsy((process.env.OPEN_CODE_CLI_SYNTAX_HIGHLIGHT ?? process.env.CLAUDE_CODE_SYNTAX_HIGHLIGHT))) {
     return 'env'
   }
   return null

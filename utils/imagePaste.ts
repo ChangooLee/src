@@ -34,7 +34,7 @@ function getClipboardCommands() {
   // Platform-specific temporary file paths
   // Use CLAUDE_CODE_TMPDIR if set, otherwise fall back to platform defaults
   const baseTmpDir =
-    process.env.CLAUDE_CODE_TMPDIR ||
+    (process.env.OPEN_CODE_CLI_TMPDIR ?? process.env.CLAUDE_CODE_TMPDIR) ||
     (platform === 'win32' ? process.env.TEMP || 'C:\\Temp' : '/tmp')
   const screenshotFilename = 'claude_cli_latest_screenshot.png'
   const tempPaths: Record<SupportedPlatform, string> = {

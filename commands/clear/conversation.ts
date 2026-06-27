@@ -77,7 +77,7 @@ export async function clearConversation({
   // Signal to inference that this conversation's cache can be evicted.
   const lastRequestId = getLastMainRequestId()
   if (lastRequestId) {
-    logEvent('tengu_cache_eviction_hint', {
+    logEvent('open_code_cli_cache_eviction_hint', {
       scope:
         'conversation_clear' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
       last_request_id:
@@ -203,7 +203,7 @@ export async function clearConversation({
   // Set the old session as parent for analytics lineage tracking
   regenerateSessionId({ setCurrentAsParent: true })
   // Update the environment variable so subprocesses use the new session ID
-  if (process.env.USER_TYPE === 'ant' && process.env.CLAUDE_CODE_SESSION_ID) {
+  if (process.env.USER_TYPE === 'ant' && (process.env.OPEN_CODE_CLI_SESSION_ID ?? process.env.CLAUDE_CODE_SESSION_ID)) {
     setOpenCodeCliEnv('SESSION_ID', getSessionId())
   }
   await resetSessionFilePointer()

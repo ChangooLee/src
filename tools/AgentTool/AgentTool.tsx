@@ -220,7 +220,7 @@ export const AgentTool = buildTool({
 
     // Use inline env check instead of coordinatorModule to avoid circular
     // dependency issues during test module loading.
-    const isCoordinator = feature('COORDINATOR_MODE') ? isEnvTruthy(process.env.CLAUDE_CODE_COORDINATOR_MODE) : false;
+    const isCoordinator = feature('COORDINATOR_MODE') ? isEnvTruthy((process.env.OPEN_CODE_CLI_COORDINATOR_MODE ?? process.env.CLAUDE_CODE_COORDINATOR_MODE)) : false;
     return await getPrompt(filteredAgents, isCoordinator, allowedAgentTypes);
   },
   name: AGENT_TOOL_NAME,
@@ -416,7 +416,7 @@ export const AgentTool = buildTool({
 
     // Resolve agent params for logging (these are already resolved in runAgent)
     const resolvedAgentModel = getAgentModel(selectedAgent.model, toolUseContext.options.mainLoopModel, isForkPath ? undefined : model, permissionMode);
-    logEvent('tengu_agent_tool_selected', {
+    logEvent('open_code_cli_agent_tool_selected', {
       agent_type: selectedAgent.agentType as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
       model: resolvedAgentModel as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
       source: selectedAgent.source as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
@@ -463,7 +463,7 @@ export const AgentTool = buildTool({
         context: toolUseContext,
         toolUseId: toolUseContext.toolUseId
       });
-      logEvent('tengu_agent_tool_remote_launched', {
+      logEvent('open_code_cli_agent_tool_remote_launched', {
         agent_type: selectedAgent.agentType as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS
       });
       const remoteResult: RemoteLaunchedOutput = {
@@ -521,7 +521,7 @@ export const AgentTool = buildTool({
 
         // Log agent memory loaded event for subagents
         if (selectedAgent.memory) {
-          logEvent('tengu_agent_memory_loaded', {
+          logEvent('open_code_cli_agent_memory_loaded', {
             ...("external" === 'ant' && {
               agent_type: selectedAgent.agentType as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS
             }),
@@ -550,7 +550,7 @@ export const AgentTool = buildTool({
 
     // Use inline env check instead of coordinatorModule to avoid circular
     // dependency issues during test module loading.
-    const isCoordinator = feature('COORDINATOR_MODE') ? isEnvTruthy(process.env.CLAUDE_CODE_COORDINATOR_MODE) : false;
+    const isCoordinator = feature('COORDINATOR_MODE') ? isEnvTruthy((process.env.OPEN_CODE_CLI_COORDINATOR_MODE ?? process.env.CLAUDE_CODE_COORDINATOR_MODE)) : false;
 
     // Fork subagent experiment: force ALL spawns async for a unified
     // <task-notification> interaction model (not just fork spawns — all of them).
@@ -994,7 +994,7 @@ export const AgentTool = buildTool({
                       // Transition status BEFORE worktree cleanup so
                       // TaskOutput unblocks even if git hangs (gh-20236).
                       killAsyncAgent(backgroundedTaskId, rootSetAppState);
-                      logEvent('tengu_agent_tool_terminated', {
+                      logEvent('open_code_cli_agent_tool_terminated', {
                         agent_type: metadata.agentType as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
                         model: metadata.resolvedAgentModel as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
                         duration_ms: Date.now() - metadata.startTime,
@@ -1129,7 +1129,7 @@ export const AgentTool = buildTool({
           // AbortError should be re-thrown for proper interruption handling
           if (error instanceof AbortError) {
             wasAborted = true;
-            logEvent('tengu_agent_tool_terminated', {
+            logEvent('open_code_cli_agent_tool_terminated', {
               agent_type: metadata.agentType as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
               model: metadata.resolvedAgentModel as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
               duration_ms: Date.now() - metadata.startTime,
@@ -1206,7 +1206,7 @@ export const AgentTool = buildTool({
         // TODO: Find a cleaner way to express this
         const lastMessage = agentMessages.findLast(_ => _.type !== 'system' && _.type !== 'progress');
         if (lastMessage && isSyntheticMessage(lastMessage)) {
-          logEvent('tengu_agent_tool_terminated', {
+          logEvent('open_code_cli_agent_tool_terminated', {
             agent_type: metadata.agentType as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
             model: metadata.resolvedAgentModel as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
             duration_ms: Date.now() - metadata.startTime,

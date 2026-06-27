@@ -164,7 +164,7 @@ export function getModelCosts(model: string, usage: Usage): ModelCosts {
 }
 
 function trackUnknownModelCost(model: string, shortName: ModelShortName): void {
-  logEvent('tengu_unknown_model_cost', {
+  logEvent('open_code_cli_unknown_model_cost', {
     model: model as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
     shortName:
       shortName as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,

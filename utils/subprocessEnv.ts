@@ -83,7 +83,7 @@ export function subprocessEnv(): NodeJS.ProcessEnv {
   // CCR containers.
   const proxyEnv = _getUpstreamProxyEnv?.() ?? {}
 
-  if (!isEnvTruthy(process.env.CLAUDE_CODE_SUBPROCESS_ENV_SCRUB)) {
+  if (!isEnvTruthy((process.env.OPEN_CODE_CLI_SUBPROCESS_ENV_SCRUB ?? process.env.CLAUDE_CODE_SUBPROCESS_ENV_SCRUB))) {
     return Object.keys(proxyEnv).length > 0
       ? { ...process.env, ...proxyEnv }
       : process.env

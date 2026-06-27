@@ -51,10 +51,10 @@ export function shouldEnableClaudeInChrome(chromeFlag?: boolean): boolean {
   }
 
   // Check environment variables
-  if (isEnvTruthy(process.env.CLAUDE_CODE_ENABLE_CFC)) {
+  if (isEnvTruthy((process.env.OPEN_CODE_CLI_ENABLE_CFC ?? process.env.CLAUDE_CODE_ENABLE_CFC))) {
     return true
   }
-  if (isEnvDefinedFalsy(process.env.CLAUDE_CODE_ENABLE_CFC)) {
+  if (isEnvDefinedFalsy((process.env.OPEN_CODE_CLI_ENABLE_CFC ?? process.env.CLAUDE_CODE_ENABLE_CFC))) {
     return false
   }
 

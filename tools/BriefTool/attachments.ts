@@ -92,7 +92,7 @@ export async function resolveAttachments(
     // which already passes CLAUDE_CODE_OAUTH_TOKEN for auth.
     const shouldUpload =
       uploadCtx.replBridgeEnabled ||
-      isEnvTruthy(process.env.CLAUDE_CODE_BRIEF_UPLOAD)
+      isEnvTruthy((process.env.OPEN_CODE_CLI_BRIEF_UPLOAD ?? process.env.CLAUDE_CODE_BRIEF_UPLOAD))
     const { uploadBriefAttachment } = await import('./upload.js')
     const uuids = await Promise.all(
       stated.map(a =>

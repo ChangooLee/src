@@ -489,7 +489,7 @@ export function useManageMCPConnections(
                 : undefined
             // Skip capability-miss — every non-channel MCP server trips it.
             if (gate.action === 'register' || gate.kind !== 'capability') {
-              logEvent('tengu_mcp_channel_gate', {
+              logEvent('open_code_cli_mcp_channel_gate', {
                 registered: gate.action === 'register',
                 skip_kind:
                   gate.action === 'skip'
@@ -512,7 +512,7 @@ export function useManageMCPConnections(
                       client.name,
                       `notifications/claude/channel: ${content.slice(0, 80)}`,
                     )
-                    logEvent('tengu_mcp_channel_message', {
+                    logEvent('open_code_cli_mcp_channel_message', {
                       content_length: content.length,
                       meta_key_count: Object.keys(meta ?? {}).length,
                       entry_kind:
@@ -634,21 +634,21 @@ export function useManageMCPConnections(
                   if (previousToolsPromise) {
                     previousToolsPromise.then(
                       (previousTools: Tool[]) => {
-                        logEvent('tengu_mcp_list_changed', {
+                        logEvent('open_code_cli_mcp_list_changed', {
                           type: 'tools' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
                           previousCount: previousTools.length,
                           newCount,
                         })
                       },
                       () => {
-                        logEvent('tengu_mcp_list_changed', {
+                        logEvent('open_code_cli_mcp_list_changed', {
                           type: 'tools' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
                           newCount,
                         })
                       },
                     )
                   } else {
-                    logEvent('tengu_mcp_list_changed', {
+                    logEvent('open_code_cli_mcp_list_changed', {
                       type: 'tools' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
                       newCount,
                     })
@@ -672,7 +672,7 @@ export function useManageMCPConnections(
                   client.name,
                   `Received prompts/list_changed notification, refreshing prompts`,
                 )
-                logEvent('tengu_mcp_list_changed', {
+                logEvent('open_code_cli_mcp_list_changed', {
                   type: 'prompts' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
                 })
                 try {
@@ -710,7 +710,7 @@ export function useManageMCPConnections(
                   client.name,
                   `Received resources/list_changed notification, refreshing resources`,
                 )
-                logEvent('tengu_mcp_list_changed', {
+                logEvent('open_code_cli_mcp_list_changed', {
                   type: 'resources' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
                 })
                 try {
@@ -994,7 +994,7 @@ export function useManageMCPConnections(
           stdioCommands.push(basename(serverConfig.command))
         }
       }
-      logEvent('tengu_mcp_servers', {
+      logEvent('open_code_cli_mcp_servers', {
         ...counts,
         ...(process.env.USER_TYPE === 'ant' && stdioCommands.length > 0
           ? {

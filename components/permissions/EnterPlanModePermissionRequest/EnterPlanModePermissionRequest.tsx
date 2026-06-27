@@ -21,7 +21,7 @@ export function EnterPlanModePermissionRequest(t0) {
   if ($[0] !== onDone || $[1] !== onReject || $[2] !== toolPermissionContextMode || $[3] !== toolUseConfirm) {
     t1 = function handleResponse(value) {
       if (value === "yes") {
-        logEvent("tengu_plan_enter", {
+        logEvent("open_code_cli_plan_enter", {
           interviewPhaseEnabled: isPlanModeInterviewPhaseEnabled(),
           entryMethod: "tool" as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS
         });

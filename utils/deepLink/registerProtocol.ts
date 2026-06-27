@@ -330,12 +330,12 @@ export async function ensureDeepLinkProtocolRegistered(): Promise<void> {
 
   try {
     await registerProtocolHandler(openCodeCliPath)
-    logEvent('tengu_deep_link_registered', { success: true })
+    logEvent('open_code_cli_deep_link_registered', { success: true })
     logForDebugging('Auto-registered open-code-cli:// deep link protocol handler')
     await fs.rm(failureMarkerPath, { force: true }).catch(() => {})
   } catch (error) {
     const code = getErrnoCode(error)
-    logEvent('tengu_deep_link_registered', {
+    logEvent('open_code_cli_deep_link_registered', {
       success: false,
       error_code:
         code as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,

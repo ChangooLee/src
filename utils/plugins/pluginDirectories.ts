@@ -37,7 +37,7 @@ function getPluginsDirectoryName(): string {
     return COWORK_PLUGINS_DIR
   }
   // Fall back to env var
-  if (isEnvTruthy(process.env.CLAUDE_CODE_USE_COWORK_PLUGINS)) {
+  if (isEnvTruthy((process.env.OPEN_CODE_CLI_USE_COWORK_PLUGINS ?? process.env.CLAUDE_CODE_USE_COWORK_PLUGINS))) {
     return COWORK_PLUGINS_DIR
   }
   return PLUGINS_DIR
@@ -55,7 +55,7 @@ export function getPluginsDirectory(): string {
   // `env` (not shell), ~ is not expanded by the shell. Without this, a value
   // like "~/.claude/plugins" becomes a literal `~` directory created in the
   // cwd of every project (gh-30794 / CC-212).
-  const envOverride = process.env.CLAUDE_CODE_PLUGIN_CACHE_DIR
+  const envOverride = (process.env.OPEN_CODE_CLI_PLUGIN_CACHE_DIR ?? process.env.CLAUDE_CODE_PLUGIN_CACHE_DIR)
   if (envOverride) {
     return expandTilde(envOverride)
   }
@@ -84,7 +84,7 @@ export function getPluginsDirectory(): string {
  */
 export function getPluginSeedDirs(): string[] {
   // Same tilde-expansion rationale as getPluginsDirectory (gh-30794).
-  const raw = process.env.CLAUDE_CODE_PLUGIN_SEED_DIR
+  const raw = (process.env.OPEN_CODE_CLI_PLUGIN_SEED_DIR ?? process.env.CLAUDE_CODE_PLUGIN_SEED_DIR)
   if (!raw) return []
   return raw.split(delimiter).filter(Boolean).map(expandTilde)
 }

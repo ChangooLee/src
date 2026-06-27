@@ -139,7 +139,7 @@ export async function exchangeCodeForTokens(
         : `Token exchange failed (${response.status}): ${response.statusText}`,
     )
   }
-  logEvent('tengu_oauth_token_exchange_success', {})
+  logEvent('open_code_cli_oauth_token_exchange_success', {})
   return response.data
 }
 
@@ -182,7 +182,7 @@ export async function refreshOAuthToken(
     const expiresAt = Date.now() + expiresIn * 1000
     const scopes = parseScopes(data.scope)
 
-    logEvent('tengu_oauth_token_refresh_success', {})
+    logEvent('open_code_cli_oauth_token_refresh_success', {})
 
     // Skip the extra /api/oauth/profile round-trip when we already have both
     // the global-config profile fields AND the secure-storage subscription data.
@@ -261,7 +261,7 @@ export async function refreshOAuthToken(
       axios.isAxiosError(error) && error.response?.data
         ? JSON.stringify(error.response.data)
         : undefined
-    logEvent('tengu_oauth_token_refresh_failure', {
+    logEvent('open_code_cli_oauth_token_refresh_failure', {
       error: (error as Error)
         .message as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
       ...(responseBody && {
@@ -302,7 +302,7 @@ export async function fetchAndStoreUserRoles(
       : current.oauthAccount,
   }))
 
-  logEvent('tengu_oauth_roles_stored', {
+  logEvent('open_code_cli_oauth_roles_stored', {
     org_role:
       data.organization_role as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
   })
@@ -319,7 +319,7 @@ export async function createAndStoreApiKey(
     const apiKey = response.data?.raw_key
     if (apiKey) {
       await saveApiKey(apiKey)
-      logEvent('tengu_oauth_api_key', {
+      logEvent('open_code_cli_oauth_api_key', {
         status:
           'success' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
         statusCode: response.status,
@@ -328,7 +328,7 @@ export async function createAndStoreApiKey(
     }
     return null
   } catch (error) {
-    logEvent('tengu_oauth_api_key', {
+    logEvent('open_code_cli_oauth_api_key', {
       status:
         'failure' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
       error: (error instanceof Error
@@ -414,7 +414,7 @@ export async function fetchProfileInfo(accessToken: string): Promise<{
     result.subscriptionCreatedAt = profile.organization.subscription_created_at
   }
 
-  logEvent('tengu_oauth_profile_fetch_success', {})
+  logEvent('open_code_cli_oauth_profile_fetch_success', {})
 
   return { ...result, rawProfile: profile }
 }
@@ -454,9 +454,9 @@ export async function populateOAuthAccountInfoIfNeeded(): Promise<boolean> {
   // eliminates the race condition where early telemetry events lack account info.
   // NB: If/when adding additional SDK-relevant functionality requiring _other_ OAuth account properties,
   // please reach out to #proj-cowork so the team can add additional env var fallbacks.
-  const envAccountUuid = process.env.CLAUDE_CODE_ACCOUNT_UUID
-  const envUserEmail = process.env.CLAUDE_CODE_USER_EMAIL
-  const envOrganizationUuid = process.env.CLAUDE_CODE_ORGANIZATION_UUID
+  const envAccountUuid = (process.env.OPEN_CODE_CLI_ACCOUNT_UUID ?? process.env.CLAUDE_CODE_ACCOUNT_UUID)
+  const envUserEmail = (process.env.OPEN_CODE_CLI_USER_EMAIL ?? process.env.CLAUDE_CODE_USER_EMAIL)
+  const envOrganizationUuid = (process.env.OPEN_CODE_CLI_ORGANIZATION_UUID ?? process.env.CLAUDE_CODE_ORGANIZATION_UUID)
   const hasEnvVars = Boolean(
     envAccountUuid && envUserEmail && envOrganizationUuid,
   )

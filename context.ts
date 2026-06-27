@@ -164,7 +164,7 @@ export const getUserContext = memoize(
     // --bare: skip auto-discovery (cwd walk), BUT honor explicit --add-dir.
     // --bare means "skip what I didn't ask for", not "ignore what I asked for".
     const shouldDisableClaudeMd =
-      isEnvTruthy(process.env.CLAUDE_CODE_DISABLE_CLAUDE_MDS) ||
+      isEnvTruthy((process.env.OPEN_CODE_CLI_DISABLE_CLAUDE_MDS ?? process.env.CLAUDE_CODE_DISABLE_CLAUDE_MDS)) ||
       (isBareMode() && getAdditionalDirectoriesForClaudeMd().length === 0)
     // Await the async I/O (readFile/readdir directory walk) so the event
     // loop yields naturally at the first fs.readFile.

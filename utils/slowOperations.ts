@@ -27,7 +27,7 @@ type WriteFileOptionsWithFlush =
  * - Ants: 300ms (enabled for all internal users)
  */
 const SLOW_OPERATION_THRESHOLD_MS = (() => {
-  const envValue = process.env.CLAUDE_CODE_SLOW_OPERATION_THRESHOLD_MS
+  const envValue = (process.env.OPEN_CODE_CLI_SLOW_OPERATION_THRESHOLD_MS ?? process.env.CLAUDE_CODE_SLOW_OPERATION_THRESHOLD_MS)
   if (envValue !== undefined) {
     const parsed = Number(envValue)
     if (!Number.isNaN(parsed) && parsed >= 0) {

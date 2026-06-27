@@ -281,7 +281,7 @@ export const SettingsSchema = lazySchema(() =>
       // doesn't surface this in GlobalClaudeSettings. Read via getXaaIdpSettings().
       // .passthrough() on the outer object keeps an existing settings.json key
       // alive across env-var-off sessions — it's just not schema-validated then.
-      ...(isEnvTruthy(process.env.CLAUDE_CODE_ENABLE_XAA)
+      ...(isEnvTruthy((process.env.OPEN_CODE_CLI_ENABLE_XAA ?? process.env.CLAUDE_CODE_ENABLE_XAA))
         ? {
             xaaIdp: z
               .object({
@@ -1040,7 +1040,7 @@ export const SettingsSchema = lazySchema(() =>
                 'Default working directory on the remote host. ' +
                   'Supports tilde expansion (e.g. ~/projects). ' +
                   'If not specified, defaults to the remote user home directory. ' +
-                  'Can be overridden by the [dir] positional argument in `claude ssh <config> [dir]`.',
+                  'Can be overridden by the [dir] positional argument in `open-code-cli ssh <config> [dir]`.',
               ),
           }),
         )

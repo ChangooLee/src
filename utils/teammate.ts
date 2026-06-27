@@ -152,7 +152,7 @@ export function isPlanModeRequired(): boolean {
   if (dynamicTeamContext !== null) {
     return dynamicTeamContext.planModeRequired
   }
-  return isEnvTruthy(process.env.CLAUDE_CODE_PLAN_MODE_REQUIRED)
+  return isEnvTruthy((process.env.OPEN_CODE_CLI_PLAN_MODE_REQUIRED ?? process.env.CLAUDE_CODE_PLAN_MODE_REQUIRED))
 }
 
 /**

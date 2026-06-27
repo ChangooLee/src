@@ -2680,7 +2680,7 @@ export function normalizeContentFromAPI(
             // parse. We fall back to {} which means downstream validation
             // sees empty input. The raw prefix goes to debug log only — no
             // PII-tagged proto column exists for it yet.
-            logEvent('tengu_tool_input_json_parse_fail', {
+            logEvent('open_code_cli_tool_input_json_parse_fail', {
               toolName: sanitizeToolNameForAnalytics(contentBlock.name),
               inputLen: contentBlock.input.length,
             })
@@ -2720,7 +2720,7 @@ export function normalizeContentFromAPI(
       }
       case 'text':
         if (contentBlock.text.trim().length === 0) {
-          logEvent('tengu_model_whitespace_response', {
+          logEvent('open_code_cli_model_whitespace_response', {
             length: contentBlock.text.length,
           })
         }
@@ -4241,7 +4241,7 @@ You have exited auto mode. The user may now want to interact more directly. You 
       // Dead code elimination: CLAUDE_CODE_VERIFY_PLAN='false' in external builds, so === 'true' check allows Bun to eliminate the string
       /* eslint-disable-next-line custom-rules/no-process-env-top-level */
       const toolName =
-        process.env.CLAUDE_CODE_VERIFY_PLAN === 'true'
+        (process.env.OPEN_CODE_CLI_VERIFY_PLAN ?? process.env.CLAUDE_CODE_VERIFY_PLAN) === 'true'
           ? 'VerifyPlanExecution'
           : ''
       const content = `You have completed implementing the plan. Please call the "${toolName}" tool directly (NOT the ${AGENT_TOOL_NAME} tool or an agent) to verify that all plan items were completed correctly.`
@@ -4803,7 +4803,7 @@ function filterTrailingThinkingFromLastAssistant(
     lastValidIndex--
   }
 
-  logEvent('tengu_filtered_trailing_thinking_block', {
+  logEvent('open_code_cli_filtered_trailing_thinking_block', {
     messageUUID:
       lastMessage.uuid as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
     blocksRemoved: content.length - lastValidIndex - 1,
@@ -4890,7 +4890,7 @@ export function filterWhitespaceOnlyAssistantMessages(
 
     if (hasOnlyWhitespaceTextContent(content)) {
       hasChanges = true
-      logEvent('tengu_filtered_whitespace_only_assistant', {
+      logEvent('open_code_cli_filtered_whitespace_only_assistant', {
         messageUUID:
           message.uuid as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
       })
@@ -4953,7 +4953,7 @@ function ensureNonEmptyAssistantContent(
     const content = message.message.content
     if (Array.isArray(content) && content.length === 0) {
       hasChanges = true
-      logEvent('tengu_fixed_empty_assistant_content', {
+      logEvent('open_code_cli_fixed_empty_assistant_content', {
         messageUUID:
           message.uuid as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
         messageIndex: index,
@@ -5044,7 +5044,7 @@ export function filterOrphanedThinkingOnlyMessages(
     }
 
     // Truly orphaned - no other message with same id has content to merge with
-    logEvent('tengu_filtered_orphaned_thinking_message', {
+    logEvent('open_code_cli_filtered_orphaned_thinking_message', {
       messageUUID:
         msg.uuid as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
       messageId: msg.message
@@ -5442,7 +5442,7 @@ export function ensureToolResultPairing(
       )
     }
 
-    logEvent('tengu_tool_result_pairing_repaired', {
+    logEvent('open_code_cli_tool_result_pairing_repaired', {
       messageCount: messages.length,
       repairedMessageCount: result.length,
       messageTypes: messageTypes.join(

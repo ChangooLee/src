@@ -516,7 +516,7 @@ const GIT_NO_PROMPT_ENV = {
 const DEFAULT_PLUGIN_GIT_TIMEOUT_MS = 120 * 1000
 
 function getPluginGitTimeoutMs(): number {
-  const envValue = process.env.CLAUDE_CODE_PLUGIN_GIT_TIMEOUT_MS
+  const envValue = (process.env.OPEN_CODE_CLI_PLUGIN_GIT_TIMEOUT_MS ?? process.env.CLAUDE_CODE_PLUGIN_GIT_TIMEOUT_MS)
   if (envValue) {
     const parsed = parseInt(envValue, 10)
     if (!isNaN(parsed) && parsed > 0) {

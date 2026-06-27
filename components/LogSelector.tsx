@@ -237,13 +237,13 @@ export function LogSelector(t0) {
   if ($[8] === Symbol.for("react.memo_cache_sentinel")) {
     t10 = () => {
       setViewMode("list");
-      logEvent("tengu_session_search_toggled", {
+      logEvent("open_code_cli_session_search_toggled", {
         enabled: false
       });
     };
     t11 = () => {
       setViewMode("list");
-      logEvent("tengu_session_search_toggled", {
+      logEvent("open_code_cli_session_search_toggled", {
         enabled: false
       });
     };
@@ -764,7 +764,7 @@ export function LogSelector(t0) {
   if ($[92] === Symbol.for("react.memo_cache_sentinel")) {
     t33 = () => {
       setViewMode("list");
-      logEvent("tengu_session_search_toggled", {
+      logEvent("open_code_cli_session_search_toggled", {
         enabled: false
       });
     };
@@ -777,7 +777,7 @@ export function LogSelector(t0) {
   if ($[93] === Symbol.for("react.memo_cache_sentinel")) {
     t34 = () => {
       setViewMode("search");
-      logEvent("tengu_session_search_toggled", {
+      logEvent("open_code_cli_session_search_toggled", {
         enabled: true
       });
     };
@@ -798,7 +798,7 @@ export function LogSelector(t0) {
       setAgenticSearchState({
         status: "searching"
       });
-      logEvent("tengu_agentic_search_started", {
+      logEvent("open_code_cli_agentic_search_started", {
         query_length: searchQuery.length
       });
       ;
@@ -812,7 +812,7 @@ export function LogSelector(t0) {
           results: results_0,
           query: searchQuery
         });
-        logEvent("tengu_agentic_search_completed", {
+        logEvent("open_code_cli_agentic_search_completed", {
           query_length: searchQuery.length,
           results_count: results_0.length
         });
@@ -825,7 +825,7 @@ export function LogSelector(t0) {
           status: "error",
           message: error instanceof Error ? error.message : "Search failed"
         });
-        logEvent("tengu_agentic_search_error", {
+        logEvent("open_code_cli_agentic_search_error", {
           query_length: searchQuery.length
         });
       }
@@ -970,7 +970,7 @@ export function LogSelector(t0) {
       setAgenticSearchState({
         status: "idle"
       });
-      logEvent("tengu_agentic_search_cancelled", {});
+      logEvent("open_code_cli_agentic_search_cancelled", {});
     };
     $[120] = t44;
   } else {
@@ -1083,7 +1083,7 @@ export function LogSelector(t0) {
               const current = prev < tagTabs.length ? prev : 0;
               const newIndex = (current + tagTabs.length + offset) % tagTabs.length;
               const newTab = tagTabs[newIndex];
-              logEvent("tengu_session_tag_filter_changed", {
+              logEvent("open_code_cli_session_tag_filter_changed", {
                 is_all: newTab === "All",
                 tag_count: uniqueTags.length
               });
@@ -1095,46 +1095,46 @@ export function LogSelector(t0) {
           const lowerInput = input.toLowerCase();
           if (lowerInput === "a" && key.ctrl && onToggleAllProjects) {
             onToggleAllProjects();
-            logEvent("tengu_session_all_projects_toggled", {
+            logEvent("open_code_cli_session_all_projects_toggled", {
               enabled: !showAllProjects
             });
           } else {
             if (lowerInput === "b" && key.ctrl) {
               const newEnabled = !branchFilterEnabled;
               setBranchFilterEnabled(newEnabled);
-              logEvent("tengu_session_branch_filter_toggled", {
+              logEvent("open_code_cli_session_branch_filter_toggled", {
                 enabled: newEnabled
               });
             } else {
               if (lowerInput === "w" && key.ctrl && hasMultipleWorktrees) {
                 const newValue = !showAllWorktrees;
                 setShowAllWorktrees(newValue);
-                logEvent("tengu_session_worktree_filter_toggled", {
+                logEvent("open_code_cli_session_worktree_filter_toggled", {
                   enabled: newValue
                 });
               } else {
                 if (lowerInput === "/" && keyIsNotCtrlOrMeta) {
                   setViewMode("search");
-                  logEvent("tengu_session_search_toggled", {
+                  logEvent("open_code_cli_session_search_toggled", {
                     enabled: true
                   });
                 } else {
                   if (lowerInput === "r" && key.ctrl && focusedLog) {
                     setViewMode("rename");
                     setRenameValue("");
-                    logEvent("tengu_session_rename_started", {});
+                    logEvent("open_code_cli_session_rename_started", {});
                   } else {
                     if (lowerInput === "v" && key.ctrl && focusedLog) {
                       setPreviewLog(focusedLog);
                       setViewMode("preview");
-                      logEvent("tengu_session_preview_opened", {
+                      logEvent("open_code_cli_session_preview_opened", {
                         messageCount: focusedLog.messageCount
                       });
                     } else {
                       if (focusedLog && keyIsNotCtrlOrMeta && input.length > 0 && !/^\s+$/.test(input)) {
                         setViewMode("search");
                         setSearchQuery(input);
-                        logEvent("tengu_session_search_toggled", {
+                        logEvent("open_code_cli_session_search_toggled", {
                           enabled: true
                         });
                       }
@@ -1366,7 +1366,7 @@ export function LogSelector(t0) {
       const sessionId_3 = typeof nodeId_0 === "string" && nodeId_0.startsWith("group:") ? nodeId_0.substring(6) : null;
       if (sessionId_3) {
         setExpandedGroupSessionIds(prev_0 => new Set(prev_0).add(sessionId_3));
-        logEvent("tengu_session_group_expanded", {});
+        logEvent("open_code_cli_session_group_expanded", {});
       }
     }} onCollapse={nodeId_1 => {
       const sessionId_4 = typeof nodeId_1 === "string" && nodeId_1.startsWith("group:") ? nodeId_1.substring(6) : null;

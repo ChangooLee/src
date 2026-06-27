@@ -36,7 +36,7 @@ import {
 import { createSignal } from './signal.js'
 
 export function isFastModeEnabled(): boolean {
-  return !isEnvTruthy(process.env.CLAUDE_CODE_DISABLE_FAST_MODE)
+  return !isEnvTruthy((process.env.OPEN_CODE_CLI_DISABLE_FAST_MODE ?? process.env.CLAUDE_CODE_DISABLE_FAST_MODE))
 }
 
 export function isFastModeAvailable(): boolean {
@@ -125,7 +125,7 @@ export function getFastModeUnavailableReason(): string | null {
       // endpoint. We add CLAUDE_CODE_SKIP_FAST_MODE_NETWORK_ERRORS=1 to
       // bypass this check in the CC binary. This is OK since we have
       // another check in the API to error out when disabled by org.
-      if (isEnvTruthy(process.env.CLAUDE_CODE_SKIP_FAST_MODE_NETWORK_ERRORS)) {
+      if (isEnvTruthy((process.env.OPEN_CODE_CLI_SKIP_FAST_MODE_NETWORK_ERRORS ?? process.env.CLAUDE_CODE_SKIP_FAST_MODE_NETWORK_ERRORS))) {
         return null
       }
     }
@@ -224,7 +224,7 @@ export function triggerFastModeCooldown(
   logForDebugging(
     `Fast mode cooldown triggered (${reason}), duration ${Math.round(cooldownDurationMs / 1000)}s`,
   )
-  logEvent('tengu_fast_mode_fallback_triggered', {
+  logEvent('open_code_cli_fast_mode_fallback_triggered', {
     cooldown_duration_ms: cooldownDurationMs,
     cooldown_reason:
       reason as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
@@ -297,7 +297,7 @@ export function handleFastModeOverageRejection(reason: string | null): void {
   logForDebugging(
     `Fast mode overage rejection: ${reason ?? 'unknown'} — ${message}`,
   )
-  logEvent('tengu_fast_mode_overage_rejected', {
+  logEvent('open_code_cli_fast_mode_overage_rejected', {
     overage_disabled_reason: (reason ??
       'unknown') as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
   })
@@ -521,7 +521,7 @@ export async function prefetchFastModeStatus(): Promise<void> {
         `Failed to fetch org fast mode status, defaulting to ${orgStatus.status === 'enabled' ? 'enabled (cached)' : 'disabled (network_error)'}: ${err}`,
         { level: 'error' },
       )
-      logEvent('tengu_org_penguin_mode_fetch_failed', {})
+      logEvent('open_code_cli_org_penguin_mode_fetch_failed', {})
     } finally {
       inflightPrefetch = null
     }

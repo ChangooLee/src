@@ -363,7 +363,7 @@ function logToolUseToolResultMismatch(
     }
 
     // Log to Statsig
-    logEvent('tengu_tool_use_tool_result_mismatch_error', {
+    logEvent('open_code_cli_tool_use_tool_result_mismatch_error', {
       toolUseId:
         toolUseId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
       normalizedSequence: normalizedSeq.join(
@@ -711,7 +711,7 @@ export function getAssistantMessageFromError(
     error.status === 400 &&
     error.message.includes('unexpected `tool_use_id` found in `tool_result`')
   ) {
-    logEvent('tengu_unexpected_tool_result', {})
+    logEvent('open_code_cli_unexpected_tool_result', {})
   }
 
   // Duplicate tool_use IDs (CC-1212). ensureToolResultPairing strips these
@@ -722,7 +722,7 @@ export function getAssistantMessageFromError(
     error.status === 400 &&
     error.message.includes('`tool_use` ids must be unique')
   ) {
-    logEvent('tengu_duplicate_tool_use_id', {})
+    logEvent('open_code_cli_duplicate_tool_use_id', {})
     const rewindInstruction = getIsNonInteractiveSession()
       ? ''
       : ' Run /rewind to recover the conversation.'
@@ -886,7 +886,7 @@ export function getAssistantMessageFromError(
   // Bedrock errors like "403 You don't have access to the model with the specified model ID."
   // don't contain the actual model ID
   if (
-    isEnvTruthy(process.env.CLAUDE_CODE_USE_BEDROCK) &&
+    isEnvTruthy((process.env.OPEN_CODE_CLI_USE_BEDROCK ?? process.env.CLAUDE_CODE_USE_BEDROCK)) &&
     error instanceof Error &&
     error.message.toLowerCase().includes('model id')
   ) {
@@ -1135,7 +1135,7 @@ export function classifyAPIError(error: unknown): string {
 
   // Bedrock-specific errors
   if (
-    isEnvTruthy(process.env.CLAUDE_CODE_USE_BEDROCK) &&
+    isEnvTruthy((process.env.OPEN_CODE_CLI_USE_BEDROCK ?? process.env.CLAUDE_CODE_USE_BEDROCK)) &&
     error instanceof Error &&
     error.message.toLowerCase().includes('model id')
   ) {
@@ -1190,7 +1190,7 @@ export function getErrorMessageIfRefusal(
     return
   }
 
-  logEvent('tengu_refusal_api_response', {})
+  logEvent('open_code_cli_refusal_api_response', {})
 
   const baseMessage = getIsNonInteractiveSession()
     ? `${API_ERROR_MESSAGE_PREFIX}: Open Code CLI is unable to respond to this request, which appears to violate our Usage Policy (https://www.anthropic.com/legal/aup). Try rephrasing the request or attempting a different approach.`

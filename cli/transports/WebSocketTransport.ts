@@ -304,7 +304,7 @@ export class WebSocketTransport implements Transport {
     // Reconnect success — capture attempt count + downtime before resetting.
     // reconnectStartTime is null on first connect, non-null on reopen.
     if (this.isBridge && this.reconnectStartTime !== null) {
-      logEvent('tengu_ws_transport_reconnected', {
+      logEvent('open_code_cli_ws_transport_reconnected', {
         attempts: this.reconnectAttempts,
         downtimeMs: Date.now() - this.reconnectStartTime,
       })
@@ -406,7 +406,7 @@ export class WebSocketTransport implements Transport {
       // storm (those never surface to the onCloseCallback consumer). For the
       // Cloudflare-5min-idle hypothesis: cluster msSinceLastActivity; if the
       // peak sits at ~300s with closeCode 1006, that's the proxy RST.
-      logEvent('tengu_ws_transport_closed', {
+      logEvent('open_code_cli_ws_transport_closed', {
         closeCode,
         msSinceLastActivity:
           this.lastActivityTime > 0 ? Date.now() - this.lastActivityTime : -1,
@@ -525,7 +525,7 @@ export class WebSocketTransport implements Transport {
         reconnectAttempts: this.reconnectAttempts,
       })
       if (this.isBridge) {
-        logEvent('tengu_ws_transport_reconnecting', {
+        logEvent('open_code_cli_ws_transport_reconnecting', {
           attempt: this.reconnectAttempts,
           elapsedMs: elapsed,
           delayMs: Math.round(delay),

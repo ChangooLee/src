@@ -40,7 +40,7 @@ function logLoadOnce(success: boolean): void {
   logForDebugging(
     success ? 'tree-sitter: native module loaded' : 'tree-sitter: unavailable',
   )
-  logEvent('tengu_tree_sitter_load', { success })
+  logEvent('open_code_cli_tree_sitter_load', { success })
 }
 
 /**
@@ -117,7 +117,7 @@ export async function parseCommandRaw(
       // Previously collapsed into `return null` → parse-unavailable → legacy
       // path, which lacks EVAL_LIKE_BUILTINS — `trap`, `enable`, `hash` leaked.
       if (result === null) {
-        logEvent('tengu_tree_sitter_parse_abort', {
+        logEvent('open_code_cli_tree_sitter_parse_abort', {
           cmdLength: command.length,
           panic: false,
         })
@@ -125,7 +125,7 @@ export async function parseCommandRaw(
       }
       return result
     } catch {
-      logEvent('tengu_tree_sitter_parse_abort', {
+      logEvent('open_code_cli_tree_sitter_parse_abort', {
         cmdLength: command.length,
         panic: true,
       })

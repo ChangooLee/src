@@ -32,7 +32,7 @@ const ANTHROPIC_VERSION = '2023-06-01'
 function getDefaultApiBaseUrl(): string {
   return (
     process.env.ANTHROPIC_BASE_URL ||
-    process.env.CLAUDE_CODE_API_BASE_URL ||
+    (process.env.OPEN_CODE_CLI_API_BASE_URL ?? process.env.CLAUDE_CODE_API_BASE_URL) ||
     'https://api.anthropic.com'
   )
 }
@@ -397,7 +397,7 @@ export async function uploadFile(
   try {
     content = await fs.readFile(filePath)
   } catch (error) {
-    logEvent('tengu_file_upload_failed', {
+    logEvent('open_code_cli_file_upload_failed', {
       error_type:
         'file_read' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
     })
@@ -411,7 +411,7 @@ export async function uploadFile(
   const fileSize = content.length
 
   if (fileSize > MAX_FILE_SIZE_BYTES) {
-    logEvent('tengu_file_upload_failed', {
+    logEvent('open_code_cli_file_upload_failed', {
       error_type:
         'file_too_large' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
     })
@@ -490,7 +490,7 @@ export async function uploadFile(
 
         // Non-retriable errors - throw to exit retry loop
         if (response.status === 401) {
-          logEvent('tengu_file_upload_failed', {
+          logEvent('open_code_cli_file_upload_failed', {
             error_type:
               'auth' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
           })
@@ -500,7 +500,7 @@ export async function uploadFile(
         }
 
         if (response.status === 403) {
-          logEvent('tengu_file_upload_failed', {
+          logEvent('open_code_cli_file_upload_failed', {
             error_type:
               'forbidden' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
           })
@@ -508,7 +508,7 @@ export async function uploadFile(
         }
 
         if (response.status === 413) {
-          logEvent('tengu_file_upload_failed', {
+          logEvent('open_code_cli_file_upload_failed', {
             error_type:
               'size' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
           })
@@ -539,7 +539,7 @@ export async function uploadFile(
         success: false,
       }
     }
-    logEvent('tengu_file_upload_failed', {
+    logEvent('open_code_cli_file_upload_failed', {
       error_type:
         'network' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
     })
@@ -655,14 +655,14 @@ export async function listFilesCreatedAfter(
           }
 
           if (response.status === 401) {
-            logEvent('tengu_file_list_failed', {
+            logEvent('open_code_cli_file_list_failed', {
               error_type:
                 'auth' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
             })
             throw new Error('Authentication failed: invalid or missing API key')
           }
           if (response.status === 403) {
-            logEvent('tengu_file_list_failed', {
+            logEvent('open_code_cli_file_list_failed', {
               error_type:
                 'forbidden' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
             })
@@ -674,7 +674,7 @@ export async function listFilesCreatedAfter(
           if (!axios.isAxiosError(error)) {
             throw error
           }
-          logEvent('tengu_file_list_failed', {
+          logEvent('open_code_cli_file_list_failed', {
             error_type:
               'network' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
           })

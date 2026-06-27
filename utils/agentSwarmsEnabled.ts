@@ -29,7 +29,7 @@ export function isAgentSwarmsEnabled(): boolean {
 
   // External: require opt-in via env var or --agent-teams flag
   if (
-    !isEnvTruthy(process.env.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS) &&
+    !isEnvTruthy((process.env.OPEN_CODE_CLI_EXPERIMENTAL_AGENT_TEAMS ?? process.env.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS)) &&
     !isAgentTeamsFlagSet()
   ) {
     return false

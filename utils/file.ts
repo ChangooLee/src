@@ -440,7 +440,7 @@ export function writeFileSyncAndFlush_DEPRECATED(
     logForDebugging(`Failed to write file atomically: ${atomicError}`, {
       level: 'error',
     })
-    logEvent('tengu_atomic_write_error', {})
+    logEvent('open_code_cli_atomic_write_error', {})
 
     // Clean up temp file on error
     try {

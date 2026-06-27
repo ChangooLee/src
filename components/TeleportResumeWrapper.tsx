@@ -40,7 +40,7 @@ export function TeleportResumeWrapper(t0) {
   let t3;
   if ($[0] !== source) {
     t2 = () => {
-      logEvent("tengu_teleport_started", {
+      logEvent("open_code_cli_teleport_started", {
         source: source as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS
       });
     };
@@ -79,7 +79,7 @@ export function TeleportResumeWrapper(t0) {
   let t5;
   if ($[8] !== onCancel) {
     t5 = () => {
-      logEvent("tengu_teleport_cancelled", {});
+      logEvent("open_code_cli_teleport_cancelled", {});
       onCancel();
     };
     $[8] = onCancel;

@@ -214,7 +214,7 @@ export function ManageMarketplaces({
           // Then remove the marketplace
           await removeMarketplaceSource(state.name);
           removedCount++;
-          logEvent('tengu_marketplace_removed', {
+          logEvent('open_code_cli_marketplace_removed', {
             marketplace_name: state.name as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
             plugins_uninstalled: state.installedPlugins?.length || 0
           });
@@ -229,7 +229,7 @@ export function ManageMarketplaces({
           });
           updatedCount++;
           refreshedMarketplaces.add(state.name.toLowerCase());
-          logEvent('tengu_marketplace_updated', {
+          logEvent('open_code_cli_marketplace_updated', {
             marketplace_name: state.name as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS
           });
         }

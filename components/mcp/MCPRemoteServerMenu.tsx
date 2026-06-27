@@ -97,7 +97,7 @@ export function MCPRemoteServerMenu({
     try {
       const result = await reconnectMcpServer(server.name);
       const success = result.client.type === 'connected';
-      logEvent('tengu_claudeai_mcp_auth_completed', {
+      logEvent('open_code_cli_claudeai_mcp_auth_completed', {
         success
       });
       if (success) {
@@ -108,7 +108,7 @@ export function MCPRemoteServerMenu({
         onComplete?.('Authentication successful, but server reconnection failed. You may need to manually restart Open Code CLI for the changes to take effect.');
       }
     } catch (err) {
-      logEvent('tengu_claudeai_mcp_auth_completed', {
+      logEvent('open_code_cli_claudeai_mcp_auth_completed', {
         success: false
       });
       onComplete?.(handleReconnectError(err, server.name));
@@ -140,7 +140,7 @@ export function MCPRemoteServerMenu({
         }
       };
     });
-    logEvent('tengu_claudeai_mcp_clear_auth_completed', {});
+    logEvent('open_code_cli_claudeai_mcp_clear_auth_completed', {});
     onComplete?.(`Disconnected from ${server.name}.`);
     setIsClaudeAIClearingAuth(false);
     setClaudeAIClearAuthUrl(null);
@@ -230,19 +230,19 @@ export function MCPRemoteServerMenu({
     }
     setClaudeAIAuthUrl(authUrl);
     setIsClaudeAIAuthenticating(true);
-    logEvent('tengu_claudeai_mcp_auth_started', {});
+    logEvent('open_code_cli_claudeai_mcp_auth_started', {});
     await openBrowser(authUrl);
   }, [server.config]);
   const handleClaudeAIClearAuth = React.useCallback(() => {
     setIsClaudeAIClearingAuth(true);
-    logEvent('tengu_claudeai_mcp_clear_auth_started', {});
+    logEvent('open_code_cli_claudeai_mcp_clear_auth_started', {});
   }, []);
   const handleToggleEnabled = React.useCallback(async () => {
     const wasEnabled = server.client.type !== 'disabled';
     try {
       await toggleMcpServer(server.name);
       if (server.config.type === 'claudeai-proxy') {
-        logEvent('tengu_claudeai_mcp_toggle', {
+        logEvent('open_code_cli_claudeai_mcp_toggle', {
           new_state: (wasEnabled ? 'disabled' : 'enabled') as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS
         });
       }
@@ -274,7 +274,7 @@ export function MCPRemoteServerMenu({
             setManualCallbackSubmit(() => submit);
           }
         });
-        logEvent('tengu_mcp_auth_config_authenticate', {
+        logEvent('open_code_cli_mcp_auth_config_authenticate', {
           wasAuthenticated: server.isAuthenticated
         });
         const result_0 = await reconnectMcpServer(server.name);
@@ -306,7 +306,7 @@ export function MCPRemoteServerMenu({
     if (server.config) {
       // First revoke the authentication tokens and clear all auth state
       await revokeServerTokens(server.name, server.config);
-      logEvent('tengu_mcp_auth_config_clear', {});
+      logEvent('open_code_cli_mcp_auth_config_clear', {});
 
       // Disconnect the client and clear the cache
       await clearServerCache(server.name, {
@@ -606,7 +606,7 @@ export function MCPRemoteServerMenu({
               try {
                 const result_1 = await reconnectMcpServer(server.name);
                 if (server.config.type === 'claudeai-proxy') {
-                  logEvent('tengu_claudeai_mcp_reconnect', {
+                  logEvent('open_code_cli_claudeai_mcp_reconnect', {
                     success: result_1.client.type === 'connected'
                   });
                 }
@@ -616,7 +616,7 @@ export function MCPRemoteServerMenu({
                 onComplete?.(message_0);
               } catch (err_2) {
                 if (server.config.type === 'claudeai-proxy') {
-                  logEvent('tengu_claudeai_mcp_reconnect', {
+                  logEvent('open_code_cli_claudeai_mcp_reconnect', {
                     success: false
                   });
                 }

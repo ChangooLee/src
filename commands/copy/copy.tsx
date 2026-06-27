@@ -191,7 +191,7 @@ function CopyPicker(t0) {
         if (!getGlobalConfig().copyFullResponse) {
           saveGlobalConfig(_temp2);
         }
-        logEvent("tengu_copy", {
+        logEvent("open_code_cli_copy", {
           block_count: codeBlocks.length,
           always: true,
           message_age: messageAge
@@ -200,7 +200,7 @@ function CopyPicker(t0) {
         onDone(`${result}\nPreference saved. Use /config to change copyFullResponse`);
         return;
       }
-      logEvent("tengu_copy", {
+      logEvent("open_code_cli_copy", {
         selected_block: content.blockIndex,
         block_count: codeBlocks.length,
         message_age: messageAge
@@ -221,7 +221,7 @@ function CopyPicker(t0) {
   if ($[14] !== codeBlocks.length || $[15] !== getSelectionContent || $[16] !== messageAge || $[17] !== onDone) {
     const handleWrite = async function handleWrite(selected_1) {
       const content_0 = getSelectionContent(selected_1);
-      logEvent("tengu_copy", {
+      logEvent("open_code_cli_copy", {
         selected_block: content_0.blockIndex,
         block_count: codeBlocks.length,
         message_age: messageAge,
@@ -357,7 +357,7 @@ export const call: LocalJSXCommandCall = async (onDone, context, args) => {
   const codeBlocks = extractCodeBlocks(text);
   const config = getGlobalConfig();
   if (codeBlocks.length === 0 || config.copyFullResponse) {
-    logEvent('tengu_copy', {
+    logEvent('open_code_cli_copy', {
       always: config.copyFullResponse,
       block_count: codeBlocks.length,
       message_age: age

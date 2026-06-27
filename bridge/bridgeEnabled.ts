@@ -196,7 +196,7 @@ export function getCcrAutoConnectDefault(): boolean {
  */
 export function isCcrMirrorEnabled(): boolean {
   return feature('CCR_MIRROR')
-    ? isEnvTruthy(process.env.CLAUDE_CODE_CCR_MIRROR) ||
+    ? isEnvTruthy((process.env.OPEN_CODE_CLI_CCR_MIRROR ?? process.env.CLAUDE_CODE_CCR_MIRROR)) ||
         getFeatureValue_CACHED_MAY_BE_STALE('tengu_ccr_mirror', false)
     : false
 }

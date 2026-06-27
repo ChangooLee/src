@@ -261,7 +261,7 @@ function StatusLineInner({
   useEffect(() => {
     const statusLine = settings?.statusLine;
     if (statusLine) {
-      logEvent('tengu_status_line_mount', {
+      logEvent('open_code_cli_status_line_mount', {
         command_length: statusLine.command.length,
         padding: statusLine.padding
       });

@@ -196,7 +196,7 @@ export function logPluginsEnabledForSession(
   for (const plugin of plugins) {
     const { marketplace } = parsePluginIdentifier(plugin.repository)
 
-    logEvent('tengu_plugin_enabled_for_session', {
+    logEvent('open_code_cli_plugin_enabled_for_session', {
       _PROTO_plugin_name:
         plugin.name as AnalyticsMetadata_I_VERIFIED_THIS_IS_PII_TAGGED,
       ...(marketplace && {
@@ -274,7 +274,7 @@ export function logPluginLoadErrors(
     // some are marketplace-level). Use the 'plugin' property if present,
     // fall back to the name parsed from err.source.
     const pluginName = 'plugin' in err && err.plugin ? err.plugin : name
-    logEvent('tengu_plugin_load_failed', {
+    logEvent('open_code_cli_plugin_load_failed', {
       error_category:
         err.type as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
       _PROTO_plugin_name:

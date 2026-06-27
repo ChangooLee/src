@@ -251,7 +251,7 @@ function evictOldestEvents(): void {
  * Call this early in the application lifecycle
  */
 export function initializePerfettoTracing(): void {
-  const envValue = process.env.CLAUDE_CODE_PERFETTO_TRACE
+  const envValue = (process.env.OPEN_CODE_CLI_PERFETTO_TRACE ?? process.env.CLAUDE_CODE_PERFETTO_TRACE)
   logForDebugging(
     `[Perfetto] initializePerfettoTracing called, env value: ${envValue}`,
   )
@@ -283,7 +283,7 @@ export function initializePerfettoTracing(): void {
 
     // Start periodic full-trace write if CLAUDE_CODE_PERFETTO_WRITE_INTERVAL_S is a positive integer
     const intervalSec = parseInt(
-      process.env.CLAUDE_CODE_PERFETTO_WRITE_INTERVAL_S ?? '',
+      (process.env.OPEN_CODE_CLI_PERFETTO_WRITE_INTERVAL_S ?? process.env.CLAUDE_CODE_PERFETTO_WRITE_INTERVAL_S) ?? '',
       10,
     )
     if (intervalSec > 0) {

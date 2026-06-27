@@ -243,7 +243,7 @@ export async function setup(
       process.exit(1)
     }
 
-    logEvent('tengu_worktree_created', { tmux_enabled: tmuxEnabled })
+    logEvent('open_code_cli_worktree_created', { tmux_enabled: tmuxEnabled })
 
     // Create tmux session for the worktree if enabled
     if (tmuxEnabled && tmuxSessionName) {
@@ -314,7 +314,7 @@ export async function setup(
   // mid-install when policySettings arrives.
   const skipPluginPrefetch =
     (getIsNonInteractiveSession() &&
-      isEnvTruthy(process.env.CLAUDE_CODE_SYNC_PLUGIN_INSTALL)) ||
+      isEnvTruthy((process.env.OPEN_CODE_CLI_SYNC_PLUGIN_INSTALL ?? process.env.CLAUDE_CODE_SYNC_PLUGIN_INSTALL))) ||
     // --bare: loadPluginHooks → loadAllPlugins is filesystem work that's
     // wasted when executeHooks early-returns under --bare anyway.
     isBareMode()
@@ -375,7 +375,7 @@ export async function setup(
   // inc-3694 (P0 CHANGELOG crash) threw at checkForReleaseNotes below; every
   // event after this point was dead. This beacon is the earliest reliable
   // "process started" signal for release health monitoring.
-  logEvent('tengu_started', {})
+  logEvent('open_code_cli_started', {})
 
   void prefetchApiKeyFromApiKeyHelperIfSafe(getIsNonInteractiveSession()) // Prefetch safely - only executes if trust already confirmed
   profileCheckpoint('setup_after_prefetch')
@@ -404,7 +404,7 @@ export async function setup(
       typeof process.getuid === 'function' &&
       process.getuid() === 0 &&
       process.env.IS_SANDBOX !== '1' &&
-      !isEnvTruthy(process.env.CLAUDE_CODE_BUBBLEWRAP)
+      !isEnvTruthy((process.env.OPEN_CODE_CLI_BUBBLEWRAP ?? process.env.CLAUDE_CODE_BUBBLEWRAP))
     ) {
       // biome-ignore lint/suspicious/noConsole:: intentional console output
       console.error(
@@ -451,7 +451,7 @@ export async function setup(
     projectConfig.lastCost !== undefined &&
     projectConfig.lastDuration !== undefined
   ) {
-    logEvent('tengu_exit', {
+    logEvent('open_code_cli_exit', {
       last_session_cost: projectConfig.lastCost,
       last_session_api_duration: projectConfig.lastAPIDuration,
       last_session_tool_duration: projectConfig.lastToolDuration,

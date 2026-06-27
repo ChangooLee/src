@@ -33,7 +33,7 @@ import { formatMs, formatTimelineLine, getPerformance } from './profilerBase.js'
 
 // Module-level state - initialized once when the module loads
 // eslint-disable-next-line custom-rules/no-process-env-top-level
-const ENABLED = isEnvTruthy(process.env.CLAUDE_CODE_PROFILE_QUERY)
+const ENABLED = isEnvTruthy((process.env.OPEN_CODE_CLI_PROFILE_QUERY ?? process.env.CLAUDE_CODE_PROFILE_QUERY))
 
 // Track memory snapshots separately (perf_hooks doesn't track memory)
 const memorySnapshots = new Map<string, NodeJS.MemoryUsage>()

@@ -303,7 +303,7 @@ export function computeWheelStep(state: WheelAccelState, dir: 1 | -1, now: numbe
  *  detect which kind of terminal we're in, hence the knob. Called lazily
  *  from initAndLogWheelAccel so globalSettings.env has loaded. */
 export function readScrollSpeedBase(): number {
-  const raw = process.env.CLAUDE_CODE_SCROLL_SPEED;
+  const raw = (process.env.OPEN_CODE_CLI_SCROLL_SPEED ?? process.env.CLAUDE_CODE_SCROLL_SPEED);
   if (!raw) return 1;
   const n = parseFloat(raw);
   return Number.isNaN(n) || n <= 0 ? 1 : Math.min(n, 20);

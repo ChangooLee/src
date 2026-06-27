@@ -3137,7 +3137,7 @@ export const loadAllPlugins = memoize(async (): Promise<PluginLoadResult> => {
  */
 export const loadAllPluginsCacheOnly = memoize(
   async (): Promise<PluginLoadResult> => {
-    if (isEnvTruthy(process.env.CLAUDE_CODE_SYNC_PLUGIN_INSTALL)) {
+    if (isEnvTruthy((process.env.OPEN_CODE_CLI_SYNC_PLUGIN_INSTALL ?? process.env.CLAUDE_CODE_SYNC_PLUGIN_INSTALL))) {
       return loadAllPlugins()
     }
     return assemblePluginLoadResult(() =>

@@ -90,7 +90,7 @@ export function isBriefEntitled(): boolean {
   // would not eliminate the GB gate string from external builds.
   return feature('KAIROS') || feature('KAIROS_BRIEF')
     ? getKairosActive() ||
-        isEnvTruthy(process.env.CLAUDE_CODE_BRIEF) ||
+        isEnvTruthy((process.env.OPEN_CODE_CLI_BRIEF ?? process.env.CLAUDE_CODE_BRIEF)) ||
         getFeatureValue_CACHED_WITH_REFRESH(
           'tengu_kairos_brief',
           false,
@@ -185,7 +185,7 @@ export const BriefTool = buildTool({
   renderToolResultMessage,
   async call({ message, attachments, status }, context) {
     const sentAt = new Date().toISOString()
-    logEvent('tengu_brief_send', {
+    logEvent('open_code_cli_brief_send', {
       proactive: status === 'proactive',
       attachment_count: attachments?.length ?? 0,
     })

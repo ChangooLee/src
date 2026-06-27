@@ -462,7 +462,7 @@ export class CCRClient {
       throw new CCRInitError('no_auth_headers')
     }
     if (epoch === undefined) {
-      const rawEpoch = process.env.CLAUDE_CODE_WORKER_EPOCH
+      const rawEpoch = (process.env.OPEN_CODE_CLI_WORKER_EPOCH ?? process.env.CLAUDE_CODE_WORKER_EPOCH)
       epoch = rawEpoch ? parseInt(rawEpoch, 10) : NaN
     }
     if (isNaN(epoch)) {

@@ -25,8 +25,8 @@ import {
 import { getManagedFilePath } from './settings/managedPath.js'
 import { isRestrictedToPluginOnly } from './settings/pluginOnlyPolicy.js'
 
-// Claude configuration directory names
-export const CLAUDE_CONFIG_DIRECTORIES = [
+// Open Code CLI configuration directory names
+export const OPEN_CODE_CLI_CONFIG_DIRECTORIES = [
   'commands',
   'agents',
   'output-styles',
@@ -35,7 +35,12 @@ export const CLAUDE_CONFIG_DIRECTORIES = [
   ...(feature('TEMPLATES') ? (['templates'] as const) : []),
 ] as const
 
-export type ClaudeConfigDirectory = (typeof CLAUDE_CONFIG_DIRECTORIES)[number]
+export type OpenCodeCliConfigDirectory =
+  (typeof OPEN_CODE_CLI_CONFIG_DIRECTORIES)[number]
+
+// Compatibility export for existing integrations; primary naming is Open Code CLI.
+export const CLAUDE_CONFIG_DIRECTORIES = OPEN_CODE_CLI_CONFIG_DIRECTORIES
+export type ClaudeConfigDirectory = OpenCodeCliConfigDirectory
 
 export type MarkdownFile = {
   filePath: string
@@ -555,7 +560,7 @@ async function loadMarkdownFiles(dir: string): Promise<
   // - Fallback: native Node.js (when CLAUDE_CODE_USE_NATIVE_FILE_SEARCH is set)
   //
   // Why both? Ripgrep has poor startup performance in native builds.
-  const useNative = isEnvTruthy(process.env.CLAUDE_CODE_USE_NATIVE_FILE_SEARCH)
+  const useNative = isEnvTruthy((process.env.OPEN_CODE_CLI_USE_NATIVE_FILE_SEARCH ?? process.env.CLAUDE_CODE_USE_NATIVE_FILE_SEARCH))
   const signal = AbortSignal.timeout(3000)
   let files: string[]
   try {

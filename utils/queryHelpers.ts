@@ -163,7 +163,7 @@ export function* normalizeMessage(message: Message): Generator<SDKMessage> {
         // Only emit for Open Code CLI Remote for now
         if (
           !isEnvTruthy(getOpenCodeCliEnv('REMOTE')) &&
-          !process.env.CLAUDE_CODE_CONTAINER_ID
+          !(process.env.OPEN_CODE_CLI_CONTAINER_ID ?? process.env.CLAUDE_CODE_CONTAINER_ID)
         ) {
           break
         }

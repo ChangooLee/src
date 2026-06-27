@@ -28,7 +28,7 @@ export function getRecordFilePath(): string | null {
   if (process.env.USER_TYPE !== 'ant') {
     return null
   }
-  if (!isEnvTruthy(process.env.CLAUDE_CODE_TERMINAL_RECORDING)) {
+  if (!isEnvTruthy((process.env.OPEN_CODE_CLI_TERMINAL_RECORDING ?? process.env.CLAUDE_CODE_TERMINAL_RECORDING))) {
     return null
   }
   // Record alongside the transcript.
