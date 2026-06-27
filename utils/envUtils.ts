@@ -139,16 +139,16 @@ export function parseEnvVars(
 
 /**
  * Get the AWS region with fallback to default
- * Matches the OpenAICompatibleProvider OpenAICompatibleProvider SDK's region behavior
+ * Matches the OpenAICompatible OpenAICompatible SDK's region behavior
  */
 export function getAWSRegion(): string {
   return process.env.AWS_REGION || process.env.AWS_DEFAULT_REGION || 'us-east-1'
 }
 
 /**
- * Get the default OpenAICompatibleProvider AI region
+ * Get the default OpenAICompatible AI region
  */
-export function getDefaultOpenAICompatibleProviderRegion(): string {
+export function getDefaultOpenAICompatibleRegion(): string {
   return process.env.CLOUD_ML_REGION || 'us-east5'
 }
 
@@ -194,17 +194,17 @@ export function isInProtectedNamespace(): boolean {
   return false
 }
 
-// @[MODEL LAUNCH]: Add a OpenAICompatibleProvider region override env var for the new model.
+// @[MODEL LAUNCH]: Add a OpenAICompatible region override env var for the new model.
 /**
- * Model prefix → env var for OpenAICompatibleProvider region overrides.
+ * Model prefix → env var for OpenAICompatible region overrides.
  * Order matters: more specific prefixes must come before less specific ones
  * (e.g., 'openai/gpt-4.1' before 'openai/gpt-4.1').
  */
 const VERTEX_REGION_OVERRIDES: ReadonlyArray<[string, string]> = [
   ['openai/gpt-4o-mini', 'VERTEX_REGION_OPEN_CODE_HAIKU_4_5'],
-  ['claude-3-5-haiku', 'VERTEX_REGION_OPEN_CODE_3_5_HAIKU'],
-  ['claude-3-5-sonnet', 'VERTEX_REGION_OPEN_CODE_3_5_SONNET'],
-  ['claude-3-7-sonnet', 'VERTEX_REGION_OPEN_CODE_3_7_SONNET'],
+  ['open-code-cli-3-5-haiku', 'VERTEX_REGION_OPEN_CODE_3_5_HAIKU'],
+  ['open-code-cli-3-5-sonnet', 'VERTEX_REGION_OPEN_CODE_3_5_SONNET'],
+  ['open-code-cli-3-7-sonnet', 'VERTEX_REGION_OPEN_CODE_3_7_SONNET'],
   ['openai/gpt-4.1', 'VERTEX_REGION_OPEN_CODE_4_1_OPUS'],
   ['openai/gpt-4.1', 'VERTEX_REGION_OPEN_CODE_4_0_OPUS'],
   ['openai/gpt-4o', 'VERTEX_REGION_OPEN_CODE_4_6_SONNET'],
@@ -213,10 +213,10 @@ const VERTEX_REGION_OVERRIDES: ReadonlyArray<[string, string]> = [
 ]
 
 /**
- * Get the OpenAICompatibleProvider AI region for a specific model.
+ * Get the OpenAICompatible AI region for a specific model.
  * Different models may be available in different regions.
  */
-export function getOpenAICompatibleProviderRegionForModel(
+export function getOpenAICompatibleRegionForModel(
   model: string | undefined,
 ): string | undefined {
   if (model) {
@@ -224,8 +224,8 @@ export function getOpenAICompatibleProviderRegionForModel(
       model.startsWith(prefix),
     )
     if (match) {
-      return process.env[match[1]] || getDefaultOpenAICompatibleProviderRegion()
+      return process.env[match[1]] || getDefaultOpenAICompatibleRegion()
     }
   }
-  return getDefaultOpenAICompatibleProviderRegion()
+  return getDefaultOpenAICompatibleRegion()
 }

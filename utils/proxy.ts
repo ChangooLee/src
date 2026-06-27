@@ -275,17 +275,17 @@ export function getWebSocketProxyUrl(url: string): string | undefined {
 }
 
 /**
- * Get fetch options for the OpenAICompatibleProvider SDK with proxy and mTLS configuration
+ * Get fetch options for the OpenAICompatible SDK with proxy and mTLS configuration
  * Returns fetch options with appropriate dispatcher for proxy and/or mTLS
  *
- * @param opts.forOpenAICompatibleProviderAPI - Enables OPEN_CODE_CLI_UNIX_SOCKET tunneling. This
+ * @param opts.forOpenAICompatibleAPI - Enables OPEN_CODE_CLI_UNIX_SOCKET tunneling. This
  *   env var is set by `open-code-cli ssh` on the remote CLI to route API calls through
  *   an ssh -R forwarded unix socket to a local auth proxy. It MUST NOT leak
- *   into non-OpenAICompatibleProvider-API fetch paths (MCP HTTP/SSE transports, etc.) or those
- *   requests get misrouted to api.openai.com/v1. Only the OpenAICompatibleProvider SDK client
+ *   into non-OpenAICompatible-API fetch paths (MCP HTTP/SSE transports, etc.) or those
+ *   requests get misrouted to api.openai.com/v1. Only the OpenAICompatible SDK client
  *   should pass `true` here.
  */
-export function getProxyFetchOptions(opts?: { forOpenAICompatibleProviderAPI?: boolean }): {
+export function getProxyFetchOptions(opts?: { forOpenAICompatibleAPI?: boolean }): {
   tls?: TLSConfig
   dispatcher?: undici.Dispatcher
   proxy?: string
@@ -295,9 +295,9 @@ export function getProxyFetchOptions(opts?: { forOpenAICompatibleProviderAPI?: b
   const base = keepAliveDisabled ? ({ keepalive: false } as const) : {}
 
   // OPEN_CODE_CLI_UNIX_SOCKET tunnels through the `open-code-cli ssh` auth proxy, which
-  // hardcodes the upstream to the OpenAICompatibleProvider API. Scope to the OpenAICompatibleProvider API
+  // hardcodes the upstream to the OpenAICompatible API. Scope to the OpenAICompatible API
   // client so MCP/SSE/other callers don't get their requests misrouted.
-  if (opts?.forOpenAICompatibleProviderAPI) {
+  if (opts?.forOpenAICompatibleAPI) {
     const unixSocket = process.env.OPEN_CODE_CLI_UNIX_SOCKET
     if (unixSocket && typeof Bun !== 'undefined') {
       return { ...base, unix: unixSocket }

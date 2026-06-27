@@ -21,7 +21,7 @@ import {
 import {
   isOAuthTokenExpired,
   refreshOAuthToken,
-  shouldUseClaudeAIAuth,
+  shouldUseOpenCodeCliAuth,
 } from '../services/oauth/client.js'
 import { getOauthProfileFromOauthToken } from '../services/oauth/getOauthProfile.js'
 import type { OAuthTokens, SubscriptionType } from '../services/oauth/types.js'
@@ -81,23 +81,23 @@ import { getOpenCodeCliEnv } from '../utils/envUtils.js';
 const DEFAULT_API_KEY_HELPER_TTL = 5 * 60 * 1000
 
 /**
- * CCR and Claude Desktop spawn the CLI with OAuth and should never fall back
+ * CCR and Open Code Desktop spawn the CLI with OAuth and should never fall back
  * to the user's ~/.open-code-cli/settings.json API-key config (apiKeyHelper,
  * env.OPEN_CODE_CLI_API_KEY, env.OPEN_CODE_CLI_AUTH_TOKEN). Those settings exist for
  * the user's terminal CLI, not managed sessions. Without this guard, a user
- * who runs `claude` in their terminal with an API key sees every CCD session
+ * who runs `open-code-cli` in their terminal with an API key sees every CCD session
  * also use that key — and fail if it's stale/wrong-org.
  */
 function isManagedOAuthContext(): boolean {
   return (
     isEnvTruthy(getOpenCodeCliEnv('REMOTE')) ||
-    getOpenCodeCliEnv('ENTRYPOINT') === 'claude-desktop'
+    getOpenCodeCliEnv('ENTRYPOINT') === 'open-code-desktop'
   )
 }
 
 /** Whether we are supporting direct 1P auth. */
 // this code is closely related to getAuthTokenSource
-export function isOpenAICompatibleProviderAuthEnabled(): boolean {
+export function isOpenAICompatibleAuthEnabled(): boolean {
   // --bare: API-key-only, never OAuth.
   if (isBareMode()) return false
 
@@ -127,18 +127,18 @@ export function isOpenAICompatibleProviderAuthEnabled(): boolean {
     process.env.OPEN_CODE_CLI_API_KEY_FILE_DESCRIPTOR
 
   // Check if API key is from an external source (not managed by /login)
-  const { source: apiKeySource } = getOpenAICompatibleProviderApiKeyWithSource({
+  const { source: apiKeySource } = getOpenAICompatibleApiKeyWithSource({
     skipRetrievingKeyFromApiKeyHelper: true,
   })
   const hasExternalApiKey =
     apiKeySource === 'OPEN_CODE_CLI_API_KEY' || apiKeySource === 'apiKeyHelper'
 
   // Disable OpenAI-compatible auth if:
-  // 1. Using 3rd party services (OpenAICompatibleProviders)
+  // 1. Using 3rd party services (OpenAI-compatible providers)
   // 2. User has an external API key (regardless of proxy configuration)
   // 3. User has an external auth token (regardless of proxy configuration)
   // this may cause issues if users have complex proxy / gateway "client-side creds" auth scenarios,
-  // e.g. if they want to set X-Api-Key to a gateway key but use OpenAICompatibleProvider OAuth for the Authorization
+  // e.g. if they want to set X-Api-Key to a gateway key but use OpenAICompatible OAuth for the Authorization
   // if we get reports of that, we should probably add an env var to force OAuth enablement
   const shouldDisableAuth =
     is3P ||
@@ -149,7 +149,7 @@ export function isOpenAICompatibleProviderAuthEnabled(): boolean {
 }
 
 /** Where the auth token is being sourced from, if any. */
-// this code is closely related to isOpenAICompatibleProviderAuthEnabled
+// this code is closely related to isOpenAICompatibleAuthEnabled
 export function getAuthTokenSource() {
   // --bare: API-key-only. apiKeyHelper (from --settings) is the only
   // bearer-token-shaped source allowed. OAuth env vars, FD tokens, and
@@ -197,9 +197,9 @@ export function getAuthTokenSource() {
     return { source: 'apiKeyHelper' as const, hasToken: true }
   }
 
-  const oauthTokens = getClaudeAIOAuthTokens()
-  if (shouldUseClaudeAIAuth(oauthTokens?.scopes) && oauthTokens?.accessToken) {
-    return { source: 'claude.ai' as const, hasToken: true }
+  const oauthTokens = getOpenCodeCliOAuthTokens()
+  if (shouldUseOpenCodeCliAuth(oauthTokens?.scopes) && oauthTokens?.accessToken) {
+    return { source: 'Open Code CLI' as const, hasToken: true }
   }
 
   return { source: 'none' as const, hasToken: false }
@@ -211,19 +211,19 @@ export type ApiKeySource =
   | '/login managed key'
   | 'none'
 
-export function getOpenAICompatibleProviderApiKey(): null | string {
-  const { key } = getOpenAICompatibleProviderApiKeyWithSource()
+export function getOpenAICompatibleApiKey(): null | string {
+  const { key } = getOpenAICompatibleApiKeyWithSource()
   return key
 }
 
-export function hasOpenAICompatibleProviderApiKeyAuth(): boolean {
-  const { key, source } = getOpenAICompatibleProviderApiKeyWithSource({
+export function hasOpenAICompatibleApiKeyAuth(): boolean {
+  const { key, source } = getOpenAICompatibleApiKeyWithSource({
     skipRetrievingKeyFromApiKeyHelper: true,
   })
   return key !== null && source !== 'none'
 }
 
-export function getOpenAICompatibleProviderApiKeyWithSource(
+export function getOpenAICompatibleApiKeyWithSource(
   opts: { skipRetrievingKeyFromApiKeyHelper?: boolean } = {},
 ): {
   key: null | string
@@ -231,7 +231,7 @@ export function getOpenAICompatibleProviderApiKeyWithSource(
 } {
   // --bare: hermetic auth. Only OPEN_CODE_CLI_API_KEY env or apiKeyHelper from
   // the --settings flag. Never touches keychain, config file, or approval
-  // lists. 3P (OpenAICompatibleProviders) uses provider creds, not this path.
+  // lists. 3P (OpenAI-compatible providers) uses provider creds, not this path.
   if (isBareMode()) {
     if (process.env.OPEN_CODE_CLI_API_KEY) {
       return { key: process.env.OPEN_CODE_CLI_API_KEY, source: 'OPEN_CODE_CLI_API_KEY' }
@@ -842,7 +842,7 @@ const GCP_CREDENTIALS_CHECK_TIMEOUT_MS = 5_000
 
 /**
  * Check if GCP credentials are currently valid by attempting to get an access token.
- * This uses the same authentication chain that the OpenAICompatibleProvider SDK uses.
+ * This uses the same authentication chain that the OpenAICompatible SDK uses.
  */
 export async function checkGcpCredentialsValid(): Promise<boolean> {
   try {
@@ -1047,7 +1047,7 @@ export function prefetchAwsCredentialsAndBedRockInfoIfSafe(): void {
   getModelStrings()
 }
 
-/** @private Use {@link getOpenAICompatibleProviderApiKey} or {@link getOpenAICompatibleProviderApiKeyWithSource} */
+/** @private Use {@link getOpenAICompatibleApiKey} or {@link getOpenAICompatibleApiKeyWithSource} */
 export const getApiKeyFromConfigOrMacOSKeychain = memoize(
   (): { key: string; source: ApiKeySource } | null => {
     if (isBareMode()) return null
@@ -1195,8 +1195,8 @@ export function saveOAuthTokensIfNeeded(tokens: OAuthTokens): {
   success: boolean
   warning?: string
 } {
-  if (!shouldUseClaudeAIAuth(tokens.scopes)) {
-    logEvent('open_code_cli_oauth_tokens_not_claude_ai', {})
+  if (!shouldUseOpenCodeCliAuth(tokens.scopes)) {
+    logEvent('open_code_cli_oauth_tokens_not_open_code_cli_ai', {})
     return { success: true }
   }
 
@@ -1212,9 +1212,9 @@ export function saveOAuthTokensIfNeeded(tokens: OAuthTokens): {
 
   try {
     const storageData = secureStorage.read() || {}
-    const existingOauth = storageData.claudeAiOauth
+    const existingOauth = storageData.openCodeCliOauth
 
-    storageData.claudeAiOauth = {
+    storageData.openCodeCliOauth = {
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
       expiresAt: tokens.expiresAt,
@@ -1236,7 +1236,7 @@ export function saveOAuthTokensIfNeeded(tokens: OAuthTokens): {
       logEvent('open_code_cli_oauth_tokens_save_failed', { storageBackend })
     }
 
-    getClaudeAIOAuthTokens.cache?.clear?.()
+    getOpenCodeCliOAuthTokens.cache?.clear?.()
     clearBetasCaches()
     clearToolSchemaCache()
     return updateStatus
@@ -1252,7 +1252,7 @@ export function saveOAuthTokensIfNeeded(tokens: OAuthTokens): {
   }
 }
 
-export const getClaudeAIOAuthTokens = memoize((): OAuthTokens | null => {
+export const getOpenCodeCliOAuthTokens = memoize((): OAuthTokens | null => {
   // --bare: API-key-only. No OAuth env tokens, no keychain, no credentials file.
   if (isBareMode()) return null
 
@@ -1286,7 +1286,7 @@ export const getClaudeAIOAuthTokens = memoize((): OAuthTokens | null => {
   try {
     const secureStorage = getSecureStorage()
     const storageData = secureStorage.read()
-    const oauthData = storageData?.claudeAiOauth
+    const oauthData = storageData?.openCodeCliOauth
 
     if (!oauthData?.accessToken) {
       return null
@@ -1306,7 +1306,7 @@ export const getClaudeAIOAuthTokens = memoize((): OAuthTokens | null => {
  * server (e.g., due to clock corrections after token was issued).
  */
 export function clearOAuthTokenCache(): void {
-  getClaudeAIOAuthTokens.cache?.clear?.()
+  getOpenCodeCliOAuthTokens.cache?.clear?.()
   clearKeychainCache()
 }
 
@@ -1331,11 +1331,11 @@ async function invalidateOAuthCacheIfDiskChanged(): Promise<void> {
     // the memoize so it delegates to the keychain cache's 30s TTL instead
     // of caching forever on top. `security find-generic-password` is
     // ~15ms; bounded to once per 30s by the keychain cache.
-    getClaudeAIOAuthTokens.cache?.clear?.()
+    getOpenCodeCliOAuthTokens.cache?.clear?.()
   }
 }
 
-// In-flight dedup: when N claude.ai proxy connectors hit 401 with the same
+// In-flight dedup: when N Open Code CLI proxy connectors hit 401 with the same
 // token simultaneously (common at startup — #20930), only one should clear
 // caches and re-read the keychain. Without this, each call's clearOAuthTokenCache()
 // nukes readInFlight in macOsKeychainStorage and triggers a fresh spawn —
@@ -1375,7 +1375,7 @@ async function handleOAuth401ErrorImpl(
 ): Promise<boolean> {
   // Clear caches and re-read from keychain (async — sync read blocks ~100ms/call)
   clearOAuthTokenCache()
-  const currentTokens = await getClaudeAIOAuthTokensAsync()
+  const currentTokens = await getOpenCodeCliOAuthTokensAsync()
 
   if (!currentTokens?.refreshToken) {
     return false
@@ -1396,7 +1396,7 @@ async function handleOAuth401ErrorImpl(
  * Delegates to the sync memoized version for env var / file descriptor tokens
  * (which don't hit the keychain), and only uses async for storage reads.
  */
-export async function getClaudeAIOAuthTokensAsync(): Promise<OAuthTokens | null> {
+export async function getOpenCodeCliOAuthTokensAsync(): Promise<OAuthTokens | null> {
   if (isBareMode()) return null
 
   // Env var and FD tokens are sync and don't hit the keychain
@@ -1404,13 +1404,13 @@ export async function getClaudeAIOAuthTokensAsync(): Promise<OAuthTokens | null>
     process.env.OPEN_CODE_CLI_OAUTH_TOKEN ||
     getOAuthTokenFromFileDescriptor()
   ) {
-    return getClaudeAIOAuthTokens()
+    return getOpenCodeCliOAuthTokens()
   }
 
   try {
     const secureStorage = getSecureStorage()
     const storageData = await secureStorage.readAsync()
-    const oauthData = storageData?.claudeAiOauth
+    const oauthData = storageData?.openCodeCliOauth
     if (!oauthData?.accessToken) {
       return null
     }
@@ -1454,7 +1454,7 @@ async function checkAndRefreshOAuthTokenIfNeededImpl(
 
   // First check if token is expired with cached value
   // Skip this check if force=true (server already told us token is bad)
-  const tokens = getClaudeAIOAuthTokens()
+  const tokens = getOpenCodeCliOAuthTokens()
   if (!force) {
     if (!tokens?.refreshToken || !isOAuthTokenExpired(tokens.expiresAt)) {
       return false
@@ -1465,15 +1465,15 @@ async function checkAndRefreshOAuthTokenIfNeededImpl(
     return false
   }
 
-  if (!shouldUseClaudeAIAuth(tokens.scopes)) {
+  if (!shouldUseOpenCodeCliAuth(tokens.scopes)) {
     return false
   }
 
   // Re-read tokens async to check if they're still expired
   // Another process might have refreshed them
-  getClaudeAIOAuthTokens.cache?.clear?.()
+  getOpenCodeCliOAuthTokens.cache?.clear?.()
   clearKeychainCache()
-  const freshTokens = await getClaudeAIOAuthTokensAsync()
+  const freshTokens = await getOpenCodeCliOAuthTokensAsync()
   if (
     !freshTokens?.refreshToken ||
     !isOAuthTokenExpired(freshTokens.expiresAt)
@@ -1482,13 +1482,13 @@ async function checkAndRefreshOAuthTokenIfNeededImpl(
   }
 
   // Tokens are still expired, try to acquire lock and refresh
-  const claudeDir = getOpenCodeCliConfigHomeDir()
-  await mkdir(claudeDir, { recursive: true })
+  const openCodeCliDir = getOpenCodeCliConfigHomeDir()
+  await mkdir(openCodeCliDir, { recursive: true })
 
   let release
   try {
     logEvent('open_code_cli_oauth_token_refresh_lock_acquiring', {})
-    release = await lockfile.lock(claudeDir)
+    release = await lockfile.lock(openCodeCliDir)
     logEvent('open_code_cli_oauth_token_refresh_lock_acquired', {})
   } catch (err) {
     if ((err as { code?: string }).code === 'ELOCKED') {
@@ -1516,9 +1516,9 @@ async function checkAndRefreshOAuthTokenIfNeededImpl(
   }
   try {
     // Check one more time after acquiring lock
-    getClaudeAIOAuthTokens.cache?.clear?.()
+    getOpenCodeCliOAuthTokens.cache?.clear?.()
     clearKeychainCache()
-    const lockedTokens = await getClaudeAIOAuthTokensAsync()
+    const lockedTokens = await getOpenCodeCliOAuthTokensAsync()
     if (
       !lockedTokens?.refreshToken ||
       !isOAuthTokenExpired(lockedTokens.expiresAt)
@@ -1529,25 +1529,25 @@ async function checkAndRefreshOAuthTokenIfNeededImpl(
 
     logEvent('open_code_cli_oauth_token_refresh_starting', {})
     const refreshedTokens = await refreshOAuthToken(lockedTokens.refreshToken, {
-      // For Claude.ai subscribers, omit scopes so the default
+      // For Open Code CLI subscribers, omit scopes so the default
       // OPEN_CODE_CLI_OAUTH_SCOPES applies — this allows scope expansion
       // (e.g. adding user:file_upload) on refresh without re-login.
-      scopes: shouldUseClaudeAIAuth(lockedTokens.scopes)
+      scopes: shouldUseOpenCodeCliAuth(lockedTokens.scopes)
         ? undefined
         : lockedTokens.scopes,
     })
     saveOAuthTokensIfNeeded(refreshedTokens)
 
     // Clear the cache after refreshing token
-    getClaudeAIOAuthTokens.cache?.clear?.()
+    getOpenCodeCliOAuthTokens.cache?.clear?.()
     clearKeychainCache()
     return true
   } catch (error) {
     logError(error)
 
-    getClaudeAIOAuthTokens.cache?.clear?.()
+    getOpenCodeCliOAuthTokens.cache?.clear?.()
     clearKeychainCache()
-    const currentTokens = await getClaudeAIOAuthTokensAsync()
+    const currentTokens = await getOpenCodeCliOAuthTokensAsync()
     if (currentTokens && !isOAuthTokenExpired(currentTokens.expiresAt)) {
       logEvent('open_code_cli_oauth_token_refresh_race_recovered', {})
       return true
@@ -1561,12 +1561,12 @@ async function checkAndRefreshOAuthTokenIfNeededImpl(
   }
 }
 
-export function isClaudeAISubscriber(): boolean {
-  if (!isOpenAICompatibleProviderAuthEnabled()) {
+export function isOpenCodeCliSubscriber(): boolean {
+  if (!isOpenAICompatibleAuthEnabled()) {
     return false
   }
 
-  return shouldUseClaudeAIAuth(getClaudeAIOAuthTokens()?.scopes)
+  return shouldUseOpenCodeCliAuth(getOpenCodeCliOAuthTokens()?.scopes)
 }
 
 /**
@@ -1579,18 +1579,18 @@ export function isClaudeAISubscriber(): boolean {
  */
 export function hasProfileScope(): boolean {
   return (
-    getClaudeAIOAuthTokens()?.scopes?.includes(OPEN_CODE_CLI_PROFILE_SCOPE) ?? false
+    getOpenCodeCliOAuthTokens()?.scopes?.includes(OPEN_CODE_CLI_PROFILE_SCOPE) ?? false
   )
 }
 
 export function is1PApiCustomer(): boolean {
   // 1P API customers are users who are NOT:
-  // 1. Claude.ai subscribers (Max, Pro, Enterprise, Team)
-  // 2. OpenAICompatibleProvider AI users
-  // 3. AWS OpenAICompatibleProvider users
-  // 4. OpenAICompatibleProvider users
+  // 1. Open Code CLI subscribers (Max, Pro, Enterprise, Team)
+  // 2. OpenAICompatible AI users
+  // 3. AWS OpenAICompatible users
+  // 4. OpenAICompatible users
 
-  // Exclude OpenAICompatibleProvider, OpenAICompatibleProvider, and OpenAICompatibleProvider customers
+  // Exclude OpenAICompatible, OpenAICompatible, and OpenAICompatible customers
   if (
     isEnvTruthy(process.env.OPEN_CODE_CLI_USE_BEDROCK) ||
     isEnvTruthy(process.env.OPEN_CODE_CLI_USE_VERTEX) ||
@@ -1599,8 +1599,8 @@ export function is1PApiCustomer(): boolean {
     return false
   }
 
-  // Exclude Claude.ai subscribers
-  if (isClaudeAISubscriber()) {
+  // Exclude Open Code CLI subscribers
+  if (isOpenCodeCliSubscriber()) {
     return false
   }
 
@@ -1613,19 +1613,19 @@ export function is1PApiCustomer(): boolean {
  * Returns undefined when using external API keys or third-party services.
  */
 export function getOauthAccountInfo(): AccountInfo | undefined {
-  return isOpenAICompatibleProviderAuthEnabled() ? getGlobalConfig().oauthAccount : undefined
+  return isOpenAICompatibleAuthEnabled() ? getGlobalConfig().oauthAccount : undefined
 }
 
 /**
  * Checks if overage/extra usage provisioning is allowed for this organization.
- * This mirrors the logic in apps/claude-ai `useIsOverageProvisioningAllowed` hook as closely as possible.
+ * This mirrors the logic in apps/open-code-cli-ai `useIsOverageProvisioningAllowed` hook as closely as possible.
  */
 export function isOverageProvisioningAllowed(): boolean {
   const accountInfo = getOauthAccountInfo()
   const billingType = accountInfo?.billingType
 
-  // Must be a Claude subscriber with a supported subscription type
-  if (!isClaudeAISubscriber() || !billingType) {
+  // Must be a Open Code CLI subscriber with a supported subscription type
+  if (!isOpenCodeCliSubscriber() || !billingType) {
     return false
   }
 
@@ -1665,10 +1665,10 @@ export function getSubscriptionType(): SubscriptionType | null {
     return getMockSubscriptionType()
   }
 
-  if (!isOpenAICompatibleProviderAuthEnabled()) {
+  if (!isOpenAICompatibleAuthEnabled()) {
     return null
   }
-  const oauthTokens = getClaudeAIOAuthTokens()
+  const oauthTokens = getOpenCodeCliOAuthTokens()
   if (!oauthTokens) {
     return null
   }
@@ -1687,7 +1687,7 @@ export function isTeamSubscriber(): boolean {
 export function isTeamPremiumSubscriber(): boolean {
   return (
     getSubscriptionType() === 'team' &&
-    getRateLimitTier() === 'default_claude_max_5x'
+    getRateLimitTier() === 'default_open_code_cli_max_5x'
   )
 }
 
@@ -1700,10 +1700,10 @@ export function isProSubscriber(): boolean {
 }
 
 export function getRateLimitTier(): string | null {
-  if (!isOpenAICompatibleProviderAuthEnabled()) {
+  if (!isOpenAICompatibleAuthEnabled()) {
     return null
   }
-  const oauthTokens = getClaudeAIOAuthTokens()
+  const oauthTokens = getOpenCodeCliOAuthTokens()
   if (!oauthTokens) {
     return null
   }
@@ -1716,7 +1716,7 @@ export function getSubscriptionName(): string {
 
   switch (subscriptionType) {
     case 'enterprise':
-      return 'Claude Enterprise'
+      return 'Open Code CLI Enterprise'
     case 'team':
       return 'provider plan'
     case 'max':
@@ -1728,7 +1728,7 @@ export function getSubscriptionName(): string {
   }
 }
 
-/** Check if using third-party services (OpenAICompatibleProvider or OpenAICompatibleProvider or OpenAICompatibleProvider) */
+/** Check if using third-party services (OpenAICompatible or OpenAICompatible or OpenAICompatible) */
 export function isUsing3PServices(): boolean {
   return !!(
     isEnvTruthy(process.env.OPEN_CODE_CLI_USE_BEDROCK) ||
@@ -1846,7 +1846,7 @@ function isConsumerPlan(plan: SubscriptionType): plan is 'max' | 'pro' {
 export function isConsumerSubscriber(): boolean {
   const subscriptionType = getSubscriptionType()
   return (
-    isClaudeAISubscriber() &&
+    isOpenCodeCliSubscriber() &&
     subscriptionType !== null &&
     isConsumerPlan(subscriptionType)
   )
@@ -1868,19 +1868,19 @@ export function getAccountInformation() {
     authTokenSource === 'OPEN_CODE_CLI_OAUTH_TOKEN_FILE_DESCRIPTOR'
   ) {
     accountInfo.tokenSource = authTokenSource
-  } else if (isClaudeAISubscriber()) {
+  } else if (isOpenCodeCliSubscriber()) {
     accountInfo.subscription = getSubscriptionName()
   } else {
     accountInfo.tokenSource = authTokenSource
   }
-  const { key: apiKey, source: apiKeySource } = getOpenAICompatibleProviderApiKeyWithSource()
+  const { key: apiKey, source: apiKeySource } = getOpenAICompatibleApiKeyWithSource()
   if (apiKey) {
     accountInfo.apiKeySource = apiKeySource
   }
 
   // We don't know the organization if we're relying on an external API key or auth token
   if (
-    authTokenSource === 'claude.ai' ||
+    authTokenSource === 'Open Code CLI' ||
     apiKeySource === '/login managed key'
   ) {
     // Get organization name from OAuth account info
@@ -1891,7 +1891,7 @@ export function getAccountInformation() {
   }
   const email = getOauthAccountInfo()?.emailAddress
   if (
-    (authTokenSource === 'claude.ai' ||
+    (authTokenSource === 'Open Code CLI' ||
       apiKeySource === '/login managed key') &&
     email
   ) {
@@ -1923,7 +1923,7 @@ export async function validateForceLoginOrg(): Promise<OrgValidationResult> {
     return { valid: true }
   }
 
-  if (!isOpenAICompatibleProviderAuthEnabled()) {
+  if (!isOpenAICompatibleAuthEnabled()) {
     return { valid: true }
   }
 
@@ -1937,7 +1937,7 @@ export async function validateForceLoginOrg(): Promise<OrgValidationResult> {
   // No-op for env-var tokens (refreshToken is null).
   await checkAndRefreshOAuthTokenIfNeeded()
 
-  const tokens = getClaudeAIOAuthTokens()
+  const tokens = getOpenCodeCliOAuthTokens()
   if (!tokens) {
     return { valid: true }
   }

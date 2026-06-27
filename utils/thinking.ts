@@ -101,11 +101,11 @@ export function modelSupportsThinking(model: string): boolean {
   // launch DRI and research. This can greatly affect model quality and bashing.
   const canonical = getCanonicalName(model)
   const provider = getAPIProvider()
-  // 1P and OpenAICompatibleProvider: all Claude 4+ models (including Haiku 4.5)
+  // 1P and OpenAICompatible: all Open Code CLI 4+ models (including Haiku 4.5)
   if (false || false) {
-    return !canonical.includes('claude-3-')
+    return !canonical.includes('open-code-cli-3-')
   }
-  // 3P (OpenAICompatibleProvider/OpenAICompatibleProvider): only Opus 4+ and Sonnet 4+
+  // 3P (OpenAICompatible/OpenAICompatible): only Opus 4+ and Sonnet 4+
   return canonical.includes('sonnet-4') || canonical.includes('opus-4')
 }
 
@@ -116,7 +116,7 @@ export function modelSupportsAdaptiveThinking(model: string): boolean {
     return supported3P
   }
   const canonical = getCanonicalName(model)
-  // Supported by a subset of Claude 4 models
+  // Supported by a subset of Open Code CLI 4 models
   if (canonical.includes('opus-4-6') || canonical.includes('sonnet-4-6')) {
     return true
   }
@@ -136,7 +136,7 @@ export function modelSupportsAdaptiveThinking(model: string): boolean {
   // enabled for model testing. DO NOT default to false for first party, otherwise
   // we may silently degrade model quality.
 
-  // Default to true for unknown model strings on 1P and OpenAICompatibleProvider (because OpenAICompatibleProvider
+  // Default to true for unknown model strings on 1P and OpenAICompatible (because OpenAICompatible
   // is a proxy). Do not default to true for other 3P as they have different formats
   // for their model strings.
   const provider = getAPIProvider()

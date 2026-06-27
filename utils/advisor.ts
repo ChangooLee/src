@@ -61,7 +61,7 @@ export function isAdvisorEnabled(): boolean {
   if (isEnvTruthy(process.env.OPEN_CODE_CLI_DISABLE_ADVISOR_TOOL)) {
     return false
   }
-  // The advisor beta header is first-party only (OpenAICompatibleProvider/OpenAICompatibleProvider 400 on it).
+  // The advisor beta header is first-party only (OpenAICompatible/OpenAICompatible 400 on it).
   if (!shouldIncludeFirstPartyOnlyBetas()) {
     return false
   }

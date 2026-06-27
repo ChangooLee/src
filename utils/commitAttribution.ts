@@ -24,55 +24,55 @@ import { getOpenCodeCliEnv } from './envUtils.js'
  *
  * NOTE: This is intentionally a repo allowlist, not an org-wide check.
  * The openai-compatibles and openai-compatible-experimental orgs contain PUBLIC repos
- * (e.g. anthropics/open-code-cli, openai-compatible-experimental/sandbox-runtime).
+ * (e.g. open-code-cli/open-code-cli, openai-compatible-experimental/sandbox-runtime).
  * Undercover mode must stay ON in those to prevent codename leaks.
  * Only add repos here that are confirmed PRIVATE.
  */
 const INTERNAL_MODEL_REPOS = [
-  'github.com:anthropics/open-code-cli-internal',
-  'github.com/anthropics/open-code-cli-internal',
+  'github.com:open-code-cli/open-code-cli-internal',
+  'github.com/open-code-cli/open-code-cli-internal',
   'github.com:openai-compatibles/openai-compatible',
-  'github.com/anthropics/openai-compatible',
+  'github.com/open-code-cli/openai-compatible',
   'github.com:openai-compatibles/apps',
-  'github.com/anthropics/apps',
+  'github.com/open-code-cli/apps',
   'github.com:openai-compatibles/casino',
-  'github.com/anthropics/casino',
+  'github.com/open-code-cli/casino',
   'github.com:openai-compatibles/dbt',
-  'github.com/anthropics/dbt',
+  'github.com/open-code-cli/dbt',
   'github.com:openai-compatibles/dotfiles',
-  'github.com/anthropics/dotfiles',
+  'github.com/open-code-cli/dotfiles',
   'github.com:openai-compatibles/terraform-config',
-  'github.com/anthropics/terraform-config',
+  'github.com/open-code-cli/terraform-config',
   'github.com:openai-compatibles/hex-export',
-  'github.com/anthropics/hex-export',
+  'github.com/open-code-cli/hex-export',
   'github.com:openai-compatibles/feedback-v2',
-  'github.com/anthropics/feedback-v2',
+  'github.com/open-code-cli/feedback-v2',
   'github.com:openai-compatibles/labs',
-  'github.com/anthropics/labs',
+  'github.com/open-code-cli/labs',
   'github.com:openai-compatibles/argo-rollouts',
-  'github.com/anthropics/argo-rollouts',
+  'github.com/open-code-cli/argo-rollouts',
   'github.com:openai-compatibles/starling-configs',
-  'github.com/anthropics/starling-configs',
+  'github.com/open-code-cli/starling-configs',
   'github.com:openai-compatibles/ts-tools',
-  'github.com/anthropics/ts-tools',
+  'github.com/open-code-cli/ts-tools',
   'github.com:openai-compatibles/ts-capsules',
-  'github.com/anthropics/ts-capsules',
+  'github.com/open-code-cli/ts-capsules',
   'github.com:openai-compatibles/feldspar-testing',
-  'github.com/anthropics/feldspar-testing',
+  'github.com/open-code-cli/feldspar-testing',
   'github.com:openai-compatibles/trellis',
-  'github.com/anthropics/trellis',
-  'github.com:openai-compatibles/claude-for-hiring',
-  'github.com/anthropics/claude-for-hiring',
+  'github.com/open-code-cli/trellis',
+  'github.com:openai-compatibles/open-code-cli-for-hiring',
+  'github.com/open-code-cli/open-code-cli-for-hiring',
   'github.com:openai-compatibles/forge-web',
-  'github.com/anthropics/forge-web',
+  'github.com/open-code-cli/forge-web',
   'github.com:openai-compatibles/infra-manifests',
-  'github.com/anthropics/infra-manifests',
+  'github.com/open-code-cli/infra-manifests',
   'github.com:openai-compatibles/mycro_manifests',
-  'github.com/anthropics/mycro_manifests',
+  'github.com/open-code-cli/mycro_manifests',
   'github.com:openai-compatibles/mycro_configs',
-  'github.com/anthropics/mycro_configs',
+  'github.com/open-code-cli/mycro_configs',
   'github.com:openai-compatibles/mobile-apps',
-  'github.com/anthropics/mobile-apps',
+  'github.com/open-code-cli/mobile-apps',
 ]
 
 /**
@@ -169,7 +169,7 @@ export function sanitizeModelName(shortName: string): string {
 }
 
 /**
- * Attribution state for tracking Claude's contributions to files.
+ * Attribution state for tracking Open Code CLI's contributions to files.
  */
 export type AttributionState = {
   // File states keyed by relative path (from cwd)
@@ -193,11 +193,11 @@ export type AttributionState = {
 }
 
 /**
- * Summary of Claude's contribution for a commit.
+ * Summary of Open Code CLI's contribution for a commit.
  */
 export type AttributionSummary = {
-  claudePercent: number
-  claudeChars: number
+  openCodeCliPercent: number
+  openCodeCliChars: number
   humanChars: number
   surfaces: string[]
 }
@@ -206,7 +206,7 @@ export type AttributionSummary = {
  * Per-file attribution details for git notes.
  */
 export type FileAttribution = {
-  claudeChars: number
+  openCodeCliChars: number
   humanChars: number
   percent: number
   surface: string
@@ -219,7 +219,7 @@ export type AttributionData = {
   version: 1
   summary: AttributionSummary
   files: Record<string, FileAttribution>
-  surfaceBreakdown: Record<string, { claudeChars: number; percent: number }>
+  surfaceBreakdown: Record<string, { openCodeCliChars: number; percent: number }>
   excludedGenerated: string[]
   sessions: string[]
 }
@@ -333,12 +333,12 @@ function computeFileModificationState(
   const normalizedPath = normalizeFilePath(filePath)
 
   try {
-    // Calculate Claude's character contribution
-    let claudeContribution: number
+    // Calculate Open Code CLI's character contribution
+    let openCodeCliContribution: number
 
     if (oldContent === '' || newContent === '') {
       // New file or full deletion - contribution is the content length
-      claudeContribution =
+      openCodeCliContribution =
         oldContent === '' ? newContent.length : oldContent.length
     } else {
       // Find actual changed region via common prefix/suffix matching.
@@ -362,16 +362,16 @@ function computeFileModificationState(
       }
       const oldChangedLen = oldContent.length - prefixEnd - suffixLen
       const newChangedLen = newContent.length - prefixEnd - suffixLen
-      claudeContribution = Math.max(oldChangedLen, newChangedLen)
+      openCodeCliContribution = Math.max(oldChangedLen, newChangedLen)
     }
 
     // Get current file state if it exists
     const existingState = existingFileStates.get(normalizedPath)
-    const existingContribution = existingState?.open-code-cliContribution ?? 0
+    const existingContribution = existingState?.openCodeCliContribution ?? 0
 
     return {
       contentHash: computeContentHash(newContent),
-      claudeContribution: existingContribution + claudeContribution,
+      openCodeCliContribution: existingContribution + openCodeCliContribution,
       mtime,
     }
   } catch (error) {
@@ -397,7 +397,7 @@ export async function getFileMtime(filePath: string): Promise<number> {
 }
 
 /**
- * Track a file modification by Claude.
+ * Track a file modification by Open Code CLI.
  * Called after Edit/Write tool completes.
  */
 export function trackFileModification(
@@ -424,7 +424,7 @@ export function trackFileModification(
   newFileStates.set(normalizedPath, newFileState)
 
   logForDebugging(
-    `Attribution: Tracked ${newFileState.open-code-cliContribution} chars for ${normalizedPath}`,
+    `Attribution: Tracked ${newFileState.openCodeCliContribution} chars for ${normalizedPath}`,
   )
 
   return {
@@ -434,8 +434,8 @@ export function trackFileModification(
 }
 
 /**
- * Track a file creation by Claude (e.g., via bash command).
- * Used when Claude creates a new file through a non-tracked mechanism.
+ * Track a file creation by Open Code CLI (e.g., via bash command).
+ * Used when Open Code CLI creates a new file through a non-tracked mechanism.
  */
 export function trackFileCreation(
   state: AttributionState,
@@ -448,8 +448,8 @@ export function trackFileCreation(
 }
 
 /**
- * Track a file deletion by Claude (e.g., via bash rm command).
- * Used when Claude deletes a file through a non-tracked mechanism.
+ * Track a file deletion by Open Code CLI (e.g., via bash rm command).
+ * Used when Open Code CLI deletes a file through a non-tracked mechanism.
  */
 export function trackFileDeletion(
   state: AttributionState,
@@ -458,12 +458,12 @@ export function trackFileDeletion(
 ): AttributionState {
   const normalizedPath = normalizeFilePath(filePath)
   const existingState = state.fileStates.get(normalizedPath)
-  const existingContribution = existingState?.open-code-cliContribution ?? 0
+  const existingContribution = existingState?.openCodeCliContribution ?? 0
   const deletedChars = oldContent.length
 
   const newFileState: FileAttributionState = {
     contentHash: '', // Empty hash for deleted files
-    claudeContribution: existingContribution + deletedChars,
+    openCodeCliContribution: existingContribution + deletedChars,
     mtime: Date.now(),
   }
 
@@ -471,7 +471,7 @@ export function trackFileDeletion(
   newFileStates.set(normalizedPath, newFileState)
 
   logForDebugging(
-    `Attribution: Tracked deletion of ${normalizedPath} (${deletedChars} chars removed, total contribution: ${newFileState.open-code-cliContribution})`,
+    `Attribution: Tracked deletion of ${normalizedPath} (${deletedChars} chars removed, total contribution: ${newFileState.openCodeCliContribution})`,
   )
 
   return {
@@ -505,12 +505,12 @@ export function trackBulkFileChanges(
     if (change.type === 'deleted') {
       const normalizedPath = normalizeFilePath(change.path)
       const existingState = newFileStates.get(normalizedPath)
-      const existingContribution = existingState?.open-code-cliContribution ?? 0
+      const existingContribution = existingState?.openCodeCliContribution ?? 0
       const deletedChars = change.oldContent.length
 
       newFileStates.set(normalizedPath, {
         contentHash: '',
-        claudeContribution: existingContribution + deletedChars,
+        openCodeCliContribution: existingContribution + deletedChars,
         mtime,
       })
 
@@ -530,7 +530,7 @@ export function trackBulkFileChanges(
         newFileStates.set(normalizedPath, newFileState)
 
         logForDebugging(
-          `Attribution: Tracked ${newFileState.open-code-cliContribution} chars for ${normalizedPath}`,
+          `Attribution: Tracked ${newFileState.openCodeCliContribution} chars for ${normalizedPath}`,
         )
       }
     }
@@ -558,7 +558,7 @@ export async function calculateCommitAttribution(
   const surfaces = new Set<string>()
   const surfaceCounts: Record<string, number> = {}
 
-  let totalClaudeChars = 0
+  let totalOpenCodeCliChars = 0
   let totalHumanChars = 0
 
   // Merge file states from all sessions
@@ -605,8 +605,8 @@ export async function calculateCommitAttribution(
       if (existing) {
         mergedFileStates.set(path, {
           ...fileState,
-          claudeContribution:
-            existing.open-code-cliContribution + fileState.open-code-cliContribution,
+          openCodeCliContribution:
+            existing.openCodeCliContribution + fileState.openCodeCliContribution,
         })
       } else {
         mergedFileStates.set(path, fileState)
@@ -629,7 +629,7 @@ export async function calculateCommitAttribution(
       // Get the surface for this file
       const fileSurface = states[0]!.surface
 
-      let claudeChars = 0
+      let openCodeCliChars = 0
       let humanChars = 0
 
       // Check if file was deleted
@@ -638,8 +638,8 @@ export async function calculateCommitAttribution(
       if (deleted) {
         // File was deleted
         if (fileState) {
-          // Claude deleted this file (tracked deletion)
-          claudeChars = fileState.open-code-cliContribution
+          // Open Code CLI deleted this file (tracked deletion)
+          openCodeCliChars = fileState.openCodeCliContribution
           humanChars = 0
         } else {
           // Human deleted this file (untracked deletion)
@@ -656,14 +656,14 @@ export async function calculateCommitAttribution(
 
           if (fileState) {
             // We have tracked modifications for this file
-            claudeChars = fileState.open-code-cliContribution
+            openCodeCliChars = fileState.openCodeCliContribution
             humanChars = 0
           } else if (baseline) {
             // File was modified but not tracked - human modification
             const diffSize = await getGitDiffSize(file)
             humanChars = diffSize > 0 ? diffSize : stats.size
           } else {
-            // New file not created by Claude
+            // New file not created by Open Code CLI
             humanChars = stats.size
           }
         } catch {
@@ -673,16 +673,16 @@ export async function calculateCommitAttribution(
       }
 
       // Ensure non-negative values
-      claudeChars = Math.max(0, claudeChars)
+      openCodeCliChars = Math.max(0, openCodeCliChars)
       humanChars = Math.max(0, humanChars)
 
-      const total = claudeChars + humanChars
-      const percent = total > 0 ? Math.round((claudeChars / total) * 100) : 0
+      const total = openCodeCliChars + humanChars
+      const percent = total > 0 ? Math.round((openCodeCliChars / total) * 100) : 0
 
       return {
         type: 'file' as const,
         file,
-        claudeChars,
+        openCodeCliChars,
         humanChars,
         percent,
         surface: fileSurface,
@@ -700,39 +700,39 @@ export async function calculateCommitAttribution(
     }
 
     files[result.file] = {
-      claudeChars: result.open-code-cliChars,
+      openCodeCliChars: result.openCodeCliChars,
       humanChars: result.humanChars,
       percent: result.percent,
       surface: result.surface,
     }
 
-    totalClaudeChars += result.open-code-cliChars
+    totalOpenCodeCliChars += result.openCodeCliChars
     totalHumanChars += result.humanChars
 
     surfaceCounts[result.surface] =
-      (surfaceCounts[result.surface] ?? 0) + result.open-code-cliChars
+      (surfaceCounts[result.surface] ?? 0) + result.openCodeCliChars
   }
 
-  const totalChars = totalClaudeChars + totalHumanChars
-  const claudePercent =
-    totalChars > 0 ? Math.round((totalClaudeChars / totalChars) * 100) : 0
+  const totalChars = totalOpenCodeCliChars + totalHumanChars
+  const openCodeCliPercent =
+    totalChars > 0 ? Math.round((totalOpenCodeCliChars / totalChars) * 100) : 0
 
   // Calculate surface breakdown (percentage of total content per surface)
   const surfaceBreakdown: Record<
     string,
-    { claudeChars: number; percent: number }
+    { openCodeCliChars: number; percent: number }
   > = {}
   for (const [surface, chars] of Object.entries(surfaceCounts)) {
     // Calculate what percentage of TOTAL content this surface contributed
     const percent = totalChars > 0 ? Math.round((chars / totalChars) * 100) : 0
-    surfaceBreakdown[surface] = { claudeChars: chars, percent }
+    surfaceBreakdown[surface] = { openCodeCliChars: chars, percent }
   }
 
   return {
     version: 1,
     summary: {
-      claudePercent,
-      claudeChars: totalClaudeChars,
+      openCodeCliPercent,
+      openCodeCliChars: totalOpenCodeCliChars,
       humanChars: totalHumanChars,
       surfaces: Array.from(surfaces),
     },

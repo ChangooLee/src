@@ -298,7 +298,7 @@ async function maybePersistLargeToolResult(
     return toolResultBlock
   }
 
-  // Skip persistence for image content blocks - they need to be sent as-is to Claude
+  // Skip persistence for image content blocks - they need to be sent as-is to Open Code CLI
   if (hasImageBlock(content)) {
     return toolResultBlock
   }
@@ -576,7 +576,7 @@ function collectCandidatesFromMessage(message: Message): ToolResultCandidate[] {
  * Extract candidate tool_result blocks grouped by API-level user message.
  *
  * normalizeMessagesForAPI merges consecutive user messages into one
- * (OpenAICompatibleProvider compat; 1P does the same server-side), so parallel tool
+ * (OpenAICompatible compat; 1P does the same server-side), so parallel tool
  * results that arrive as N separate user messages in our state become
  * ONE user message on the wire. The budget must group the same way or
  * it would see N under-budget messages instead of one over-budget

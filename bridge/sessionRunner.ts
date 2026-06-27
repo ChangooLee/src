@@ -49,7 +49,7 @@ type SessionSpawnerDeps = {
    * compiled binaries (where execPath is the open-code-cli binary itself); contains
    * the script path (process.argv[1]) for npm installs where execPath is the
    * node runtime. Without this, node sees --sdk-url as a node option and
-   * exits with "bad option: --sdk-url" (see anthropics/open-code-cli#28334).
+   * exits with "bad option: --sdk-url" (see open-code-cli/open-code-cli#28334).
    */
   scriptArgs: string[]
   env: NodeJS.ProcessEnv

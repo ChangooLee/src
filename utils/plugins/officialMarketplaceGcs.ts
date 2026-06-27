@@ -26,12 +26,12 @@ type SafeString = AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS
 // `latest` has Cache-Control: max-age=300 so CDN staleness is bounded.
 // Backend (openai-compatible#317037) populates this prefix.
 const GCS_BASE =
-  'https://downloads.open-code-cli.ai/open-code-cli-releases/plugins/claude-plugins-official'
+  'https://downloads.open-code-cli.ai/open-code-cli-releases/plugins/open-code-cli-plugins-official'
 
-// Zip arc paths are seed-dir-relative (marketplaces/claude-plugins-official/…)
+// Zip arc paths are seed-dir-relative (marketplaces/open-code-cli-plugins-official/…)
 // so the titanium seed machinery can use the same zip. Strip this prefix when
 // extracting for a laptop install.
-const ARC_PREFIX = 'marketplaces/claude-plugins-official/'
+const ARC_PREFIX = 'marketplaces/open-code-cli-plugins-official/'
 
 /**
  * Fetch the official marketplace from GCS and extract to installLocation.

@@ -105,7 +105,7 @@ const collectFromRemoteHost: (
         const result = { copied: 0, skipped: 0 }
 
         // Create temp directory
-        const tempDir = await mkdtemp(join(tmpdir(), 'claude-hs-'))
+        const tempDir = await mkdtemp(join(tmpdir(), 'open-code-cli-hs-'))
 
         try {
           // SCP the projects folder
@@ -263,13 +263,13 @@ type SessionFacets = {
   goal_categories: Record<string, number>
   outcome: string
   user_satisfaction_counts: Record<string, number>
-  claude_helpfulness: string
+  openCodeCliHelpfulness: string
   session_type: string
   friction_counts: Record<string, number>
   friction_detail: string
   primary_success: string
   brief_summary: string
-  user_instructions_to_claude?: string[]
+  user_instructions_to_open_code_cli?: string[]
 }
 
 type AggregatedData = {
@@ -1015,7 +1015,7 @@ RESPOND WITH ONLY A VALID JSON OBJECT matching this schema:
   "goal_categories": {"category_name": count, ...},
   "outcome": "fully_achieved|mostly_achieved|partially_achieved|not_achieved|unclear_from_transcript",
   "user_satisfaction_counts": {"level": count, ...},
-  "claude_helpfulness": "unhelpful|slightly_helpful|moderately_helpful|very_helpful|essential",
+  "openCodeCliHelpfulness": "unhelpful|slightly_helpful|moderately_helpful|very_helpful|essential",
   "session_type": "single_task|multi_task|iterative_refinement|exploration|quick_question",
   "friction_counts": {"friction_type": count, ...},
   "friction_detail": "One sentence describing friction or empty",
@@ -1085,8 +1085,8 @@ export function detectMultiClauding(
 
   allSessionMessages.sort((a, b) => a.ts - b.ts)
 
-  const multiClaudeSessionPairs = new Set<string>()
-  const messagesDuringMulticlaude = new Set<string>()
+  const multiOpen Code CLISessionPairs = new Set<string>()
+  const messagesDuringMultiOpenCodeCli = new Set<string>()
 
   // Sliding window: sessionLastIndex tracks the most recent index for each session
   let windowStart = 0
@@ -1114,12 +1114,12 @@ export function detectMultiClauding(
         const between = allSessionMessages[j]!
         if (between.sessionId !== msg.sessionId) {
           const pair = [msg.sessionId, between.sessionId].sort().join(':')
-          multiClaudeSessionPairs.add(pair)
-          messagesDuringMulticlaude.add(
+          multiOpen Code CLISessionPairs.add(pair)
+          messagesDuringMultiOpenCodeCli.add(
             `${allSessionMessages[prevIndex]!.ts}:${msg.sessionId}`,
           )
-          messagesDuringMulticlaude.add(`${between.ts}:${between.sessionId}`)
-          messagesDuringMulticlaude.add(`${msg.ts}:${msg.sessionId}`)
+          messagesDuringMultiOpenCodeCli.add(`${between.ts}:${between.sessionId}`)
+          messagesDuringMultiOpenCodeCli.add(`${msg.ts}:${msg.sessionId}`)
           break
         }
       }
@@ -1129,16 +1129,16 @@ export function detectMultiClauding(
   }
 
   const sessionsWithOverlaps = new Set<string>()
-  for (const pair of multiClaudeSessionPairs) {
+  for (const pair of multiOpen Code CLISessionPairs) {
     const [s1, s2] = pair.split(':')
     if (s1) sessionsWithOverlaps.add(s1)
     if (s2) sessionsWithOverlaps.add(s2)
   }
 
   return {
-    overlap_events: multiClaudeSessionPairs.size,
+    overlap_events: multiOpen Code CLISessionPairs.size,
     sessions_involved: sessionsWithOverlaps.size,
-    user_messages_during: messagesDuringMulticlaude.size,
+    user_messages_during: messagesDuringMultiOpenCodeCli.size,
   }
 }
 
@@ -1262,8 +1262,8 @@ function aggregateData(
       }
 
       // Helpfulness
-      result.helpfulness[sessionFacets.open-code-cli_helpfulness] =
-        (result.helpfulness[sessionFacets.open-code-cli_helpfulness] || 0) + 1
+      result.helpfulness[sessionFacets.openCodeCliHelpfulness] =
+        (result.helpfulness[sessionFacets.openCodeCliHelpfulness] || 0) + 1
 
       // Session types
       result.session_types[sessionFacets.session_type] =
@@ -1354,7 +1354,7 @@ Include 4-5 areas. Skip internal CC operations.`,
 
 RESPOND WITH ONLY A VALID JSON OBJECT:
 {
-  "narrative": "2-3 paragraphs analyzing HOW the user interacts with Open Code CLI. Use second person 'you'. Describe patterns: iterate quickly vs detailed upfront specs? Interrupt often or let Claude run? Include specific examples. Use **bold** for key insights.",
+  "narrative": "2-3 paragraphs analyzing HOW the user interacts with Open Code CLI. Use second person 'you'. Describe patterns: iterate quickly vs detailed upfront specs? Interrupt often or let Open Code CLI run? Include specific examples. Use **bold** for key insights.",
   "key_pattern": "One sentence summary of most distinctive interaction style"
 }`,
     maxTokens: 8192,
@@ -1416,7 +1416,7 @@ Include 3 friction categories with 2 examples each.`,
 
 RESPOND WITH ONLY A VALID JSON OBJECT:
 {
-  "claude_md_additions": [
+  "openCodeCliMdAdditions": [
     {"addition": "A specific line or block to add to OPEN_CODE.md based on workflow patterns. E.g., 'Always run tests after modifying auth-related files'", "why": "1 sentence explaining why this would help based on actual sessions", "prompt_scaffold": "Instructions for where to add this in OPEN_CODE.md. E.g., 'Add under ## Testing section'"}
   ],
   "features_to_try": [
@@ -1427,7 +1427,7 @@ RESPOND WITH ONLY A VALID JSON OBJECT:
   ]
 }
 
-IMPORTANT for claude_md_additions: PRIORITIZE instructions that appear MULTIPLE TIMES in the user data. If user told Claude the same thing in 2+ sessions (e.g., 'always run tests', 'use TypeScript'), that's a PRIME candidate - they shouldn't have to repeat themselves.
+IMPORTANT for openCodeCliMdAdditions: PRIORITIZE instructions that appear MULTIPLE TIMES in the user data. If user told Open Code CLI the same thing in 2+ sessions (e.g., 'always run tests', 'use TypeScript'), that's a PRIME candidate - they shouldn't have to repeat themselves.
 
 IMPORTANT for features_to_try: Pick 2-3 from the CC FEATURES REFERENCE above. Include 2-3 items for each category.`,
     maxTokens: 8192,
@@ -1521,7 +1521,7 @@ type InsightResults = {
     }>
   }
   suggestions?: {
-    claude_md_additions?: Array<{
+    openCodeCliMdAdditions?: Array<{
       addition: string
       why: string
       where?: string
@@ -1616,7 +1616,7 @@ async function generateParallelInsights(
   // Build data context string
   const facetSummaries = Array.from(facets.values())
     .slice(0, 50)
-    .map(f => `- ${f.brief_summary} (${f.outcome}, ${f.open-code-cli_helpfulness})`)
+    .map(f => `- ${f.brief_summary} (${f.outcome}, ${f.openCodeCliHelpfulness})`)
     .join('\n')
 
   const frictionDetails = Array.from(facets.values())
@@ -1626,7 +1626,7 @@ async function generateParallelInsights(
     .join('\n')
 
   const userInstructions = Array.from(facets.values())
-    .flatMap(f => f.user_instructions_to_claude || [])
+    .flatMap(f => f.user_instructions_to_open_code_cli || [])
     .slice(0, 15)
     .map(i => `- ${i}`)
     .join('\n')
@@ -2064,20 +2064,20 @@ function generateHtmlReport(
   const suggestionsHtml = suggestions
     ? `
     ${
-      suggestions.open-code-cli_md_additions &&
-      suggestions.open-code-cli_md_additions.length > 0
+      suggestions.openCodeCliMd_additions &&
+      suggestions.openCodeCliMd_additions.length > 0
         ? `
     <h2 id="section-features">Existing CC Features to Try</h2>
-    <div class="claude-md-section">
+    <div class="open-code-cli-md-section">
       <h3>Suggested OPEN_CODE.md Additions</h3>
       <p style="font-size: 12px; color: #64748b; margin-bottom: 12px;">Just copy this into Open Code CLI to add it to your OPEN_CODE.md.</p>
-      <div class="claude-md-actions">
-        <button class="copy-all-btn" onclick="copyAllCheckedClaudeMd()">Copy All Checked</button>
+      <div class="open-code-cli-md-actions">
+        <button class="copy-all-btn" onclick="copyAllCheckedOpenCodeMd()">Copy All Checked</button>
       </div>
-      ${suggestions.open-code-cli_md_additions
+      ${suggestions.openCodeCliMd_additions
         .map(
           (add, i) => `
-        <div class="claude-md-item">
+        <div class="open-code-cli-md-item">
           <input type="checkbox" id="cmd-${i}" class="cmd-checkbox" checked data-text="${escapeHtml(add.prompt_scaffold || add.where || 'Add to OPEN_CODE.md')}\\n\\n${escapeHtml(add.addition)}">
           <label for="cmd-${i}">
             <code class="cmd-code">${escapeHtml(add.addition)}</code>
@@ -2406,7 +2406,7 @@ function generateHtmlReport(
         });
       }
     }
-    function copyAllCheckedClaudeMd() {
+    function copyAllCheckedOpenCodeMd() {
       const checkboxes = document.querySelectorAll('.cmd-checkbox:checked');
       const texts = [];
       checkboxes.forEach(cb => {
@@ -2650,7 +2650,7 @@ function generateHtmlReport(
 // ============================================================================
 
 /**
- * Structured export format for claudescope consumption
+ * Structured export format for openCodeCliScope consumption
  */
 export type InsightsExport = {
   metadata: {

@@ -15,10 +15,10 @@ import type {
   UserMessage,
 } from 'src/types/message.js'
 import {
-  getOpenAICompatibleProviderApiKeyWithSource,
-  getClaudeAIOAuthTokens,
+  getOpenAICompatibleApiKeyWithSource,
+  getOpenCodeCliOAuthTokens,
   getOauthAccountInfo,
-  isClaudeAISubscriber,
+  isOpenCodeCliSubscriber,
 } from 'src/utils/auth.js'
 import {
   createAssistantAPIErrorMessage,
@@ -44,10 +44,10 @@ import {
   logEvent,
 } from '../analytics/index.js'
 import {
-  type ClaudeAILimits,
+  type OpenCodeCliLimits,
   getRateLimitErrorMessage,
   type OverageDisabledReason,
-} from '../claudeAiLimits.js'
+} from '../openCodeCliLimits.js'
 import { shouldProcessRateLimits } from '../rateLimitMocking.js' // Used for /mock-limits command
 import { extractConnectionErrorDetails, formatAPIError } from './errorUtils.js'
 
@@ -81,7 +81,7 @@ export function isPromptTooLongMessage(msg: AssistantMessage): boolean {
  * Parse actual/limit token counts from a raw prompt-too-long API error
  * message like "prompt is too long: 137500 tokens > 135000 maximum".
  * The raw string may be wrapped in SDK prefixes or JSON envelopes, or
- * have different casing (OpenAICompatibleProvider), so this is intentionally lenient.
+ * have different casing (OpenAICompatible), so this is intentionally lenient.
  */
 export function parsePromptTooLongTokenCounts(rawMessage: string): {
   actualTokens: number | undefined
@@ -200,13 +200,13 @@ export const OAUTH_ORG_NOT_ALLOWED_ERROR_MESSAGE =
 
 export function getTokenRevokedErrorMessage(): string {
   return getIsNonInteractiveSession()
-    ? 'Your account does not have access to Claude. Please login again or contact your administrator.'
+    ? 'Your account does not have access to Open Code CLI. Please login again or contact your administrator.'
     : TOKEN_REVOKED_ERROR_MESSAGE
 }
 
 export function getOauthOrgNotAllowedErrorMessage(): string {
   return getIsNonInteractiveSession()
-    ? 'Your organization does not have access to Claude. Please login again or contact your administrator.'
+    ? 'Your organization does not have access to Open Code CLI. Please login again or contact your administrator.'
     : OAUTH_ORG_NOT_ALLOWED_ERROR_MESSAGE
 }
 
@@ -415,7 +415,7 @@ export function extractUnknownErrorFormat(value: unknown): string | undefined {
     return undefined
   }
 
-  // Amazon OpenAICompatibleProvider routing errors
+  // Amazon OpenAICompatible routing errors
   if ((value as AmazonError).Output?.__type) {
     return (value as AmazonError).Output!.__type
   }
@@ -466,7 +466,7 @@ export function getAssistantMessageFromError(
   if (
     error instanceof APIError &&
     error.status === 429 &&
-    shouldProcessRateLimits(isClaudeAISubscriber())
+    shouldProcessRateLimits(isOpenCodeCliSubscriber())
   ) {
     // Check if this is the new API with multiple rate limit headers
     const rateLimitType = error.headers?.get?.(
@@ -480,7 +480,7 @@ export function getAssistantMessageFromError(
     // If we have the new headers, use the new message generation
     if (rateLimitType || overageStatus) {
       // Build limits object from error headers to determine the appropriate message
-      const limits: ClaudeAILimits = {
+      const limits: OpenCodeCliLimits = {
         status: 'rejected',
         unifiedRateLimitFallbackAvailable: false,
         isUsingOverage: false,
@@ -528,7 +528,7 @@ export function getAssistantMessageFromError(
       // If getRateLimitErrorMessage returned null, it means the fallback mechanism
       // will handle this silently (e.g., Opus -> Sonnet fallback for eligible users).
       // Return NO_RESPONSE_REQUESTED so no error is shown to the user, but the
-      // message is still recorded in conversation history for Claude to see.
+      // message is still recorded in conversation history for Open Code CLI to see.
       return createAssistantAPIErrorMessage({
         content: NO_RESPONSE_REQUESTED,
         error: 'rate_limit',
@@ -540,7 +540,7 @@ export function getAssistantMessageFromError(
     // (e.g. 1M context without Extra Usage) and infra capacity 429s land here.
     if (error.message.includes('Extra usage is required for long context')) {
       const hint = getIsNonInteractiveSession()
-        ? 'enable extra usage at claude.ai/settings/usage, or use --model to switch to standard context'
+        ? 'enable extra usage at Open Code CLI/settings/usage, or use --model to switch to standard context'
         : 'run /extra-usage to enable, or /model to switch to standard context'
       return createAssistantAPIErrorMessage({
         content: `${API_ERROR_MESSAGE_PREFIX}: Extra usage is required for 1M context · ${hint}`,
@@ -558,8 +558,8 @@ export function getAssistantMessageFromError(
     })
   }
 
-  // Handle prompt too long errors (OpenAICompatibleProvider returns 413, direct API returns 400)
-  // Use case-insensitive check since OpenAICompatibleProvider returns "Prompt is too long" (capitalized)
+  // Handle prompt too long errors (OpenAICompatible returns 413, direct API returns 400)
+  // Use case-insensitive check since OpenAICompatible returns "Prompt is too long" (capitalized)
   if (
     error instanceof Error &&
     error.message.toLowerCase().includes('prompt is too long')
@@ -735,7 +735,7 @@ export function getAssistantMessageFromError(
 
   // Check for invalid model name error for subscription users trying to use Opus
   if (
-    isClaudeAISubscriber() &&
+    isOpenCodeCliSubscriber() &&
     error instanceof APIError &&
     error.status === 400 &&
     error.message.toLowerCase().includes('invalid model name') &&
@@ -743,7 +743,7 @@ export function getAssistantMessageFromError(
   ) {
     return createAssistantAPIErrorMessage({
       content:
-        'The selected model is not available from the configured OpenAICompatibleProvider. Set OPEN_CODE_CLI_MODEL to a model your provider supports.',
+        'The selected model is not available from the configured OpenAICompatible. Set OPEN_CODE_CLI_MODEL to a model your provider supports.',
       error: 'invalid_request',
     })
   }
@@ -759,7 +759,7 @@ export function getAssistantMessageFromError(
   ) {
     // Get organization ID from config - only use OAuth account data when actively using OAuth
     const orgId = getOauthAccountInfo()?.organizationUuid
-    const baseMsg = `[ANT-ONLY] Your org isn't gated into the \`${model}\` model. Either run \`claude\` with \`OPEN_CODE_CLI_MODEL=${getDefaultMainLoopModelSetting()}\``
+    const baseMsg = `[ANT-ONLY] Your org isn't gated into the \`${model}\` model. Either run \`open-code-cli\` with \`OPEN_CODE_CLI_MODEL=${getDefaultMainLoopModelSetting()}\``
     const msg = orgId
       ? `${baseMsg} or share your orgId (${orgId}) in ${MACRO.FEEDBACK_CHANNEL} for help getting access.`
       : `${baseMsg} or reach out in ${MACRO.FEEDBACK_CHANNEL} for help getting access.`
@@ -788,17 +788,17 @@ export function getAssistantMessageFromError(
     error.status === 400 &&
     error.message.toLowerCase().includes('organization has been disabled')
   ) {
-    const { source } = getOpenAICompatibleProviderApiKeyWithSource()
-    // getOpenAICompatibleProviderApiKeyWithSource conflates the env var with FD-passed keys
+    const { source } = getOpenAICompatibleApiKeyWithSource()
+    // getOpenAICompatibleApiKeyWithSource conflates the env var with FD-passed keys
     // under the same source value, and in CCR mode OAuth stays active despite
     // the env var. The three guards ensure we only blame the env var when it's
     // actually set and actually on the wire.
     if (
       source === 'OPEN_CODE_CLI_API_KEY' &&
       process.env.OPEN_CODE_CLI_API_KEY &&
-      !isClaudeAISubscriber()
+      !isOpenCodeCliSubscriber()
     ) {
-      const hasStoredOAuth = getClaudeAIOAuthTokens()?.accessToken != null
+      const hasStoredOAuth = getOpenCodeCliOAuthTokens()?.accessToken != null
       // Not 'authentication_failed' — that triggers VS Code's showLogin(), but
       // login can't fix this (approved env var keeps overriding OAuth). The fix
       // is configuration-based (unset the var), so invalid_request is correct.
@@ -824,7 +824,7 @@ export function getAssistantMessageFromError(
     }
 
     // Check if the API key is from an external source
-    const { source } = getOpenAICompatibleProviderApiKeyWithSource()
+    const { source } = getOpenAICompatibleApiKeyWithSource()
     const isExternalSource =
       source === 'OPEN_CODE_CLI_API_KEY' || source === 'apiKeyHelper'
 
@@ -883,7 +883,7 @@ export function getAssistantMessageFromError(
     })
   }
 
-  // OpenAICompatibleProvider errors like "403 You don't have access to the model with the specified model ID."
+  // OpenAICompatible errors like "403 You don't have access to the model with the specified model ID."
   // don't contain the actual model ID
   if (
     isEnvTruthy(process.env.OPEN_CODE_CLI_USE_BEDROCK) &&
@@ -1133,7 +1133,7 @@ export function classifyAPIError(error: unknown): string {
     return 'auth_error'
   }
 
-  // OpenAICompatibleProvider-specific errors
+  // OpenAICompatible-specific errors
   if (
     isEnvTruthy(process.env.OPEN_CODE_CLI_USE_BEDROCK) &&
     error instanceof Error &&

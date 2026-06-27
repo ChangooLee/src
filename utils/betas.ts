@@ -38,7 +38,7 @@ export function shouldUseGlobalCacheScope(): boolean {
 
 export const getAllModelBetas = memoize((_model: string): string[] => [])
 export const getModelBetas = memoize((_model: string): string[] => [])
-export const getOpenAICompatibleProviderExtraBodyParamsBetas = memoize((_model: string): string[] => [])
+export const getOpenAICompatibleExtraBodyParamsBetas = memoize((_model: string): string[] => [])
 
 export function getMergedBetas(
   model: string,
@@ -50,5 +50,5 @@ export function getMergedBetas(
 export function clearBetasCaches(): void {
   getAllModelBetas.cache.clear?.()
   getModelBetas.cache.clear?.()
-  getOpenAICompatibleProviderExtraBodyParamsBetas.cache.clear?.()
+  getOpenAICompatibleExtraBodyParamsBetas.cache.clear?.()
 }

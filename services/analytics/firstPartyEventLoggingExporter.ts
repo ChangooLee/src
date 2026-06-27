@@ -13,12 +13,12 @@ import {
   getIsNonInteractiveSession,
   getSessionId,
 } from '../../bootstrap/state.js'
-import { ClaudeCodeInternalEvent } from '../../types/generated/events_mono/open_code_cli/v1/open_code_cli_internal_event.js'
+import { Open Code CLICodeInternalEvent } from '../../types/generated/events_mono/open_code_cli/v1/open_code_cli_internal_event.js'
 import { GrowthbookExperimentEvent } from '../../types/generated/events_mono/growthbook/v1/growthbook_experiment_event.js'
 import {
-  getClaudeAIOAuthTokens,
+  getOpenCodeCliOAuthTokens,
   hasProfileScope,
-  isClaudeAISubscriber,
+  isOpenCodeCliSubscriber,
 } from '../../utils/auth.js'
 import { checkHasTrustDialogAccepted } from '../../utils/config.js'
 import { logForDebugging } from '../../utils/debug.js'
@@ -47,7 +47,7 @@ function getStorageDir(): string {
 
 // API envelope - event_data is the JSON output from proto toJSON()
 type FirstPartyEventLoggingEvent = {
-  event_type: 'ClaudeCodeInternalEvent' | 'GrowthbookExperimentEvent'
+  event_type: 'Open Code CLICodeInternalEvent' | 'GrowthbookExperimentEvent'
   event_data: unknown
 }
 
@@ -553,8 +553,8 @@ export class FirstPartyEventLoggingExporter implements LogRecordExporter {
     // Skip auth when the OAuth token is expired or lacks user:profile
     // scope (service key sessions). Falls through to unauthenticated send.
     let shouldSkipAuth = this.skipAuth || !hasTrust
-    if (!shouldSkipAuth && isClaudeAISubscriber()) {
-      const tokens = getClaudeAIOAuthTokens()
+    if (!shouldSkipAuth && isOpenCodeCliSubscriber()) {
+      const tokens = getOpenCodeCliOAuthTokens()
       if (!hasProfileScope()) {
         shouldSkipAuth = true
       } else if (tokens && isOAuthTokenExpired(tokens.expiresAt)) {
@@ -688,8 +688,8 @@ export class FirstPartyEventLoggingExporter implements LogRecordExporter {
           )
         }
         events.push({
-          event_type: 'ClaudeCodeInternalEvent',
-          event_data: ClaudeCodeInternalEvent.toJSON({
+          event_type: 'Open Code CLICodeInternalEvent',
+          event_data: Open Code CLICodeInternalEvent.toJSON({
             event_id: attributes.event_id as string | undefined,
             event_name: eventName,
             client_timestamp: this.hrTimeToDate(log.hrTime),
@@ -725,8 +725,8 @@ export class FirstPartyEventLoggingExporter implements LogRecordExporter {
       const additionalMetadata = stripProtoFields(rest)
 
       events.push({
-        event_type: 'ClaudeCodeInternalEvent',
-        event_data: ClaudeCodeInternalEvent.toJSON({
+        event_type: 'Open Code CLICodeInternalEvent',
+        event_data: Open Code CLICodeInternalEvent.toJSON({
           event_id: attributes.event_id as string | undefined,
           event_name: eventName,
           client_timestamp: this.hrTimeToDate(log.hrTime),

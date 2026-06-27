@@ -98,7 +98,7 @@ export function detectAsdf(): boolean {
  * Homebrew, which would place npm global packages under the same Homebrew prefix
  * (e.g., /opt/homebrew/lib/node_modules). We need to distinguish between:
  * - Homebrew cask: /opt/homebrew/Caskroom/open-code-cli/...
- * - npm-global (via Homebrew's npm): /opt/homebrew/lib/node_modules/@anthropic-ai/...
+ * - npm-global (via Homebrew's npm): /opt/homebrew/lib/node_modules/@open-code-cli/...
  */
 export function detectHomebrew(): boolean {
   const platform = getPlatform()
@@ -296,7 +296,7 @@ export const detectApk = memoize(async (): Promise<boolean> => {
 })
 
 /**
- * Memoized function to detect which package manager installed Claude
+ * Memoized function to detect which package manager installed Open Code CLI
  * Returns 'unknown' if no package manager is detected
  */
 export const getPackageManager = memoize(async (): Promise<PackageManager> => {

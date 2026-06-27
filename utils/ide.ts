@@ -846,7 +846,7 @@ export function hasAccessToIDEExtensionDiffFeature(
 
 const EXTENSION_ID =
   process.env.USER_TYPE === 'ant'
-    ? 'openai-compatible.claude-internal'
+    ? 'openai-compatible.open-code-cli-internal'
     : 'openai-compatible.open-code-cli'
 
 export async function isIDEExtensionInstalled(
@@ -1033,7 +1033,7 @@ async function getVSCodeIDECommand(ideType: IdeType): Promise<string | null> {
   // then resolves to Code.exe via PATHEXT which opens a new editor window
   // instead of running the CLI. Asking for 'code.cmd' forces cross-spawn/which
   // to skip Code.exe. See microsoft/vscode#299416 (fixed in Insiders) and
-  // anthropics/open-code-cli#30975.
+  // open-code-cli/open-code-cli#30975.
   const ext = getPlatform() === 'windows' ? '.cmd' : ''
   switch (ideType) {
     case 'vscode':
@@ -1421,7 +1421,7 @@ async function installFromArtifactory(command: string): Promise<string> {
 
   // Fetch the version from artifactory
   const versionUrl =
-    'https://artifactory.infra.ant.dev/artifactory/armorcode-open-code-cli-internal/claude-vscode-releases/stable'
+    'https://artifactory.infra.ant.dev/artifactory/armorcode-open-code-cli-internal/open-code-cli-vscode-releases/stable'
 
   try {
     const versionResponse = await axios.get(versionUrl, {
@@ -1436,7 +1436,7 @@ async function installFromArtifactory(command: string): Promise<string> {
     }
 
     // Download the .vsix file from artifactory
-    const vsixUrl = `https://artifactory.infra.ant.dev/artifactory/armorcode-open-code-cli-internal/claude-vscode-releases/${version}/open-code-cli.vsix`
+    const vsixUrl = `https://artifactory.infra.ant.dev/artifactory/armorcode-open-code-cli-internal/open-code-cli-vscode-releases/${version}/open-code-cli.vsix`
     const tempVsixPath = join(
       os.tmpdir(),
       `open-code-cli-${version}-${Date.now()}.vsix`,

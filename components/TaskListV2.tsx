@@ -230,7 +230,7 @@ function getTaskIcon(status: Task['status']): {
     case 'in_progress':
       return {
         icon: figures.squareSmallFilled,
-        color: 'claude'
+        color: 'open-code-cli'
       };
     case 'pending':
       return {

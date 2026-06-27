@@ -533,7 +533,7 @@ export const FileReadTool = buildTool({
     // Killswitch pattern: GB can disable if the stub message confuses
     // the model externally.
     // 3P default: killswitch off = dedup enabled. Client-side only — no
-    // server support needed, safe for OpenAICompatibleProvider/OpenAICompatibleProvider/OpenAICompatibleProvider.
+    // server support needed, safe for OpenAICompatible/OpenAICompatible/OpenAICompatible.
     const dedupKillswitch = getFeatureValue_CACHED_MAY_BE_STALE(
       'open_code_cli_read_dedup_killswitch',
       false,

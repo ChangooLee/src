@@ -2,10 +2,10 @@
  * MDM (Mobile Device Management) profile enforcement for Open Code CLI managed settings.
  *
  * Reads enterprise settings from OS-level MDM configuration:
- * - macOS: `com.openai-compatible.open-code-clicode` preference domain
+ * - macOS: `com.openai-compatible.open-code-cli-code` preference domain
  *   (MDM profiles at /Library/Managed Preferences/ only — not user-writable ~/Library/Preferences/)
- * - Windows: `HKLM\SOFTWARE\Policies\ClaudeCode` (admin-only)
- *   and `HKCU\SOFTWARE\Policies\ClaudeCode` (user-writable, lowest priority)
+ * - Windows: `HKLM\SOFTWARE\Policies\Open Code CLICode` (admin-only)
+ *   and `HKCU\SOFTWARE\Policies\Open Code CLICode` (user-writable, lowest priority)
  * - Linux: No MDM equivalent (uses /etc/open-code-cli/managed-settings.json instead)
  *
  * Policy settings use "first source wins" — the highest-priority source that exists

@@ -42,7 +42,7 @@ import {
 import picomatch from 'picomatch'
 import { logEvent } from 'src/services/analytics/index.js'
 import {
-  getAdditionalDirectoriesForClaudeMd,
+  getAdditionalDirectoriesForOpenCodeMd,
   getOriginalCwd,
 } from '../bootstrap/state.js'
 import { truncateEntrypointContent } from '../memdir/memdir.js'
@@ -50,9 +50,9 @@ import { getAutoMemEntrypoint, isAutoMemoryEnabled } from '../memdir/paths.js'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../services/analytics/growthbook.js'
 import {
   getCurrentProjectConfig,
-  getManagedClaudeRulesDir,
+  getManagedOpen Code CLIRulesDir,
   getMemoryPath,
-  getUserClaudeRulesDir,
+  getUserOpen Code CLIRulesDir,
 } from './config.js'
 import { logForDebugging } from './debug.js'
 import { logForDiagnosticsNoPII } from './diagLogs.js'
@@ -408,7 +408,7 @@ function handleMemoryFileReadError(error: unknown, filePath: string): void {
   // Log permission errors (EACCES) as they're actionable
   if (code === 'EACCES') {
     // Don't log the full file path to avoid PII/security issues
-    logEvent('open_code_cli_claude_md_permission_error', {
+    logEvent('open_code_cli_openCodeCliMd_permission_error', {
       is_access_error: 1,
       has_home_dir: filePath.includes(getOpenCodeCliConfigHomeDir()) ? 1 : 0,
     })
@@ -537,19 +537,19 @@ function extractIncludePathsFromTokens(
 const MAX_INCLUDE_DEPTH = 5
 
 /**
- * Checks whether a OPEN_CODE.md file path is excluded by the claudeMdExcludes setting.
+ * Checks whether a OPEN_CODE.md file path is excluded by the openCodeMdExcludes setting.
  * Only applies to User, Project, and Local memory types.
  * Managed, AutoMem, and TeamMem types are never excluded.
  *
  * Matches both the original path and the realpath-resolved path to handle symlinks
  * (e.g., /tmp -> /private/tmp on macOS).
  */
-function isClaudeMdExcluded(filePath: string, type: MemoryType): boolean {
+function isOpenCodeMdExcluded(filePath: string, type: MemoryType): boolean {
   if (type !== 'User' && type !== 'Project' && type !== 'Local') {
     return false
   }
 
-  const patterns = getInitialSettings().open-code-cliMdExcludes
+  const patterns = getInitialSettings().openCodeMdExcludes
   if (!patterns || patterns.length === 0) {
     return false
   }
@@ -596,7 +596,7 @@ function resolveExcludePatterns(patterns: string[]): string[] {
     const dirToResolve = dirname(staticPrefix)
 
     try {
-      // sync IO: called from sync context (isClaudeMdExcluded -> processMemoryFile -> getMemoryFiles)
+      // sync IO: called from sync context (isOpenCodeMdExcluded -> processMemoryFile -> getMemoryFiles)
       const resolvedDir = fs.realpathSync(dirToResolve).replaceAll('\\', '/')
       if (resolvedDir !== dirToResolve) {
         const resolvedPattern =
@@ -631,8 +631,8 @@ export async function processMemoryFile(
     return []
   }
 
-  // Skip if path is excluded by claudeMdExcludes setting
-  if (isClaudeMdExcluded(filePath, type)) {
+  // Skip if path is excluded by openCodeMdExcludes setting
+  if (isOpenCodeMdExcluded(filePath, type)) {
     return []
   }
 
@@ -778,7 +778,7 @@ export async function processMdRules({
     return result
   } catch (error) {
     if (error instanceof Error && error.message.includes('EACCES')) {
-      logEvent('open_code_cli_claude_rules_md_permission_error', {
+      logEvent('open_code_cli_open_code_cli_rules_md_permission_error', {
         is_access_error: 1,
         has_home_dir: rulesDir.includes(getOpenCodeCliConfigHomeDir()) ? 1 : 0,
       })
@@ -797,24 +797,24 @@ export const getMemoryFiles = memoize(
     const config = getCurrentProjectConfig()
     const includeExternal =
       forceIncludeExternal ||
-      config.hasClaudeMdExternalIncludesApproved ||
+      config.hasOpenCodeMdExternalIncludesApproved ||
       false
 
     // Process Managed file first (always loaded - policy settings)
-    const managedClaudeMd = getMemoryPath('Managed')
+    const managedOpenCodeMd = getMemoryPath('Managed')
     result.push(
       ...(await processMemoryFile(
-        managedClaudeMd,
+        managedOpenCodeMd,
         'Managed',
         processedPaths,
         includeExternal,
       )),
     )
     // Process Managed .open-code-cli/rules/*.md files
-    const managedClaudeRulesDir = getManagedClaudeRulesDir()
+    const managedOpen Code CLIRulesDir = getManagedOpen Code CLIRulesDir()
     result.push(
       ...(await processMdRules({
-        rulesDir: managedClaudeRulesDir,
+        rulesDir: managedOpen Code CLIRulesDir,
         type: 'Managed',
         processedPaths,
         includeExternal,
@@ -824,20 +824,20 @@ export const getMemoryFiles = memoize(
 
     // Process User file (only if userSettings is enabled)
     if (isSettingSourceEnabled('userSettings')) {
-      const userClaudeMd = getMemoryPath('User')
+      const userOpenCodeMd = getMemoryPath('User')
       result.push(
         ...(await processMemoryFile(
-          userClaudeMd,
+          userOpenCodeMd,
           'User',
           processedPaths,
           true, // User memory can always include external files
         )),
       )
       // Process User ~/.open-code-cli/rules/*.md files
-      const userClaudeRulesDir = getUserClaudeRulesDir()
+      const userOpen Code CLIRulesDir = getUserOpen Code CLIRulesDir()
       result.push(
         ...(await processMdRules({
-          rulesDir: userClaudeRulesDir,
+          rulesDir: userOpen Code CLIRulesDir,
           type: 'User',
           processedPaths,
           includeExternal: true,
@@ -864,7 +864,7 @@ export const getMemoryFiles = memoize(
     // directories above the worktree but within the main repo — the worktree
     // already has its own checkout. OPEN_CODE.local.md is gitignored so it only
     // exists in the main repo and is still loaded.
-    // See: https://github.com/anthropics/open-code-cli/issues/29599
+    // See: https://github.com/open-code-cli/open-code-cli/issues/29599
     const gitRoot = findGitRoot(originalCwd)
     const canonicalRoot = findCanonicalGitRoot(originalCwd)
     const isNestedWorktree =
@@ -896,10 +896,10 @@ export const getMemoryFiles = memoize(
         )
 
         // Try reading .open-code-cli/OPEN_CODE.md (Project)
-        const dotClaudePath = join(dir, '.open-code-cli', 'OPEN_CODE.md')
+        const dotOpen Code CLIPath = join(dir, '.open-code-cli', 'OPEN_CODE.md')
         result.push(
           ...(await processMemoryFile(
-            dotClaudePath,
+            dotOpen Code CLIPath,
             'Project',
             processedPaths,
             includeExternal,
@@ -938,7 +938,7 @@ export const getMemoryFiles = memoize(
     // Note: we don't check isSettingSourceEnabled('projectSettings') here because --add-dir
     // is an explicit user action and the SDK defaults settingSources to [] when not specified
     if (isEnvTruthy(process.env.OPEN_CODE_CLI_ADDITIONAL_DIRECTORIES_OPEN_CODE_MD)) {
-      const additionalDirs = getAdditionalDirectoriesForClaudeMd()
+      const additionalDirs = getAdditionalDirectoriesForOpenCodeMd()
       for (const dir of additionalDirs) {
         // Try reading OPEN_CODE.md from the additional directory
         const projectPath = join(dir, 'OPEN_CODE.md')
@@ -952,10 +952,10 @@ export const getMemoryFiles = memoize(
         )
 
         // Try reading .open-code-cli/OPEN_CODE.md from the additional directory
-        const dotClaudePath = join(dir, '.open-code-cli', 'OPEN_CODE.md')
+        const dotOpen Code CLIPath = join(dir, '.open-code-cli', 'OPEN_CODE.md')
         result.push(
           ...(await processMemoryFile(
-            dotClaudePath,
+            dotOpen Code CLIPath,
             'Project',
             processedPaths,
             includeExternal,
@@ -1024,7 +1024,7 @@ export const getMemoryFiles = memoize(
 
     if (!hasLoggedInitialLoad) {
       hasLoggedInitialLoad = true
-      logEvent('open_code_cli_claudemd__initial_load', {
+      logEvent('open_code_cli_openCodeMd__initial_load', {
         file_count: result.length,
         total_content_length: totalContentLength,
         user_count: typeCounts['User'] ?? 0,
@@ -1044,7 +1044,7 @@ export const getMemoryFiles = memoize(
     // AutoMem/TeamMem are intentionally excluded — they're a separate
     // memory system, not "instructions" in the OPEN_CODE.md/rules sense.
     // Gated on !forceIncludeExternal: the forceIncludeExternal=true variant
-    // is only used by getExternalClaudeMdIncludes() for approval checks, not
+    // is only used by getExternalOpenCodeMdIncludes() for approval checks, not
     // for building context — firing the hook there would double-fire on startup.
     // The one-shot flag is consumed on every !forceIncludeExternal cache miss
     // (NOT gated on hasInstructionsLoadedHook) so the flag is released even
@@ -1209,11 +1209,11 @@ export async function getManagedAndUserConditionalRules(
   const result: MemoryFileInfo[] = []
 
   // Process Managed conditional .open-code-cli/rules/*.md files
-  const managedClaudeRulesDir = getManagedClaudeRulesDir()
+  const managedOpen Code CLIRulesDir = getManagedOpen Code CLIRulesDir()
   result.push(
     ...(await processConditionedMdRules(
       targetPath,
-      managedClaudeRulesDir,
+      managedOpen Code CLIRulesDir,
       'Managed',
       processedPaths,
       false,
@@ -1222,11 +1222,11 @@ export async function getManagedAndUserConditionalRules(
 
   if (isSettingSourceEnabled('userSettings')) {
     // Process User conditional .open-code-cli/rules/*.md files
-    const userClaudeRulesDir = getUserClaudeRulesDir()
+    const userOpen Code CLIRulesDir = getUserOpen Code CLIRulesDir()
     result.push(
       ...(await processConditionedMdRules(
         targetPath,
-        userClaudeRulesDir,
+        userOpen Code CLIRulesDir,
         'User',
         processedPaths,
         true,
@@ -1264,10 +1264,10 @@ export async function getMemoryFilesForNestedDirectory(
         false,
       )),
     )
-    const dotClaudePath = join(dir, '.open-code-cli', 'OPEN_CODE.md')
+    const dotOpen Code CLIPath = join(dir, '.open-code-cli', 'OPEN_CODE.md')
     result.push(
       ...(await processMemoryFile(
-        dotClaudePath,
+        dotOpen Code CLIPath,
         'Project',
         processedPaths,
         false,
@@ -1396,15 +1396,15 @@ export async function processConditionedMdRules(
   })
 }
 
-export type ExternalClaudeMdInclude = {
+export type ExternalOpenCodeMdInclude = {
   path: string
   parent: string
 }
 
-export function getExternalClaudeMdIncludes(
+export function getExternalOpenCodeMdIncludes(
   files: MemoryFileInfo[],
-): ExternalClaudeMdInclude[] {
-  const externals: ExternalClaudeMdInclude[] = []
+): ExternalOpenCodeMdInclude[] {
+  const externals: ExternalOpenCodeMdInclude[] = []
   for (const file of files) {
     if (file.type !== 'User' && file.parent && !pathInOriginalCwd(file.path)) {
       externals.push({ path: file.path, parent: file.parent })
@@ -1413,20 +1413,20 @@ export function getExternalClaudeMdIncludes(
   return externals
 }
 
-export function hasExternalClaudeMdIncludes(files: MemoryFileInfo[]): boolean {
-  return getExternalClaudeMdIncludes(files).length > 0
+export function hasExternalOpenCodeMdIncludes(files: MemoryFileInfo[]): boolean {
+  return getExternalOpenCodeMdIncludes(files).length > 0
 }
 
-export async function shouldShowClaudeMdExternalIncludesWarning(): Promise<boolean> {
+export async function shouldShowOpenCodeMdExternalIncludesWarning(): Promise<boolean> {
   const config = getCurrentProjectConfig()
   if (
-    config.hasClaudeMdExternalIncludesApproved ||
-    config.hasClaudeMdExternalIncludesWarningShown
+    config.hasOpenCodeMdExternalIncludesApproved ||
+    config.hasOpenCodeMdExternalIncludesWarningShown
   ) {
     return false
   }
 
-  return hasExternalClaudeMdIncludes(await getMemoryFiles(true))
+  return hasExternalOpenCodeMdIncludes(await getMemoryFiles(true))
 }
 
 /**

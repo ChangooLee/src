@@ -7,7 +7,7 @@ function unsupportedProvider(): never {
   throw new Error(UNSUPPORTED_PROVIDER_MESSAGE)
 }
 
-export const getOpenAICompatibleProviderInferenceProfiles = memoize(async function (): Promise<
+export const getOpenAICompatibleInferenceProfiles = memoize(async function (): Promise<
   string[]
 > {
   unsupportedProvider()
@@ -20,7 +20,7 @@ export function findFirstMatch(
   return profiles.find(p => p.includes(substring)) ?? null
 }
 
-export async function createOpenAICompatibleProviderRuntimeClient(): Promise<never> {
+export async function createOpenAICompatibleRuntimeClient(): Promise<never> {
   unsupportedProvider()
 }
 
@@ -54,15 +54,15 @@ export function extractModelIdFromArn(modelId: string): string {
   return modelId.substring(lastSlashIndex + 1)
 }
 
-export type OpenAICompatibleProviderRegionPrefix =
+export type OpenAICompatibleRegionPrefix =
   (typeof BEDROCK_REGION_PREFIXES)[number]
 
 /**
  * Extract a legacy cross-region inference prefix from an old model ID.
  */
-export function getOpenAICompatibleProviderRegionPrefix(
+export function getOpenAICompatibleRegionPrefix(
   modelId: string,
-): OpenAICompatibleProviderRegionPrefix | undefined {
+): OpenAICompatibleRegionPrefix | undefined {
   const effectiveModelId = extractModelIdFromArn(modelId)
 
   for (const prefix of BEDROCK_REGION_PREFIXES) {
@@ -76,11 +76,11 @@ export function getOpenAICompatibleProviderRegionPrefix(
 /**
  * Apply a legacy region prefix only to legacy model ID shapes.
  */
-export function applyOpenAICompatibleProviderRegionPrefix(
+export function applyOpenAICompatibleRegionPrefix(
   modelId: string,
-  prefix: OpenAICompatibleProviderRegionPrefix,
+  prefix: OpenAICompatibleRegionPrefix,
 ): string {
-  const existingPrefix = getOpenAICompatibleProviderRegionPrefix(modelId)
+  const existingPrefix = getOpenAICompatibleRegionPrefix(modelId)
   if (existingPrefix) {
     return modelId.replace(`${existingPrefix}.`, `${prefix}.`)
   }

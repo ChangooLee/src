@@ -21,7 +21,7 @@ import {
 } from '../../bootstrap/state.js'
 import { isEnvTruthy } from '../../utils/envUtils.js'
 import { isOfficialMcpUrl } from '../mcp/officialRegistry.js'
-import { isClaudeAISubscriber, getSubscriptionType } from '../../utils/auth.js'
+import { isOpenCodeCliSubscriber, getSubscriptionType } from '../../utils/auth.js'
 import { getRepoRemoteHash } from '../../utils/git.js'
 import {
   getWslVersion,
@@ -94,7 +94,7 @@ export function isToolDetailsLoggingEnabled(): boolean {
  *
  * Per go/taxonomy, MCP names are medium PII. We log them for:
  * - Cowork (entrypoint=local-agent) — no ZDR concept, log all MCPs
- * - claude.ai-proxied connectors — always official (from claude.ai's list)
+ * - Open Code CLI-proxied connectors — always official (from Open Code CLI's list)
  * - Servers whose URL matches the official MCP registry — directory
  *   connectors added via `open-code-cli mcp add`, not customer-specific config
  *
@@ -107,7 +107,7 @@ export function isAnalyticsToolDetailsLoggingEnabled(
   if (getOpenCodeCliEnv('ENTRYPOINT') === 'local-agent') {
     return true
   }
-  if (mcpServerType === 'claudeai-proxy') {
+  if (mcpServerType === 'openCodeCli-proxy') {
     return true
   }
   if (mcpServerBaseUrl && isOfficialMcpUrl(mcpServerBaseUrl)) {
@@ -426,7 +426,7 @@ export type EnvContext = {
   isRunningWithBun: boolean
   isCi: boolean
   isClaubbit: boolean
-  isClaudeCodeRemote: boolean
+  isOpen Code CLICodeRemote: boolean
   isLocalAgentMode: boolean
   isConductor: boolean
   remoteEnvironmentType?: string
@@ -435,8 +435,8 @@ export type EnvContext = {
   openCodeCliRemoteSessionId?: string
   tags?: string
   isGithubAction: boolean
-  isClaudeCodeAction: boolean
-  isClaudeAiAuth: boolean
+  isOpen Code CLICodeAction: boolean
+  isOpenCodeCliAuth: boolean
   version: string
   versionBase?: string
   buildTime: string
@@ -594,7 +594,7 @@ const buildEnvContext = memoize(async (): Promise<EnvContext> => {
     isRunningWithBun: env.isRunningWithBun(),
     isCi: isEnvTruthy(process.env.CI),
     isClaubbit: isEnvTruthy(process.env.CLAUBBIT),
-    isClaudeCodeRemote: isEnvTruthy(getOpenCodeCliEnv('REMOTE')),
+    isOpen Code CLICodeRemote: isEnvTruthy(getOpenCodeCliEnv('REMOTE')),
     isLocalAgentMode: getOpenCodeCliEnv('ENTRYPOINT') === 'local-agent',
     isConductor: env.isConductor(),
     ...(getOpenCodeCliEnv('REMOTE_ENVIRONMENT_TYPE') && {
@@ -616,8 +616,8 @@ const buildEnvContext = memoize(async (): Promise<EnvContext> => {
       tags: getOpenCodeCliEnv('TAGS'),
     }),
     isGithubAction: isEnvTruthy(process.env.GITHUB_ACTIONS),
-    isClaudeCodeAction: isEnvTruthy(getOpenCodeCliEnv('ACTION')),
-    isClaudeAiAuth: isClaudeAISubscriber(),
+    isOpen Code CLICodeAction: isEnvTruthy(getOpenCodeCliEnv('ACTION')),
+    isOpenCodeCliAuth: isOpenCodeCliSubscriber(),
     version: MACRO.VERSION,
     versionBase: getVersionBase(),
     buildTime: MACRO.BUILD_TIME,
@@ -772,14 +772,14 @@ export type FirstPartyEventLoggingCoreMetadata = {
 export type FirstPartyEventLoggingMetadata = {
   env: EnvironmentMetadata
   process?: string
-  // auth is a top-level field on ClaudeCodeInternalEvent (proto PublicApiAuth).
+  // auth is a top-level field on Open Code CLICodeInternalEvent (proto PublicApiAuth).
   // account_id is intentionally omitted — only UUID fields are populated client-side.
   auth?: PublicApiAuth
-  // core fields correspond to the top level of ClaudeCodeInternalEvent.
+  // core fields correspond to the top level of Open Code CLICodeInternalEvent.
   // They get directly exported to their individual columns in the BigQuery tables
   core: FirstPartyEventLoggingCoreMetadata
   // additional fields are populated in the additional_metadata field of the
-  // ClaudeCodeInternalEvent proto. Includes but is not limited to information
+  // Open Code CLICodeInternalEvent proto. Includes but is not limited to information
   // that differs by event type.
   additional: Record<string, unknown>
 }
@@ -829,12 +829,12 @@ export function to1PEventFormat(
     is_running_with_bun: envContext.isRunningWithBun,
     is_ci: envContext.isCi,
     is_claubbit: envContext.isClaubbit,
-    is_open_code_cli_remote: envContext.isClaudeCodeRemote,
+    is_open_code_cli_remote: envContext.isOpen Code CLICodeRemote,
     is_local_agent_mode: envContext.isLocalAgentMode,
     is_conductor: envContext.isConductor,
     is_github_action: envContext.isGithubAction,
-    is_open_code_cli_action: envContext.isClaudeCodeAction,
-    is_claude_ai_auth: envContext.isClaudeAiAuth,
+    is_open_code_cli_action: envContext.isOpen Code CLICodeAction,
+    is_open_code_cli_ai_auth: envContext.isOpenCodeCliAuth,
     version: envContext.version,
     build_time: envContext.buildTime,
     deployment_environment: envContext.deploymentEnvironment,
@@ -935,10 +935,10 @@ export function to1PEventFormat(
 
   // Map userMetadata to output fields.
   // Based on src/utils/user.ts getUser(), but with fields present in other
-  // parts of ClaudeCodeInternalEvent deduplicated.
+  // parts of Open Code CLICodeInternalEvent deduplicated.
   // Convert camelCase GitHubActionsMetadata to snake_case for 1P API
   // Note: github_actions_metadata is placed inside env (EnvironmentMetadata)
-  // rather than at the top level of ClaudeCodeInternalEvent
+  // rather than at the top level of Open Code CLICodeInternalEvent
   if (userMetadata.githubActionsMetadata) {
     const ghMeta = userMetadata.githubActionsMetadata
     env.github_actions_metadata = {

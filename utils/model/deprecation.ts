@@ -31,8 +31,8 @@ type DeprecationEntry = {
  * To add a new deprecated model, add an entry to this object.
  */
 const DEPRECATED_MODELS: Record<string, DeprecationEntry> = {
-  'claude-3-opus': {
-    modelName: 'Claude 3 Opus',
+  'open-code-cli-3-opus': {
+    modelName: 'Open Code CLI 3 Opus',
     retirementDates: {
       firstParty: 'January 5, 2026',
       openaiCompatible: 'January 15, 2026',
@@ -40,8 +40,8 @@ const DEPRECATED_MODELS: Record<string, DeprecationEntry> = {
       openaiCompatible: 'January 5, 2026',
     },
   },
-  'claude-3-7-sonnet': {
-    modelName: 'Claude 3.7 Sonnet',
+  'open-code-cli-3-7-sonnet': {
+    modelName: 'Open Code CLI 3.7 Sonnet',
     retirementDates: {
       firstParty: 'February 19, 2026',
       openaiCompatible: 'April 28, 2026',
@@ -49,8 +49,8 @@ const DEPRECATED_MODELS: Record<string, DeprecationEntry> = {
       openaiCompatible: 'February 19, 2026',
     },
   },
-  'claude-3-5-haiku': {
-    modelName: 'Claude 3.5 Haiku',
+  'open-code-cli-3-5-haiku': {
+    modelName: 'Open Code CLI 3.5 Haiku',
     retirementDates: {
       firstParty: 'February 19, 2026',
       openaiCompatible: null,

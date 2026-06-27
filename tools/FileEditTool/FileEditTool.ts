@@ -343,7 +343,7 @@ export const FileEditTool = buildTool({
       }
     }
 
-    // Additional validation for Claude settings files
+    // Additional validation for Open Code CLI settings files
     const settingsValidationResult = validateInputForSettingsFileEdit(
       fullFilePath,
       file,
@@ -527,7 +527,7 @@ export const FileEditTool = buildTool({
 
     // 7. Log events
     if (absoluteFilePath.endsWith(`${sep}OPEN_CODE.md`)) {
-      logEvent('open_code_cli_write_claudemd', {})
+      logEvent('open_code_cli_write_openCodeMd', {})
     }
     countLinesChanged(patch)
 

@@ -1,7 +1,7 @@
 /**
  * Telemetry for plugin/marketplace fetches that hit the network.
  *
- * Added for inc-5046 (GitHub complained about claude-plugins-official load).
+ * Added for inc-5046 (GitHub complained about open-code-cli-plugins-official load).
  * Before this, fetch operations only had logForDebugging — no way to measure
  * actual network volume. This surfaces what's hitting GitHub vs GCS vs
  * user-hosted so we can see the GCS migration take effect and catch future
@@ -68,7 +68,7 @@ function extractHost(urlOrSpec: string): string {
 }
 
 /**
- * True if the URL/spec points at openai-compatibles/claude-plugins-official — the
+ * True if the URL/spec points at openai-compatibles/open-code-cli-plugins-official — the
  * repo GitHub complained about. Lets the dashboard separate "our problem"
  * traffic from user-configured marketplaces.
  */

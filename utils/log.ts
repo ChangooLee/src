@@ -166,7 +166,7 @@ export function logError(error: unknown): void {
   try {
     // Check if error reporting should be disabled
     if (
-      // Cloud providers (OpenAICompatibleProvider/OpenAICompatibleProvider/OpenAICompatibleProvider) always disable features
+      // Cloud providers (OpenAICompatible/OpenAICompatible/OpenAICompatible) always disable features
       isEnvTruthy(process.env.OPEN_CODE_CLI_USE_BEDROCK) ||
       isEnvTruthy(process.env.OPEN_CODE_CLI_USE_VERTEX) ||
       isEnvTruthy(process.env.OPEN_CODE_CLI_USE_FOUNDRY) ||

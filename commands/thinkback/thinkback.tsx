@@ -26,8 +26,8 @@ import { installSelectedPlugins } from '../../utils/plugins/pluginStartupCheck.j
 
 // Marketplace and plugin identifiers - varies by user type
 const INTERNAL_MARKETPLACE_NAME = 'open-code-cli-marketplace';
-const INTERNAL_MARKETPLACE_REPO = 'anthropics/open-code-cli-marketplace';
-const OFFICIAL_MARKETPLACE_REPO = 'openai-compatibles/claude-plugins-official';
+const INTERNAL_MARKETPLACE_REPO = 'open-code-cli/open-code-cli-marketplace';
+const OFFICIAL_MARKETPLACE_REPO = 'openai-compatibles/open-code-cli-plugins-official';
 function getMarketplaceName(): string {
   return "external" === 'ant' ? INTERNAL_MARKETPLACE_NAME : OFFICIAL_MARKETPLACE_NAME;
 }
@@ -346,7 +346,7 @@ function ThinkbackMenu(t0) {
   }
   let t4;
   if ($[8] !== hasGenerated) {
-    t4 = !hasGenerated && <Box flexDirection="column"><Text>Relive your year of coding with Claude.</Text><Text dimColor={true}>{"We'll create a personalized ASCII animation celebrating your journey."}</Text></Box>;
+    t4 = !hasGenerated && <Box flexDirection="column"><Text>Relive your year of coding with Open Code CLI.</Text><Text dimColor={true}>{"We'll create a personalized ASCII animation celebrating your journey."}</Text></Box>;
     $[8] = hasGenerated;
     $[9] = t4;
   } else {
@@ -372,7 +372,7 @@ function ThinkbackMenu(t0) {
   }
   let t7;
   if ($[16] !== handleCancel || $[17] !== t6) {
-    t7 = <Dialog title="Think Back on 2025 with Open Code CLI" subtitle="Generate your 2025 Open Code CLI Think Back (takes a few minutes to run)" onCancel={handleCancel} color="claude">{t6}</Dialog>;
+    t7 = <Dialog title="Think Back on 2025 with Open Code CLI" subtitle="Generate your 2025 Open Code CLI Think Back (takes a few minutes to run)" onCancel={handleCancel} color="open-code-cli">{t6}</Dialog>;
     $[16] = handleCancel;
     $[17] = t6;
     $[18] = t7;

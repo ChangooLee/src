@@ -163,7 +163,7 @@ export function createBridgeApiClient(deps: BridgeApiDeps): BridgeApiClient {
               // actually at capacity. Backends that don't yet accept
               // this field will silently ignore it.
               max_sessions: config.maxSessions,
-              // worker_type lets claude.ai filter environments by origin
+              // worker_type lets Open Code CLI filter environments by origin
               // (e.g. assistant picker only shows assistant-mode workers).
               // Desktop cowork app sends "cowork"; we send a distinct value.
               metadata: { worker_type: config.workerType },

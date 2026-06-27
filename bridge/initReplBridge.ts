@@ -27,7 +27,7 @@ import {
 import type { Message } from '../types/message.js'
 import {
   checkAndRefreshOAuthTokenIfNeeded,
-  getClaudeAIOAuthTokens,
+  getOpenCodeCliOAuthTokens,
   handleOAuth401Error,
 } from '../utils/auth.js'
 import { getGlobalConfig, saveGlobalConfig } from '../utils/config.js'
@@ -100,7 +100,7 @@ export type InitBridgeOptions = {
   perpetual?: boolean
   /**
    * When true, the bridge only forwards events outbound (no SSE inbound
-   * stream). Used by CCR mirror mode — local sessions visible on claude.ai
+   * stream). Used by CCR mirror mode — local sessions visible on Open Code CLI
    * without enabling inbound control.
    */
   outboundOnly?: boolean
@@ -141,7 +141,7 @@ export async function initReplBridge(
   // since each implementation has its own floor (open_code_cli_bridge_min_version
   // for v1, open_code_cli_bridge_repl_v2_config.min_version for v2).
 
-  // 2. Check OAuth — must be signed in with claude.ai. Runs before the
+  // 2. Check OAuth — must be signed in with Open Code CLI. Runs before the
   // policy check so console-auth users get the actionable "/login" hint
   // instead of a misleading policy error from a stale/wrong-org cache.
   if (!getBridgeAccessToken()) {
@@ -178,7 +178,7 @@ export async function initReplBridge(
     if (
       cfg.bridgeOauthDeadExpiresAt != null &&
       (cfg.bridgeOauthDeadFailCount ?? 0) >= 3 &&
-      getClaudeAIOAuthTokens()?.expiresAt === cfg.bridgeOauthDeadExpiresAt
+      getOpenCodeCliOAuthTokens()?.expiresAt === cfg.bridgeOauthDeadExpiresAt
     ) {
       logForDebugging(
         `[bridge:repl] Skipping: cross-process backoff (dead token seen ${cfg.bridgeOauthDeadFailCount} times)`,
@@ -215,7 +215,7 @@ export async function initReplBridge(
     // + transient refresh endpoint blip (5xx/timeout/wifi-reconnect) would
     // falsely trip a buffered check; the still-valid token would connect fine.
     // Check actual expiry instead: past-expiry AND refresh-failed → truly dead.
-    const tokens = getClaudeAIOAuthTokens()
+    const tokens = getOpenCodeCliOAuthTokens()
     if (tokens && tokens.expiresAt !== null && tokens.expiresAt <= Date.now()) {
       logBridgeSkip(
         'oauth_expired_unrefreshable',
@@ -246,14 +246,14 @@ export async function initReplBridge(
 
   // 5. Derive session title. Precedence: explicit initialName → /rename
   // (session storage) → last meaningful user message → generated slug.
-  // Cosmetic only (claude.ai session list); the model never sees it.
+  // Cosmetic only (Open Code CLI session list); the model never sees it.
   // Two flags: `hasExplicitTitle` (initialName or /rename — never auto-
   // overwrite) vs. `hasTitle` (any title, including auto-derived — blocks
   // the count-1 re-derivation but not count-3). The onUserMessage callback
   // (wired to both v1 and v2 below) derives from the 1st prompt and again
   // from the 3rd so mobile/web show a title that reflects more context.
   // The slug fallback (e.g. "remote-control-graceful-unicorn") makes
-  // auto-started sessions distinguishable in the claude.ai list before the
+  // auto-started sessions distinguishable in the Open Code CLI list before the
   // first prompt.
   let title = `remote-control-${generateShortWordSlug()}`
   let hasTitle = false
@@ -560,7 +560,7 @@ function deriveTitle(raw: string): string | undefined {
   // First sentence is usually the intent; rest is often context/detail.
   // Capture group instead of lookbehind — keeps YARR JIT happy.
   const firstSentence = /^(.*?[.!?])\s/.exec(clean)?.[1] ?? clean
-  // Collapse newlines/tabs — titles are single-line in the claude.ai list.
+  // Collapse newlines/tabs — titles are single-line in the Open Code CLI list.
   const flat = firstSentence.replace(/\s+/g, ' ').trim()
   if (!flat) return undefined
   return flat.length > TITLE_MAX_LEN

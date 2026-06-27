@@ -7,7 +7,7 @@
  *
  * Eligibility:
  * - Console users (API key): All eligible
- * - OAuth users (Claude.ai): Only Enterprise/C4E and Team subscribers are eligible
+ * - OAuth users (Open Code CLI): Only Enterprise/C4E and Team subscribers are eligible
  * - API fails open (non-blocking) - if fetch fails, continues without remote settings
  * - API returns empty settings for users without managed settings
  */
@@ -18,8 +18,8 @@ import { open, unlink } from 'fs/promises'
 import { getOauthConfig, OAUTH_BETA_HEADER } from '../../constants/oauth.js'
 import {
   checkAndRefreshOAuthTokenIfNeeded,
-  getOpenAICompatibleProviderApiKeyWithSource,
-  getClaudeAIOAuthTokens,
+  getOpenAICompatibleApiKeyWithSource,
+  getOpenCodeCliOAuthTokens,
 } from '../../utils/auth.js'
 import { registerCleanup } from '../../utils/cleanupRegistry.js'
 import { logForDebugging } from '../../utils/debug.js'
@@ -169,9 +169,9 @@ function getRemoteSettingsAuthHeaders(): {
 } {
   // Try API key first (for Console users)
   // Skip apiKeyHelper to avoid circular dependency with getSettings()
-  // Wrap in try-catch because getOpenAICompatibleProviderApiKeyWithSource throws in CI/test environments
+  // Wrap in try-catch because getOpenAICompatibleApiKeyWithSource throws in CI/test environments
   try {
-    const { key: apiKey } = getOpenAICompatibleProviderApiKeyWithSource({
+    const { key: apiKey } = getOpenAICompatibleApiKeyWithSource({
       skipRetrievingKeyFromApiKeyHelper: true,
     })
     if (apiKey) {
@@ -185,8 +185,8 @@ function getRemoteSettingsAuthHeaders(): {
     // No API key available - continue to check OAuth
   }
 
-  // Fall back to OAuth tokens (for Claude.ai users)
-  const oauthTokens = getClaudeAIOAuthTokens()
+  // Fall back to OAuth tokens (for Open Code CLI users)
+  const oauthTokens = getOpenCodeCliOAuthTokens()
   if (oauthTokens?.accessToken) {
     return {
       headers: {

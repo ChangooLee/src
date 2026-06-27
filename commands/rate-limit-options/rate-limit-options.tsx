@@ -5,11 +5,11 @@ import { type OptionWithDescription, Select } from '../../components/CustomSelec
 import { Dialog } from '../../components/design-system/Dialog.js';
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../../services/analytics/growthbook.js';
 import { logEvent } from '../../services/analytics/index.js';
-import { useClaudeAiLimits } from '../../services/claudeAiLimitsHook.js';
+import { useOpenCodeCliLimits } from '../../services/openCodeCliLimitsHook.js';
 import type { ToolUseContext } from '../../Tool.js';
 import type { LocalJSXCommandOnDone } from '../../types/command.js';
 import { getOauthAccountInfo, getRateLimitTier, getSubscriptionType } from '../../utils/auth.js';
-import { hasClaudeAiBillingAccess } from '../../utils/billing.js';
+import { hasOpenCodeCliBillingAccess } from '../../utils/billing.js';
 import { call as extraUsageCall } from '../extra-usage/extra-usage.js';
 import { extraUsage } from '../extra-usage/index.js';
 import upgrade from '../upgrade/index.js';
@@ -28,7 +28,7 @@ function RateLimitOptionsMenu(t0) {
     context
   } = t0;
   const [subCommandJSX, setSubCommandJSX] = useState(null);
-  const claudeAiLimits = useClaudeAiLimits();
+  const openCodeCliLimits = useOpenCodeCliLimits();
   let t1;
   if ($[0] === Symbol.for("react.memo_cache_sentinel")) {
     t1 = getSubscriptionType();
@@ -47,20 +47,20 @@ function RateLimitOptionsMenu(t0) {
   const rateLimitTier = t2;
   const hasExtraUsageEnabled = getOauthAccountInfo()?.hasExtraUsageEnabled === true;
   const isMax = subscriptionType === "max";
-  const isMax20x = isMax && rateLimitTier === "default_claude_max_20x";
+  const isMax20x = isMax && rateLimitTier === "default_open_code_cli_max_20x";
   const isTeamOrEnterprise = subscriptionType === "team" || subscriptionType === "enterprise";
   const buyFirst = getFeatureValue_CACHED_MAY_BE_STALE("open_code_cli_jade_anvil_4", false);
   let t3;
   bb0: {
     let actionOptions;
-    if ($[2] !== claudeAiLimits.overageDisabledReason || $[3] !== claudeAiLimits.overageStatus) {
+    if ($[2] !== openCodeCliLimits.overageDisabledReason || $[3] !== openCodeCliLimits.overageStatus) {
       actionOptions = [];
       if (extraUsage.isEnabled()) {
-        const hasBillingAccess = hasClaudeAiBillingAccess();
+        const hasBillingAccess = hasOpenCodeCliBillingAccess();
         const needsToRequestFromAdmin = isTeamOrEnterprise && !hasBillingAccess;
-        const isOrgSpendCapDepleted = claudeAiLimits.overageDisabledReason === "out_of_credits" || claudeAiLimits.overageDisabledReason === "org_level_disabled_until" || claudeAiLimits.overageDisabledReason === "org_service_zero_credit_limit";
+        const isOrgSpendCapDepleted = openCodeCliLimits.overageDisabledReason === "out_of_credits" || openCodeCliLimits.overageDisabledReason === "org_level_disabled_until" || openCodeCliLimits.overageDisabledReason === "org_service_zero_credit_limit";
         if (needsToRequestFromAdmin && isOrgSpendCapDepleted) {} else {
-          const isOverageState = claudeAiLimits.overageStatus === "rejected" || claudeAiLimits.overageStatus === "allowed_warning";
+          const isOverageState = openCodeCliLimits.overageStatus === "rejected" || openCodeCliLimits.overageStatus === "allowed_warning";
           let label;
           if (needsToRequestFromAdmin) {
             label = isOverageState ? "Request more" : "Request extra usage";
@@ -94,8 +94,8 @@ function RateLimitOptionsMenu(t0) {
         }
         actionOptions.push(t4);
       }
-      $[2] = claudeAiLimits.overageDisabledReason;
-      $[3] = claudeAiLimits.overageStatus;
+      $[2] = openCodeCliLimits.overageDisabledReason;
+      $[3] = openCodeCliLimits.overageStatus;
       $[4] = actionOptions;
     } else {
       actionOptions = $[4];

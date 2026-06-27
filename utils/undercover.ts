@@ -3,14 +3,14 @@
  *
  * When active, Open Code CLI adds safety instructions to commit/PR prompts and
  * strips all attribution to avoid leaking internal model codenames, project
- * names, or other OpenAICompatibleProvider-internal information. The model is not told what
+ * names, or other OpenAICompatible-internal information. The model is not told what
  * model it is.
  *
  * Activation:
  *   - OPEN_CODE_CLI_UNDERCOVER=1 — force ON (even in internal repos)
  *   - Otherwise AUTO: active UNLESS the repo remote matches the internal
  *     allowlist (INTERNAL_MODEL_REPOS in commitAttribution.ts). Safe default
- *     is ON — Claude may push to public remotes from a CWD that isn't itself
+ *     is ON — Open Code CLI may push to public remotes from a CWD that isn't itself
  *     a git checkout (e.g. /tmp crash repro).
  *   - There is NO force-OFF. This guards against model codename leaks — if
  *     we're not confident we're in an internal repo, we stay undercover.
@@ -41,7 +41,7 @@ export function getUndercoverInstructions(): string {
     return `## UNDERCOVER MODE — CRITICAL
 
 You are operating UNDERCOVER in a PUBLIC/OPEN-SOURCE repository. Your commit
-messages, PR titles, and PR bodies MUST NOT contain ANY OpenAICompatibleProvider-internal
+messages, PR titles, and PR bodies MUST NOT contain ANY OpenAICompatible-internal
 information. Do not blow your cover.
 
 NEVER include in commit messages or PR descriptions:
@@ -62,7 +62,7 @@ GOOD:
 - "Refactor parser for better error messages"
 
 BAD (never write these):
-- "Fix bug found while testing with Claude Capybara"
+- "Fix bug found while testing with Open Code CLI Capybara"
 - "1-shotted by openai/gpt-4.1"
 - "Generated with Open Code CLI"
 - "Co-Authored-By: configured model 4.6 <…>"

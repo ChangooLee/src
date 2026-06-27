@@ -436,7 +436,7 @@ function getSimpleToneAndStyleSection(): string {
       ? null
       : `Your responses should be short and concise.`,
     `When referencing specific functions or pieces of code include the pattern file_path:line_number to allow the user to easily navigate to the source code location.`,
-    `When referencing GitHub issues or pull requests, use the owner/repo#123 format (e.g. anthropics/open-code-cli#100) so they render as clickable links.`,
+    `When referencing GitHub issues or pull requests, use the owner/repo#123 format (e.g. open-code-cli/open-code-cli#100) so they render as clickable links.`,
     `Do not use a colon before tool calls. Your tool calls may not be shown directly in the output, so text like "Let me read the file:" followed by a read tool call should just be "Let me read the file." with a period.`,
   ].filter(item => item !== null)
 
@@ -695,7 +695,7 @@ export async function computeSimpleEnvInfo(
     knowledgeCutoffMessage,
     process.env.USER_TYPE === 'ant' && isUndercover()
       ? null
-      : `The most recent Claude model family is Claude 4.5/4.6. Model IDs — Opus 4.6: '${OPEN_CODE_4_5_OR_4_6_MODEL_IDS.opus}', Sonnet 4.6: '${OPEN_CODE_4_5_OR_4_6_MODEL_IDS.sonnet}', Haiku 4.5: '${OPEN_CODE_4_5_OR_4_6_MODEL_IDS.haiku}'. When building AI applications, default to the latest and most capable Claude models.`,
+      : `The most recent Open Code CLI model family is Open Code CLI 4.5/4.6. Model IDs — Opus 4.6: '${OPEN_CODE_4_5_OR_4_6_MODEL_IDS.opus}', Sonnet 4.6: '${OPEN_CODE_4_5_OR_4_6_MODEL_IDS.sonnet}', Haiku 4.5: '${OPEN_CODE_4_5_OR_4_6_MODEL_IDS.haiku}'. When building AI applications, default to the latest and most capable Open Code CLI models.`,
     process.env.USER_TYPE === 'ant' && isUndercover()
       ? null
       : `This code agent is available through CLI, desktop, web, and IDE surfaces.`,
@@ -794,7 +794,7 @@ export async function enhanceSystemPromptWithEnvDetails(
 
 /**
  * Returns instructions for using the scratchpad directory if enabled.
- * The scratchpad is a per-session directory where Claude can write temporary files.
+ * The scratchpad is a per-session directory where Open Code CLI can write temporary files.
  */
 export function getScratchpadInstructions(): string | null {
   if (!isScratchpadEnabled()) {

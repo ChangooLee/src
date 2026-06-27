@@ -20,7 +20,7 @@ const ALLOWED_TOOLS = [
   'Bash(gh pr merge:*)',
   'ToolSearch',
   'mcp__slack__send_message',
-  'mcp__claude_ai_Slack__slack_send_message',
+  'mcp__open_code_cli_ai_Slack__slack_send_message',
 ]
 
 function getPromptContent(
@@ -35,8 +35,8 @@ function getPromptContent(
   const username = process.env.USER || ''
 
   let prefix = ''
-  let reviewerArg = ' and `--reviewer anthropics/open-code-cli`'
-  let addReviewerArg = ' (and add `--add-reviewer anthropics/open-code-cli`)'
+  let reviewerArg = ' and `--reviewer open-code-cli/open-code-cli`'
+  let addReviewerArg = ' (and add `--add-reviewer open-code-cli/open-code-cli`)'
   let changelogSection = `
 
 ## Changelog

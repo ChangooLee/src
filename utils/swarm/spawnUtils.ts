@@ -104,7 +104,7 @@ const TEAMMATE_ENV_VARS = [
   // Config directory override
   'OPEN_CODE_CLI_CONFIG_DIR',
   // CCR marker — teammates need this for CCR-aware code paths. Auth finds
-  // its own way via /home/claude/.open-code-cli/remote/.oauth_token regardless;
+  // its own way via /home/open-code-cli/.open-code-cli/remote/.oauth_token regardless;
   // the FD env var wouldn't help (pipe FDs don't cross tmux).
   'OPEN_CODE_CLI_REMOTE',
   // Auto-memory gate (memdir/paths.ts) checks REMOTE && !MEMORY_DIR to

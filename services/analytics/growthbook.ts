@@ -425,13 +425,13 @@ function isGrowthBookEnabled(): boolean {
 }
 
 /**
- * Hostname of OPEN_CODE_CLI_BASE_URL when it points at a non-OpenAICompatibleProvider proxy.
+ * Hostname of OPEN_CODE_CLI_BASE_URL when it points at a non-OpenAICompatible proxy.
  *
  * Enterprise-proxy deployments (Epic, Marble, etc.) typically use
- * apiKeyHelper auth, which means isOpenAICompatibleProviderAuthEnabled() returns false and
+ * apiKeyHelper auth, which means isOpenAICompatibleAuthEnabled() returns false and
  * organizationUUID/accountUUID/email are all absent from GrowthBook
  * attributes. Without this, there's no stable attribute to target them on
- * — only per-device IDs. See src/utils/auth.ts isOpenAICompatibleProviderAuthEnabled().
+ * — only per-device IDs. See src/utils/auth.ts isOpenAICompatibleAuthEnabled().
  *
  * Returns undefined for unset/default (api.openai.com/v1) so the attribute
  * is absent for direct-API users. Hostname only — no path/query/creds.

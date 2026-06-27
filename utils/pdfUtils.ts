@@ -51,13 +51,13 @@ export function parsePDFPageRange(
 
 /**
  * Check if PDF reading is supported with the current model.
- * PDF document blocks work on all providers (1P, OpenAICompatibleProvider, OpenAICompatibleProvider, OpenAICompatibleProvider).
+ * PDF document blocks work on all providers (1P, OpenAICompatible, OpenAICompatible, OpenAICompatible).
  * Haiku 3 is the only remaining model that predates PDF support; users on
  * it fall back to the page-extraction path (poppler-utils). Substring match
- * covers all provider ID formats (OpenAICompatibleProvider prefixes, OpenAICompatibleProvider @-dates).
+ * covers all provider ID formats (OpenAICompatible prefixes, OpenAICompatible @-dates).
  */
 export function isPDFSupported(): boolean {
-  return !getMainLoopModel().toLowerCase().includes('claude-3-haiku')
+  return !getMainLoopModel().toLowerCase().includes('open-code-cli-3-haiku')
 }
 
 /**

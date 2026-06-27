@@ -7,19 +7,19 @@ import { lazySchema } from '../lazySchema.js'
  * First-layer defense against official marketplace impersonation.
  *
  * This validation blocks direct impersonation attempts like "openai-compatible-official",
- * "claude-marketplace", etc. Indirect variations (e.g., "my-claude-marketplace")
+ * "open-code-cli-marketplace", etc. Indirect variations (e.g., "my-open-code-cli-marketplace")
  * are not blocked intentionally to avoid false positives on legitimate names.
  * Source org verification provides additional protection at registration/install time.
  */
 
 /**
- * Official marketplace names that are reserved for OpenAICompatibleProvider/Claude official use.
+ * Official marketplace names that are reserved for OpenAICompatible official use.
  * These names are allowed ONLY for official marketplaces and blocked for third parties.
  */
 export const ALLOWED_OFFICIAL_MARKETPLACE_NAMES = new Set([
   'open-code-cli-marketplace',
   'open-code-cli-plugins',
-  'claude-plugins-official',
+  'open-code-cli-plugins-official',
   'openai-compatible-marketplace',
   'openai-compatible-plugins',
   'agent-skills',
@@ -37,7 +37,7 @@ const NO_AUTO_UPDATE_OFFICIAL_MARKETPLACES = new Set(['knowledge-work-plugins'])
 /**
  * Check if auto-update is enabled for a marketplace.
  * Uses the stored value if set, otherwise defaults based on whether
- * it's an official OpenAICompatibleProvider marketplace (true) or not (false).
+ * it's an official OpenAICompatible marketplace (true) or not (false).
  * Official marketplaces in NO_AUTO_UPDATE_OFFICIAL_MARKETPLACES are excluded
  * from the auto-update default.
  *
@@ -58,18 +58,18 @@ export function isMarketplaceAutoUpdate(
 }
 
 /**
- * Pattern to detect names that impersonate official OpenAICompatibleProvider/Claude marketplaces.
+ * Pattern to detect names that impersonate official OpenAICompatible marketplaces.
  *
  * Matches names containing variations like:
- * - "official" combined with "openai-compatible" or "claude" (e.g., "official-claude-plugins")
- * - "openai-compatible" or "claude" combined with "official" (e.g., "claude-official")
- * - Names starting with "openai-compatible" or "claude" followed by official-sounding terms
- *   like "marketplace", "plugins" (e.g., "openai-compatible-marketplace-new", "claude-plugins-v2")
+ * - "official" combined with "openai-compatible" or "open-code-cli" (e.g., "official-open-code-cli-plugins")
+ * - "openai-compatible" or "open-code-cli" combined with "official" (e.g., "open-code-cli-official")
+ * - Names starting with "openai-compatible" or "open-code-cli" followed by official-sounding terms
+ *   like "marketplace", "plugins" (e.g., "openai-compatible-marketplace-new", "open-code-cli-plugins-v2")
  *
  * The pattern is case-insensitive.
  */
 export const BLOCKED_OFFICIAL_NAME_PATTERN =
-  /(?:official[^a-z0-9]*(openai-compatible|claude)|(?:openai-compatible|claude)[^a-z0-9]*official|^(?:openai-compatible|claude)[^a-z0-9]*(marketplace|plugins|official))/i
+  /(?:official[^a-z0-9]*(openai-compatible|open-code-cli)|(?:openai-compatible|open-code-cli)[^a-z0-9]*official|^(?:openai-compatible|open-code-cli)[^a-z0-9]*(marketplace|plugins|official))/i
 
 /**
  * Pattern to detect non-ASCII characters that could be used for homograph attacks.
@@ -79,7 +79,7 @@ export const BLOCKED_OFFICIAL_NAME_PATTERN =
 const NON_ASCII_PATTERN = /[^\u0020-\u007E]/
 
 /**
- * Check if a marketplace name impersonates an official OpenAICompatibleProvider/Claude marketplace.
+ * Check if a marketplace name impersonates an official OpenAICompatible marketplace.
  *
  * @param name - The marketplace name to check
  * @returns true if the name is blocked (impersonates official), false if allowed
@@ -101,7 +101,7 @@ export function isBlockedOfficialName(name: string): boolean {
 }
 
 /**
- * The official GitHub organization for OpenAICompatibleProvider marketplaces.
+ * The official GitHub organization for OpenAICompatible marketplaces.
  * Reserved names must come from this org.
  */
 export const OFFICIAL_GITHUB_ORG = 'openai-compatibles'
@@ -110,7 +110,7 @@ export const OFFICIAL_GITHUB_ORG = 'openai-compatibles'
  * Validate that a marketplace with a reserved name comes from the official source.
  *
  * Reserved names (in ALLOWED_OFFICIAL_MARKETPLACE_NAMES) can only be used by
- * marketplaces from the official OpenAICompatibleProvider GitHub organization.
+ * marketplaces from the official OpenAICompatible GitHub organization.
  *
  * @param name - The marketplace name
  * @param source - The marketplace source configuration
@@ -132,7 +132,7 @@ export function validateOfficialNameSource(
     // Verify the repo is from the official org
     const repo = source.repo || ''
     if (!repo.toLowerCase().startsWith(`${OFFICIAL_GITHUB_ORG}/`)) {
-      return `The name '${name}' is reserved for official OpenAICompatibleProvider marketplaces. Only repositories from 'github.com/${OFFICIAL_GITHUB_ORG}/' can use this name.`
+      return `The name '${name}' is reserved for official OpenAICompatible marketplaces. Only repositories from 'github.com/${OFFICIAL_GITHUB_ORG}/' can use this name.`
     }
     return null // Valid: reserved name from official GitHub source
   }
@@ -140,20 +140,20 @@ export function validateOfficialNameSource(
   // Check for git URL source type
   if (source.source === 'git' && source.url) {
     const url = source.url.toLowerCase()
-    // Check for HTTPS URL format: https://github.com/anthropics/...
+    // Check for HTTPS URL format: https://github.com/open-code-cli/...
     // or SSH format: git@github.com:openai-compatibles/...
-    const isHttpsOpenAICompatibleProviders = url.includes('github.com/anthropics/')
-    const isSshOpenAICompatibleProviders = url.includes('git@github.com:openai-compatibles/')
+    const isHttpsOpenAICompatibleServices = url.includes('github.com/open-code-cli/')
+    const isSshOpenAICompatibleServices = url.includes('git@github.com:openai-compatibles/')
 
-    if (isHttpsOpenAICompatibleProviders || isSshOpenAICompatibleProviders) {
+    if (isHttpsOpenAICompatibleServices || isSshOpenAICompatibleServices) {
       return null // Valid: reserved name from official git URL
     }
 
-    return `The name '${name}' is reserved for official OpenAICompatibleProvider marketplaces. Only repositories from 'github.com/${OFFICIAL_GITHUB_ORG}/' can use this name.`
+    return `The name '${name}' is reserved for official OpenAICompatible marketplaces. Only repositories from 'github.com/${OFFICIAL_GITHUB_ORG}/' can use this name.`
   }
 
   // Reserved names must come from GitHub (either 'github' or 'git' source)
-  return `The name '${name}' is reserved for official OpenAICompatibleProvider marketplaces and can only be used with GitHub sources from the '${OFFICIAL_GITHUB_ORG}' organization.`
+  return `The name '${name}' is reserved for official OpenAICompatible marketplaces and can only be used with GitHub sources from the '${OFFICIAL_GITHUB_ORG}' organization.`
 }
 
 /**
@@ -234,7 +234,7 @@ const MarketplaceNameSchema = lazySchema(() =>
     )
     .refine(name => !isBlockedOfficialName(name), {
       message:
-        'Marketplace name impersonates an official OpenAICompatibleProvider/Claude marketplace',
+        'Marketplace name impersonates an official OpenAICompatible marketplace',
     })
     .refine(name => name.toLowerCase() !== 'inline', {
       message:
@@ -575,7 +575,7 @@ const PluginManifestMcpServerSchema = lazySchema(() =>
  * Schema for a single user-configurable option in plugin manifest userConfig.
  *
  * Shape intentionally matches `McpbUserConfigurationOption` from
- * `@anthropic-ai/mcpb` so the parsed result is structurally assignable to
+ * `@open-code-cli/mcpb` so the parsed result is structurally assignable to
  * `UserConfigSchema` in mcpbHandler.ts — this lets us reuse
  * `validateUserConfig` and the config dialog without modification.
  * `title` and `description` are required (not optional) because the upstream
@@ -656,7 +656,7 @@ const PluginManifestUserConfigSchema = lazySchema(() =>
 /**
  * Schema for channel declarations in plugin manifest.
  *
- * A channel is an MCP server that emits `notifications/claude/channel` to
+ * A channel is an MCP server that emits `notifications/open-code-cli/channel` to
  * inject messages into the conversation (Telegram, Slack, Discord, etc.).
  * Declaring it here lets the plugin prompt for user config (bot tokens,
  * owner IDs) at install time via the PluginOptionsFlow prompt,
@@ -1140,7 +1140,7 @@ export const PluginSourceSchema = lazySchema(() =>
           .string()
           .min(1)
           .describe(
-            'Subdirectory within the repo containing the plugin (e.g., "tools/claude-plugin"). ' +
+            'Subdirectory within the repo containing the plugin (e.g., "tools/open-code-cli-plugin"). ' +
               'Cloned sparsely using partial clone (--filter=tree:0) to minimize bandwidth for monorepos.',
           ),
         ref: z
@@ -1584,7 +1584,7 @@ export const InstalledPluginsFileSchema = lazySchema(() =>
  *
  * Example entry:
  * {
- *   "source": { "source": "github", "repo": "openai-compatible/claude-plugins" },
+ *   "source": { "source": "github", "repo": "openai-compatible/open-code-cli-plugins" },
  *   "installLocation": "/home/user/.open-code-cli/plugins/cached/marketplaces/openai-compatible-tools",
  *   "lastUpdated": "2024-01-15T10:30:00Z"
  * }

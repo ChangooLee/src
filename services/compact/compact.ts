@@ -122,7 +122,7 @@ import {
 export const POST_COMPACT_MAX_FILES_TO_RESTORE = 5
 export const POST_COMPACT_TOKEN_BUDGET = 50_000
 export const POST_COMPACT_MAX_TOKENS_PER_FILE = 5_000
-// Skills can be large (verify=18.7KB, claude-api=20.1KB). Previously re-injected
+// Skills can be large (verify=18.7KB, openai-compatible-api=20.1KB). Previously re-injected
 // unbounded on every compact → 5-10K tok/compact. Per-skill truncation beats
 // dropping — instructions at the top of a skill file are usually the critical
 // part. Budget sized to hold ~5 skills at the per-skill cap.
@@ -230,7 +230,7 @@ const PTL_RETRY_MARKER = '[earlier conversation truncated for compaction retry]'
 /**
  * Drops the oldest API-round groups from messages until tokenGap is covered.
  * Falls back to dropping 20% of groups when the gap is unparseable (some
- * OpenAICompatibleProvider/OpenAICompatibleProvider error formats). Returns null when nothing can be dropped
+ * OpenAICompatible/OpenAICompatible error formats). Returns null when nothing can be dropped
  * without leaving an empty summarize set.
  *
  * This is the last-resort escape hatch for CC-1180 — when the compact request
@@ -1181,7 +1181,7 @@ async function streamCompactSummary({
         // DO NOT set maxOutputTokens here. The fork piggybacks on the main thread's
         // prompt cache by sending identical cache-key params (system, tools, model,
         // messages prefix, thinking config). Setting maxOutputTokens would clamp
-        // budget_tokens via Math.min(budget, maxOutputTokens-1) in claude.ts,
+        // budget_tokens via Math.min(budget, maxOutputTokens-1) in open-code-cli.ts,
         // creating a thinking config mismatch that invalidates the cache.
         // The streaming fallback path (below) can safely set maxOutputTokensOverride
         // since it doesn't share cache with the main thread.
@@ -1686,8 +1686,8 @@ function shouldExcludeFromPostCompactRestore(
     // If we can't get plan file path, continue with other checks
   }
 
-  // Exclude all types of claude.md files
-  // TODO: Refactor to use isMemoryFilePath() from claudemd.ts for consistency
+  // Exclude all types of open-code-cli.md files
+  // TODO: Refactor to use isMemoryFilePath() from openCodeMd.ts for consistency
   // and to also match child directory memory files (.open-code-cli/rules/*.md, etc.)
   try {
     const normalizedMemoryPaths = new Set(

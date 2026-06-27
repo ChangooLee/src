@@ -96,7 +96,7 @@ function getTokenFromFileDescriptor(): string | null {
  *  2. File descriptor (legacy path) — OPEN_CODE_CLI_WEBSOCKET_AUTH_FILE_DESCRIPTOR,
  *     read once and cached.
  *  3. Well-known file — OPEN_CODE_SESSION_INGRESS_TOKEN_FILE env var path, or
- *     /home/claude/.open-code-cli/remote/.session_ingress_token. Covers subprocesses
+ *     /home/open-code-cli/.open-code-cli/remote/.session_ingress_token. Covers subprocesses
  *     that can't inherit the FD.
  */
 export function getSessionIngressAuthToken(): string | null {

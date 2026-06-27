@@ -47,7 +47,7 @@ function isAttributionHeaderEnabled(): boolean {
   if (isEnvDefinedFalsy(getOpenCodeCliEnv('ATTRIBUTION_HEADER'))) {
     return false
   }
-  return getFeatureValue_CACHED_MAY_BE_STALE('tengu_attribution_header', true)
+  return getFeatureValue_CACHED_MAY_BE_STALE('open_code_cli_attribution_header', true)
 }
 
 /**

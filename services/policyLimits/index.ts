@@ -7,7 +7,7 @@
  *
  * Eligibility:
  * - Console users (API key): All eligible
- * - OAuth users (Claude.ai): Only Team and Enterprise/C4E subscribers are eligible
+ * - OAuth users (Open Code CLI): Only Team and Enterprise/C4E subscribers are eligible
  * - API fails open (non-blocking) - if fetch fails, continues without restrictions
  * - API returns empty restrictions for users without policy limits
  */
@@ -24,8 +24,8 @@ import {
 } from '../../constants/oauth.js'
 import {
   checkAndRefreshOAuthTokenIfNeeded,
-  getOpenAICompatibleProviderApiKeyWithSource,
-  getClaudeAIOAuthTokens,
+  getOpenAICompatibleApiKeyWithSource,
+  getOpenCodeCliOAuthTokens,
 } from '../../utils/auth.js'
 import { registerCleanup } from '../../utils/cleanupRegistry.js'
 import { logForDebugging } from '../../utils/debug.js'
@@ -34,7 +34,7 @@ import { classifyAxiosError } from '../../utils/errors.js'
 import { safeParseJSON } from '../../utils/json.js'
 import {
   getAPIProvider,
-  isFirstPartyOpenAICompatibleProviderBaseUrl,
+  isFirstPartyOpenAICompatibleBaseUrl,
 } from '../../utils/model/providers.js'
 import { isEssentialTrafficOnly } from '../../utils/privacyLevel.js'
 import { sleep } from '../../utils/sleep.js'
@@ -171,13 +171,13 @@ export function isPolicyLimitsEligible(): boolean {
   }
 
   // Custom base URL users should not hit the policy limits endpoint
-  if (!isFirstPartyOpenAICompatibleProviderBaseUrl()) {
+  if (!isFirstPartyOpenAICompatibleBaseUrl()) {
     return false
   }
 
   // Console users (API key) are eligible if we can get the actual key
   try {
-    const { key: apiKey } = getOpenAICompatibleProviderApiKeyWithSource({
+    const { key: apiKey } = getOpenAICompatibleApiKeyWithSource({
       skipRetrievingKeyFromApiKeyHelper: true,
     })
     if (apiKey) {
@@ -187,13 +187,13 @@ export function isPolicyLimitsEligible(): boolean {
     // No API key available - continue to check OAuth
   }
 
-  // For OAuth users, check if they have Claude.ai tokens
-  const tokens = getClaudeAIOAuthTokens()
+  // For OAuth users, check if they have Open Code CLI tokens
+  const tokens = getOpenCodeCliOAuthTokens()
   if (!tokens?.accessToken) {
     return false
   }
 
-  // Must have Claude.ai inference scope
+  // Must have Open Code CLI inference scope
   if (!tokens.scopes?.includes(OPEN_CODE_CLI_INFERENCE_SCOPE)) {
     return false
   }
@@ -230,7 +230,7 @@ function getAuthHeaders(): {
 } {
   // Try API key first (for Console users)
   try {
-    const { key: apiKey } = getOpenAICompatibleProviderApiKeyWithSource({
+    const { key: apiKey } = getOpenAICompatibleApiKeyWithSource({
       skipRetrievingKeyFromApiKeyHelper: true,
     })
     if (apiKey) {
@@ -244,8 +244,8 @@ function getAuthHeaders(): {
     // No API key available - continue to check OAuth
   }
 
-  // Fall back to OAuth tokens (for Claude.ai users)
-  const oauthTokens = getClaudeAIOAuthTokens()
+  // Fall back to OAuth tokens (for Open Code CLI users)
+  const oauthTokens = getOpenCodeCliOAuthTokens()
   if (oauthTokens?.accessToken) {
     return {
       headers: {

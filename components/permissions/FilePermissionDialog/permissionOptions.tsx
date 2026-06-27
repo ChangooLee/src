@@ -12,18 +12,18 @@ import type { OptionWithDescription } from '../../CustomSelect/select.js';
  * Check if a path is within the project's .open-code-cli/ folder.
  * This is used to determine whether to show the special ".open-code-cli folder" permission option.
  */
-export function isInClaudeFolder(filePath: string): boolean {
+export function isInOpen Code CLIFolder(filePath: string): boolean {
   const absolutePath = expandPath(filePath);
-  const claudeFolderPath = expandPath(`${getOriginalCwd()}/.open-code-cli`);
+  const openCodeCliFolderPath = expandPath(`${getOriginalCwd()}/.open-code-cli`);
 
   // Check if the path is within the project's .open-code-cli folder
   const normalizedAbsolutePath = normalizeCaseForComparison(absolutePath);
-  const normalizedClaudeFolderPath = normalizeCaseForComparison(claudeFolderPath);
+  const normalizedOpenCodeCliFolderPath = normalizeCaseForComparison(openCodeCliFolderPath);
 
   // Path must start with the .open-code-cli folder path (and be inside it, not just the folder itself)
-  return normalizedAbsolutePath.startsWith(normalizedClaudeFolderPath + sep.toLowerCase()) ||
+  return normalizedAbsolutePath.startsWith(normalizedOpenCodeCliFolderPath + sep.toLowerCase()) ||
   // Also match case where sep is / on posix systems
-  normalizedAbsolutePath.startsWith(normalizedClaudeFolderPath + '/');
+  normalizedAbsolutePath.startsWith(normalizedOpenCodeCliFolderPath + '/');
 }
 
 /**
@@ -31,18 +31,18 @@ export function isInClaudeFolder(filePath: string): boolean {
  * This is used to determine whether to show the special ".open-code-cli folder" permission option
  * for files in the user's home directory.
  */
-export function isInGlobalClaudeFolder(filePath: string): boolean {
+export function isInGlobalOpen Code CLIFolder(filePath: string): boolean {
   const absolutePath = expandPath(filePath);
-  const globalClaudeFolderPath = join(homedir(), '.open-code-cli');
+  const globalOpen Code CLIFolderPath = join(homedir(), '.open-code-cli');
   const normalizedAbsolutePath = normalizeCaseForComparison(absolutePath);
-  const normalizedGlobalClaudeFolderPath = normalizeCaseForComparison(globalClaudeFolderPath);
-  return normalizedAbsolutePath.startsWith(normalizedGlobalClaudeFolderPath + sep.toLowerCase()) || normalizedAbsolutePath.startsWith(normalizedGlobalClaudeFolderPath + '/');
+  const normalizedGlobalOpen Code CLIFolderPath = normalizeCaseForComparison(globalOpen Code CLIFolderPath);
+  return normalizedAbsolutePath.startsWith(normalizedGlobalOpen Code CLIFolderPath + sep.toLowerCase()) || normalizedAbsolutePath.startsWith(normalizedGlobalOpen Code CLIFolderPath + '/');
 }
 export type PermissionOption = {
   type: 'accept-once';
 } | {
   type: 'accept-session';
-  scope?: 'claude-folder' | 'global-claude-folder';
+  scope?: 'open-code-cli-folder' | 'global-open-code-cli-folder';
 } | {
   type: 'reject';
 };
@@ -95,20 +95,20 @@ export function getFilePermissionOptions({
   const inAllowedPath = pathInAllowedWorkingPath(filePath, toolPermissionContext);
 
   // Check if this is a .open-code-cli/ folder path (project or global)
-  const inClaudeFolder = isInClaudeFolder(filePath);
-  const inGlobalClaudeFolder = isInGlobalClaudeFolder(filePath);
+  const inOpen Code CLIFolder = isInOpen Code CLIFolder(filePath);
+  const inGlobalOpen Code CLIFolder = isInGlobalOpen Code CLIFolder(filePath);
 
   // Option 2: For .open-code-cli/ folder, show special option instead of generic session option
   // Note: Session-level options are always shown since they only affect in-memory state,
   // not persisted settings. The allowManagedPermissionRulesOnly setting only restricts
   // persisted permission rules.
-  if ((inClaudeFolder || inGlobalClaudeFolder) && operationType !== 'read') {
+  if ((inOpen Code CLIFolder || inGlobalOpen Code CLIFolder) && operationType !== 'read') {
     options.push({
       label: 'Yes, and allow Open Code CLI to edit its own settings for this session',
-      value: 'yes-claude-folder',
+      value: 'yes-open-code-cli-folder',
       option: {
         type: 'accept-session',
-        scope: inGlobalClaudeFolder ? 'global-claude-folder' : 'claude-folder'
+        scope: inGlobalOpen Code CLIFolder ? 'global-open-code-cli-folder' : 'open-code-cli-folder'
       }
     });
   } else {

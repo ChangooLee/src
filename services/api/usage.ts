@@ -1,9 +1,9 @@
 import axios from 'axios'
 import { getOauthConfig } from '../../constants/oauth.js'
 import {
-  getClaudeAIOAuthTokens,
+  getOpenCodeCliOAuthTokens,
   hasProfileScope,
-  isClaudeAISubscriber,
+  isOpenCodeCliSubscriber,
 } from '../../utils/auth.js'
 import { getAuthHeaders } from '../../utils/http.js'
 import { getOpenCodeCliUserAgent } from '../../utils/userAgent.js'
@@ -31,12 +31,12 @@ export type Utilization = {
 }
 
 export async function fetchUtilization(): Promise<Utilization | null> {
-  if (!isClaudeAISubscriber() || !hasProfileScope()) {
+  if (!isOpenCodeCliSubscriber() || !hasProfileScope()) {
     return {}
   }
 
   // Skip API call if OAuth token is expired to avoid 401 errors
-  const tokens = getClaudeAIOAuthTokens()
+  const tokens = getOpenCodeCliOAuthTokens()
   if (tokens && isOAuthTokenExpired(tokens.expiresAt)) {
     return null
   }

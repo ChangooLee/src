@@ -18,7 +18,7 @@ import {
  * `open-code-cli ssh` remote: OPEN_CODE_CLI_UNIX_SOCKET routes auth through a -R forwarded
  * socket to a local proxy, and the launcher sets a handful of placeholder auth
  * env vars that the remote's settings.env MUST NOT clobber (see
- * isOpenAICompatibleProviderAuthEnabled). Strip them from any settings-sourced env object.
+ * isOpenAICompatibleAuthEnabled). Strip them from any settings-sourced env object.
  */
 function withoutSSHTunnelVars(
   env: Record<string, string> | undefined,
@@ -126,7 +126,7 @@ export function applySafeConfigEnvironmentVariables(): void {
   // Capture CCD spawn-env keys before any settings.env is applied (once).
   if (ccdSpawnEnvKeys === undefined) {
     ccdSpawnEnvKeys =
-      getOpenCodeCliEnv('ENTRYPOINT') === 'claude-desktop'
+      getOpenCodeCliEnv('ENTRYPOINT') === 'open-code-desktop'
         ? new Set(Object.keys(process.env))
         : null
   }

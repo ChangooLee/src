@@ -46,7 +46,7 @@ import { isEnvTruthy } from './envUtils.js'
 import { createUserMessage } from './messages.js'
 import {
   getAPIProvider,
-  isFirstPartyOpenAICompatibleProviderBaseUrl,
+  isFirstPartyOpenAICompatibleBaseUrl,
 } from './model/providers.js'
 import {
   getFileReadIgnorePatterns,
@@ -194,11 +194,11 @@ export async function toolToAPISchema(
     // Enable fine-grained tool streaming via per-tool API field.
     // Without FGTS, the API buffers entire tool input parameters before sending
     // input_json_delta events, causing multi-minute hangs on large tool inputs.
-    // Gated to direct api.openai.com/v1: proxies (LiteLLM etc.) and OpenAICompatibleProvider/OpenAICompatibleProvider
-    // with Claude 4.5 reject this field with 400. See GH#32742, PR #21729.
+    // Gated to direct api.openai.com/v1: proxies (LiteLLM etc.) and OpenAICompatible/OpenAICompatible
+    // with Open Code CLI 4.5 reject this field with 400. See GH#32742, PR #21729.
     if (
       false &&
-      isFirstPartyOpenAICompatibleProviderBaseUrl() &&
+      isFirstPartyOpenAICompatibleBaseUrl() &&
       (getFeatureValue_CACHED_MAY_BE_STALE('open_code_cli_fgts', false) ||
         isEnvTruthy(process.env.OPEN_CODE_CLI_ENABLE_FINE_GRAINED_TOOL_STREAMING))
     ) {
@@ -230,16 +230,16 @@ export async function toolToAPISchema(
   }
 
   // OPEN_CODE_CLI_DISABLE_EXPERIMENTAL_BETAS is the kill switch for beta API
-  // shapes. Proxy gateways (OPEN_CODE_CLI_BASE_URL → LiteLLM → OpenAICompatibleProvider) reject
+  // shapes. Proxy gateways (OPEN_CODE_CLI_BASE_URL → LiteLLM → OpenAICompatible) reject
   // fields like defer_loading with "Extra inputs are not permitted". The gates
   // above each field are scattered and not all provider-aware, so this strips
   // everything not in the base-tool allowlist at the one choke point all tool
   // schemas pass through — including fields added in the future.
   // cache_control is allowlisted: the base {type: 'ephemeral'} shape is
-  // standard prompt caching (OpenAICompatibleProvider/OpenAICompatibleProvider supported); the beta sub-fields
+  // standard prompt caching (OpenAICompatible/OpenAICompatible supported); the beta sub-fields
   // (scope, ttl) are already gated upstream by shouldIncludeFirstPartyOnlyBetas
   // which independently respects this kill switch.
-  // github.com/anthropics/open-code-cli/issues/20031
+  // github.com/open-code-cli/open-code-cli/issues/20031
   if (isEnvTruthy(process.env.OPEN_CODE_CLI_DISABLE_EXPERIMENTAL_BETAS)) {
     const allowed = new Set([
       'name',
@@ -493,10 +493,10 @@ export async function logContextMetrics(
     ])
   // Extract individual context sizes and calculate total
   const gitStatusSize = systemContext.gitStatus?.length ?? 0
-  const claudeMdSize = userContext.open-code-cliMd?.length ?? 0
+  const openCodeMdSize = userContext.openCodeMd?.length ?? 0
 
   // Calculate total context size
-  const totalContextSize = gitStatusSize + claudeMdSize
+  const totalContextSize = gitStatusSize + openCodeMdSize
 
   // Get file count using ripgrep (rounded to nearest power of 10 for privacy)
   const currentDir = getCwd()
@@ -551,7 +551,7 @@ export async function logContextMetrics(
 
   logEvent('open_code_cli_context_size', {
     git_status_size: gitStatusSize,
-    claude_md_size: claudeMdSize,
+    openCodeCliMd_size: openCodeMdSize,
     total_context_size: totalContextSize,
     project_file_count_rounded: fileCount,
     mcp_tools_count: mcpToolsCount,
@@ -594,7 +594,7 @@ export function normalizeToolInput<T extends Tool>(
       // Replace \\; with \; (commonly needed for find -exec commands)
       normalizedCommand = normalizedCommand.replace(/\\\\;/g, '\\;')
 
-      // Logging for commands that are only echoing a string. This is to help us understand how often  Claude talks via bash
+      // Logging for commands that are only echoing a string. This is to help us understand how often  Open Code CLI talks via bash
       if (/^echo\s+["']?[^|&;><]*["']?$/i.test(normalizedCommand.trim())) {
         logEvent('open_code_cli_bash_tool_simple_echo', {})
       }
@@ -623,7 +623,7 @@ export function normalizeToolInput<T extends Tool>(
       // Validated upstream, won't throw
       const parsedInput = FileEditTool.inputSchema.parse(input)
 
-      // This is a workaround for tokens claude can't see
+      // This is a workaround for tokens open-code-cli can't see
       const { file_path, edits } = normalizeFileEditInput({
         file_path: parsedInput.file_path,
         edits: [

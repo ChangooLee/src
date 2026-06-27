@@ -1,6 +1,6 @@
 /**
- * Singleton manager for cloud-provider authentication status (AWS OpenAICompatibleProvider,
- * GCP OpenAICompatibleProvider). Communicates auth refresh state between auth utilities and
+ * Singleton manager for cloud-provider authentication status (AWS OpenAICompatible,
+ * GCP OpenAICompatible). Communicates auth refresh state between auth utilities and
  * React components / SDK output. The SDK 'auth_status' message shape is
  * provider-agnostic, so a single manager serves all providers.
  *

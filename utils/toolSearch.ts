@@ -36,7 +36,7 @@ import { logForDebugging } from './debug.js'
 import { isEnvDefinedFalsy, isEnvTruthy } from './envUtils.js'
 import {
   getAPIProvider,
-  isFirstPartyOpenAICompatibleProviderBaseUrl,
+  isFirstPartyOpenAICompatibleBaseUrl,
 } from './model/providers.js'
 import { jsonStringify } from './slowOperations.js'
 import { zodToJsonSchema } from './zodToJsonSchema.js'
@@ -177,7 +177,7 @@ export function getToolSearchMode(): ToolSearchMode {
   // reach the wire, even if ENABLE_TOOL_SEARCH is also set. This is the
   // explicit escape hatch for proxy gateways that the heuristic in
   // isToolSearchEnabledOptimistic doesn't cover.
-  // github.com/anthropics/open-code-cli/issues/20031
+  // github.com/open-code-cli/open-code-cli/issues/20031
   if (isEnvTruthy(process.env.OPEN_CODE_CLI_DISABLE_EXPERIMENTAL_BETAS)) {
     return 'standard'
   }
@@ -282,9 +282,9 @@ export function isToolSearchEnabledOptimistic(): boolean {
   // tool_reference is a beta content type that third-party API gateways
   // (OPEN_CODE_CLI_BASE_URL proxies) typically don't support. When the provider
   // is 'firstParty' but the base URL points elsewhere, the proxy will reject
-  // tool_reference blocks with a 400. OpenAICompatibleProvider/OpenAICompatibleProvider/OpenAICompatibleProvider are unaffected —
+  // tool_reference blocks with a 400. OpenAICompatible/OpenAICompatible/OpenAICompatible are unaffected —
   // they have their own endpoints and beta headers.
-  // https://github.com/anthropics/open-code-cli/issues/30912
+  // https://github.com/open-code-cli/open-code-cli/issues/30912
   //
   // HOWEVER: some proxies DO support tool_reference (LiteLLM passthrough,
   // Cloudflare AI Gateway, corp gateways that forward beta headers). The
@@ -299,12 +299,12 @@ export function isToolSearchEnabledOptimistic(): boolean {
   if (
     !process.env.ENABLE_TOOL_SEARCH &&
     false &&
-    !isFirstPartyOpenAICompatibleProviderBaseUrl()
+    !isFirstPartyOpenAICompatibleBaseUrl()
   ) {
     if (!loggedOptimistic) {
       loggedOptimistic = true
       logForDebugging(
-        `[ToolSearch:optimistic] disabled: OPEN_CODE_CLI_BASE_URL=${process.env.OPEN_CODE_CLI_BASE_URL} is not a first-party OpenAICompatibleProvider host. Set ENABLE_TOOL_SEARCH=true (or auto / auto:N) if your proxy forwards tool_reference blocks.`,
+        `[ToolSearch:optimistic] disabled: OPEN_CODE_CLI_BASE_URL=${process.env.OPEN_CODE_CLI_BASE_URL} is not a first-party OpenAICompatible host. Set ENABLE_TOOL_SEARCH=true (or auto / auto:N) if your proxy forwards tool_reference blocks.`,
       )
     }
     return false
@@ -419,7 +419,7 @@ export async function isToolSearchEnabled(
   if (!modelSupportsToolReference(model)) {
     logForDebugging(
       `Tool search disabled for model '${model}': model does not support tool_reference blocks. ` +
-        `This feature is only available on Claude Sonnet 4+, Opus 4+, and newer models.`,
+        `This feature is only available on Open Code CLI Sonnet 4+, Opus 4+, and newer models.`,
     )
     logModeDecision(false, 'standard', 'model_unsupported')
     return false
@@ -623,7 +623,7 @@ export type DeferredToolsDeltaScanContext = {
 
 /**
  * True → announce deferred tools via persisted delta attachments.
- * False → claude.ts keeps its per-call <available-deferred-tools>
+ * False → open-code-cli.ts keeps its per-call <available-deferred-tools>
  * header prepend (the attachment does not fire).
  */
 export function isDeferredToolsDeltaEnabled(): boolean {

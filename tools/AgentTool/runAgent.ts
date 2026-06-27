@@ -384,17 +384,17 @@ export async function* runAgent({
 
   // Read-only agents (Explore, Plan) don't act on commit/PR/lint rules from
   // OPEN_CODE.md — the main agent has full context and interprets their output.
-  // Dropping claudeMd here saves ~5-15 Gtok/week across 34M+ Explore spawns.
+  // Dropping openCodeMd here saves ~5-15 Gtok/week across 34M+ Explore spawns.
   // Explicit override.userContext from callers is preserved untouched.
-  // Kill-switch defaults true; flip open_code_cli_slim_subagent_claudemd=false to revert.
-  const shouldOmitClaudeMd =
-    agentDefinition.omitClaudeMd &&
+  // Kill-switch defaults true; flip open_code_cli_slim_subagent_openCodeMd=false to revert.
+  const shouldOmitOpenCodeMd =
+    agentDefinition.omitOpenCodeMd &&
     !override?.userContext &&
-    getFeatureValue_CACHED_MAY_BE_STALE('open_code_cli_slim_subagent_claudemd', true)
-  const { claudeMd: _omittedClaudeMd, ...userContextNoClaudeMd } =
+    getFeatureValue_CACHED_MAY_BE_STALE('open_code_cli_slim_subagent_openCodeMd', true)
+  const { openCodeMd: _omittedOpenCodeMd, ...userContextNoOpenCodeMd } =
     baseUserContext
-  const resolvedUserContext = shouldOmitClaudeMd
-    ? userContextNoClaudeMd
+  const resolvedUserContext = shouldOmitOpenCodeMd
+    ? userContextNoOpenCodeMd
     : baseUserContext
 
   // Explore/Plan are read-only search agents — the parent-session-start

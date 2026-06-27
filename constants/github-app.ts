@@ -1,7 +1,7 @@
 export const PR_TITLE = 'Add Open Code CLI GitHub Workflow'
 
 export const GITHUB_ACTION_SETUP_DOCS_URL =
-  'https://github.com/anthropics/open-code-cli-action/blob/main/docs/setup.md'
+  'https://github.com/open-code-cli/open-code-cli-action/blob/main/docs/setup.md'
 
 export const WORKFLOW_CONTENT = `name: Open Code CLI
 
@@ -37,7 +37,7 @@ jobs:
 
       - name: Run Open Code CLI
         id: open-code-cli
-        uses: anthropics/open-code-cli-action@v1
+        uses: open-code-cli/open-code-cli-action@v1
         with:
           open_code_cli_api_key: \${{ secrets.OPEN_CODE_CLI_API_KEY }}
 
@@ -49,7 +49,7 @@ jobs:
           # prompt: 'Update the pull request description to include a summary of changes.'
 
           # Optional: Add open_code_cli_args to customize Open Code CLI behavior and configuration
-          # See https://github.com/anthropics/open-code-cli-action/blob/main/docs/usage.md
+          # See https://github.com/open-code-cli/open-code-cli-action/blob/main/docs/usage.md
           # or https://open-code-cli.dev/docs/cli-reference for available options
           # open_code_cli_args: '--allowed-tools Bash(gh pr:*)'
 
@@ -93,7 +93,7 @@ Once the workflow is triggered, Open Code CLI will analyze the comment and surro
 allowed_tools: Bash(npm install),Bash(npm run build),Bash(npm run lint),Bash(npm run test)
 \`\`\`
 
-There's more information in the [Open Code CLI action repo](https://github.com/anthropics/open-code-cli-action).
+There's more information in the [Open Code CLI action repo](https://github.com/open-code-cli/open-code-cli-action).
 
 After merging this PR, let's try mentioning @open-code-cli (legacy GitHub App trigger) in a comment on any PR to get started!`
 
@@ -132,13 +132,13 @@ jobs:
 
       - name: Run Open Code CLI Review
         id: open-code-cli-review
-        uses: anthropics/open-code-cli-action@v1
+        uses: open-code-cli/open-code-cli-action@v1
         with:
           open_code_cli_api_key: \${{ secrets.OPEN_CODE_CLI_API_KEY }}
-          plugin_marketplaces: 'https://github.com/anthropics/open-code-cli.git'
+          plugin_marketplaces: 'https://github.com/open-code-cli/open-code-cli.git'
           plugins: 'code-review@open-code-cli-plugins'
           prompt: '/code-review:code-review \${{ github.repository }}/pull/\${{ github.event.pull_request.number }}'
-          # See https://github.com/anthropics/open-code-cli-action/blob/main/docs/usage.md
+          # See https://github.com/open-code-cli/open-code-cli-action/blob/main/docs/usage.md
           # or https://open-code-cli.dev/docs/cli-reference for available options
 
 `

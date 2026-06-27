@@ -169,7 +169,7 @@ const resolveCanonicalRoot = memoizeWithLRU(
         return gitRoot
       }
       // Bare-repo worktrees: the common dir isn't inside a working directory.
-      // Use the common dir itself as the stable identity (anthropics/open-code-cli#27994).
+      // Use the common dir itself as the stable identity (open-code-cli/open-code-cli#27994).
       if (basename(commonDir) !== '.git') {
         return commonDir.normalize('NFC')
       }

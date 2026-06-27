@@ -278,7 +278,7 @@ export const SettingsSchema = lazySchema(() =>
           'Command to refresh GCP authentication (e.g., gcloud auth application-default login)',
         ),
       // Gated so the SDK generator (which runs without OPEN_CODE_CLI_ENABLE_XAA)
-      // doesn't surface this in GlobalClaudeSettings. Read via getXaaIdpSettings().
+      // doesn't surface this in GlobalOpen Code CLISettings. Read via getXaaIdpSettings().
       // .passthrough() on the outer object keeps an existing settings.json key
       // alive across env-var-off sessions — it's just not schema-validated then.
       ...(isEnvTruthy(process.env.OPEN_CODE_CLI_ENABLE_XAA)
@@ -392,8 +392,8 @@ export const SettingsSchema = lazySchema(() =>
         .record(z.string(), z.string())
         .optional()
         .describe(
-          'Override mapping from OpenAICompatibleProvider model ID (e.g. "openai/gpt-4.1") to provider-specific ' +
-            'model ID (e.g. a OpenAICompatibleProvider inference profile ARN). Typically set in managed settings by ' +
+          'Override mapping from OpenAICompatible model ID (e.g. "openai/gpt-4.1") to provider-specific ' +
+            'model ID (e.g. a OpenAICompatible inference profile ARN). Typically set in managed settings by ' +
             'enterprise administrators.',
         ),
       // Whether to automatically approve all MCP servers in the project
@@ -620,12 +620,12 @@ export const SettingsSchema = lazySchema(() =>
             'these exact sources are blocked from being added as marketplaces. The check happens BEFORE ' +
             'downloading, so blocked sources never touch the filesystem.',
         ),
-      // Force a specific login method: 'claudeai' for provider plan/Max, 'console' for Console billing
+      // Force a specific login method: 'openCodeCli' for provider plan/Max, 'console' for Console billing
       forceLoginMethod: z
-        .enum(['claudeai', 'console'])
+        .enum(['openCodeCli', 'console'])
         .optional()
         .describe(
-          'Force a specific login method: "claudeai" for provider plan/Max, "console" for Console billing',
+          'Force a specific login method: "openCodeCli" for provider plan/Max, "console" for Console billing',
         ),
       // Organization UUID to use for OAuth login (will be added as URL param to authorization URL)
       forceLoginOrgUUID: z
@@ -881,12 +881,12 @@ export const SettingsSchema = lazySchema(() =>
               .string()
               .optional()
               .describe(
-                'Display name for the assistant, shown in the claude.ai session list',
+                'Display name for the assistant, shown in the Open Code CLI session list',
               ),
           }
         : {}),
       // Teams/Enterprise opt-IN for channel notifications. Default OFF.
-      // MCP servers that declare the claude/channel capability can push
+      // MCP servers that declare the open-code-cli/channel capability can push
       // inbound messages into the conversation; for managed orgs this only
       // works when explicitly enabled. Which servers can connect at all is
       // still governed by allowedMcpServers/deniedMcpServers. Not
@@ -898,11 +898,11 @@ export const SettingsSchema = lazySchema(() =>
         .optional()
         .describe(
           'Teams/Enterprise opt-in for channel notifications (MCP servers with the ' +
-            'claude/channel capability pushing inbound messages). Default off. ' +
+            'open-code-cli/channel capability pushing inbound messages). Default off. ' +
             'Set true to allow; users then select servers via --channels.',
         ),
       // Org-level channel plugin allowlist. When set, REPLACES the
-      // OpenAICompatibleProvider ledger — admin owns the trust decision. Undefined means
+      // OpenAICompatible ledger — admin owns the trust decision. Undefined means
       // fall back to the ledger. Plugin-only entry shape (same as the
       // ledger); server-kind entries still need the dev flag.
       allowedChannelPlugins: z
@@ -915,7 +915,7 @@ export const SettingsSchema = lazySchema(() =>
         .optional()
         .describe(
           'Teams/Enterprise allowlist of channel plugins. When set, ' +
-            'replaces the default OpenAICompatibleProvider allowlist — admins decide which ' +
+            'replaces the default OpenAICompatible allowlist — admins decide which ' +
             'plugins may push inbound messages. Undefined falls back to the default. ' +
             'Requires channelsEnabled: true.',
         ),
@@ -1040,7 +1040,7 @@ export const SettingsSchema = lazySchema(() =>
                 'Default working directory on the remote host. ' +
                   'Supports tilde expansion (e.g. ~/projects). ' +
                   'If not specified, defaults to the remote user home directory. ' +
-                  'Can be overridden by the [dir] positional argument in `claude ssh <config> [dir]`.',
+                  'Can be overridden by the [dir] positional argument in `open-code-cli ssh <config> [dir]`.',
               ),
           }),
         )
@@ -1050,7 +1050,7 @@ export const SettingsSchema = lazySchema(() =>
             'Typically set in managed settings by enterprise administrators ' +
             'to pre-configure SSH connections for team members.',
         ),
-      claudeMdExcludes: z
+      openCodeMdExcludes: z
         .array(z.string())
         .optional()
         .describe(

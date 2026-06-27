@@ -64,7 +64,7 @@ export async function update() {
       logForDebugging(`update: Warning detected: ${warning.issue}`)
 
       // Don't skip PATH warnings - they're always relevant
-      // The user needs to know that 'which claude' points elsewhere
+      // The user needs to know that 'which open-code-cli' points elsewhere
       logForDebugging(`update: Showing warning: ${warning.issue}`)
 
       writeToStdout(chalk.yellow(`Warning: ${warning.issue}\n`))
@@ -138,7 +138,7 @@ export async function update() {
         writeToStdout('\n')
         writeToStdout('To update, run:\n')
         writeToStdout(
-          chalk.bold('  winget upgrade OpenAICompatibleProvider.ClaudeCode') + '\n',
+          chalk.bold('  winget upgrade OpenAICompatible.Open Code CLICode') + '\n',
         )
       } else {
         writeToStdout('Open Code CLI is up to date!\n')
@@ -296,7 +296,7 @@ export async function update() {
       MACRO.PACKAGE_URL ||
       (process.env.USER_TYPE === 'ant'
         ? 'open-code-cli'
-        : '@anthropic-ai/open-code-cli')
+        : '@open-code-cli/open-code-cli')
     process.stderr.write(
       `  • Manually check: npm view ${packageName} version\n`,
     )

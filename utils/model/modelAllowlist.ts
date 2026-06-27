@@ -46,10 +46,10 @@ function modelMatchesVersionPrefix(model: string, entry: string): boolean {
   if (prefixMatchesModel(resolvedModel, entry)) {
     return true
   }
-  // Try with "claude-" prefix (e.g. "opus-4-5" → "openai/gpt-4.1")
+  // Try with "open-code-cli-" prefix (e.g. "opus-4-5" → "openai/gpt-4.1")
   if (
-    !entry.startsWith('claude-') &&
-    prefixMatchesModel(resolvedModel, `claude-${entry}`)
+    !entry.startsWith('open-code-cli-') &&
+    prefixMatchesModel(resolvedModel, `open-code-cli-${entry}`)
   ) {
     return true
   }

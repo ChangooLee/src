@@ -40,7 +40,7 @@ export type OpenCodeCliConfigDirectory =
 
 // Compatibility export for existing integrations; primary naming is Open Code CLI.
 export const OPEN_CODE_CLI_CONFIG_DIRECTORIES = OPEN_CODE_CLI_CONFIG_DIRECTORIES
-export type ClaudeConfigDirectory = OpenCodeCliConfigDirectory
+export type Open Code CLIConfigDirectory = OpenCodeCliConfigDirectory
 
 export type MarkdownFile = {
   filePath: string
@@ -156,7 +156,7 @@ export function parseSlashCommandToolsFromFrontmatter(
  * Uses bigint: true to handle filesystems with large inodes (e.g., ExFAT)
  * that exceed JavaScript's Number precision (53 bits). Without bigint, different
  * large inodes can round to the same Number, causing false duplicate detection.
- * See: https://github.com/anthropics/open-code-cli/issues/13893
+ * See: https://github.com/open-code-cli/open-code-cli/issues/13893
  *
  * @param filePath - Path to the file
  * @returns A string identifier "device:inode" or null if file can't be identified
@@ -237,7 +237,7 @@ function resolveStopBoundary(cwd: string): string | null {
  * @returns Array of directory paths containing .open-code-cli/subdir, from most specific (cwd) to least specific
  */
 export function getProjectDirsUpToHome(
-  subdir: ClaudeConfigDirectory,
+  subdir: Open Code CLIConfigDirectory,
   cwd: string,
 ): string[] {
   const home = resolve(homedir()).normalize('NFC')
@@ -255,7 +255,7 @@ export function getProjectDirsUpToHome(
       break
     }
 
-    const claudeSubdir = join(current, '.open-code-cli', subdir)
+    const openCodeCliSubdir = join(current, '.open-code-cli', subdir)
     // Filter to existing dirs. This is a perf filter (avoids spawning
     // ripgrep on non-existent dirs downstream) and the worktree fallback
     // in loadMarkdownFilesForSubdir relies on it. statSync + explicit error
@@ -263,8 +263,8 @@ export function getProjectDirsUpToHome(
     // than silently swallowing them. Downstream loadMarkdownFiles handles
     // the TOCTOU window (dir disappearing before read) gracefully.
     try {
-      statSync(claudeSubdir)
-      dirs.push(claudeSubdir)
+      statSync(openCodeCliSubdir)
+      dirs.push(openCodeCliSubdir)
     } catch (e: unknown) {
       if (!isFsInaccessible(e)) throw e
     }
@@ -301,7 +301,7 @@ export function getProjectDirsUpToHome(
  */
 export const loadMarkdownFilesForSubdir = memoize(
   async function (
-    subdir: ClaudeConfigDirectory,
+    subdir: Open Code CLIConfigDirectory,
     cwd: string,
   ): Promise<MarkdownFile[]> {
     const searchStartTime = Date.now()
@@ -318,7 +318,7 @@ export const loadMarkdownFilesForSubdir = memoize(
     // is absent. A standard `git worktree add` checks out the full tree, so the
     // worktree already has identical .open-code-cli/<subdir> content — loading the main
     // repo's copy too would duplicate every command/agent/skill
-    // (anthropics/open-code-cli#29599, #28182, #26992).
+    // (open-code-cli/open-code-cli#29599, #28182, #26992).
     //
     // projectDirs already reflects existence (getProjectDirsUpToHome checked
     // each dir), so we compare against that instead of stat'ing again.
@@ -332,9 +332,9 @@ export const loadMarkdownFilesForSubdir = memoize(
         dir => normalizePathForComparison(dir) === worktreeSubdir,
       )
       if (!worktreeHasSubdir) {
-        const mainClaudeSubdir = join(canonicalRoot, '.open-code-cli', subdir)
-        if (!projectDirs.includes(mainClaudeSubdir)) {
-          projectDirs.push(mainClaudeSubdir)
+        const mainOpen Code CLISubdir = join(canonicalRoot, '.open-code-cli', subdir)
+        if (!projectDirs.includes(mainOpen Code CLISubdir)) {
+          projectDirs.push(mainOpen Code CLISubdir)
         }
       }
     }
@@ -431,7 +431,7 @@ export const loadMarkdownFilesForSubdir = memoize(
     return deduplicatedFiles
   },
   // Custom resolver creates cache key from both subdir and cwd parameters
-  (subdir: ClaudeConfigDirectory, cwd: string) => `${subdir}:${cwd}`,
+  (subdir: Open Code CLIConfigDirectory, cwd: string) => `${subdir}:${cwd}`,
 )
 
 /**
@@ -468,7 +468,7 @@ async function findMarkdownFilesNative(
     // Cycle detection: track visited directories by device+inode
     // Uses bigint: true to handle filesystems with large inodes (e.g., ExFAT)
     // that exceed JavaScript's Number precision (53 bits).
-    // See: https://github.com/anthropics/open-code-cli/issues/13893
+    // See: https://github.com/open-code-cli/open-code-cli/issues/13893
     try {
       const stats = await stat(currentDir, { bigint: true })
       if (stats.isDirectory()) {

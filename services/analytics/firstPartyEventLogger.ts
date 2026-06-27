@@ -131,7 +131,7 @@ export async function shutdown1PEventLogging(): Promise<void> {
  * Check if 1P event logging is enabled.
  * Respects the same opt-outs as other analytics sinks:
  * - Test environment
- * - Third-party cloud providers (OpenAICompatibleProvider/OpenAICompatibleProvider)
+ * - Third-party cloud providers (OpenAICompatible/OpenAICompatible)
  * - Global telemetry opt-outs
  * - Non-essential traffic disabled
  *

@@ -6,7 +6,7 @@ import { MemoryFileSelector } from '../../components/memory/MemoryFileSelector.j
 import { getRelativeMemoryPath } from '../../components/memory/MemoryUpdateNotification.js';
 import { Box, Link, Text } from '../../ink.js';
 import type { LocalJSXCommandCall } from '../../types/command.js';
-import { clearMemoryFileCaches, getMemoryFiles } from '../../utils/claudemd.js';
+import { clearMemoryFileCaches, getMemoryFiles } from '../../utils/openCodeMd.js';
 import { getOpenCodeCliConfigHomeDir } from '../../utils/envUtils.js';
 import { getErrnoCode } from '../../utils/errors.js';
 import { logError } from '../../utils/log.js';
@@ -20,7 +20,7 @@ function MemoryCommand({
 }): React.ReactNode {
   const handleSelectMemoryFile = async (memoryPath: string) => {
     try {
-      // Create claude directory if it doesn't exist (idempotent with recursive)
+      // Create open-code-cli directory if it doesn't exist (idempotent with recursive)
       if (memoryPath.includes(getOpenCodeCliConfigHomeDir())) {
         await mkdir(getOpenCodeCliConfigHomeDir(), {
           recursive: true

@@ -57,7 +57,7 @@ export type PermissionHandlerOptions = {
   hasFeedback?: boolean
   feedback?: string
   enteredFeedbackMode?: boolean
-  scope?: 'claude-folder' | 'global-claude-folder'
+  scope?: 'open-code-cli-folder' | 'global-open-code-cli-folder'
 }
 
 function handleAcceptOnce(
@@ -101,13 +101,13 @@ function handleAcceptSession(
 
   logPermissionEvent('accept', completionType, languageName, messageId)
 
-  // For claude-folder scope, grant session-level access to all .open-code-cli/ files
+  // For open-code-cli-folder scope, grant session-level access to all .open-code-cli/ files
   if (
-    options?.scope === 'claude-folder' ||
-    options?.scope === 'global-claude-folder'
+    options?.scope === 'open-code-cli-folder' ||
+    options?.scope === 'global-open-code-cli-folder'
   ) {
     const pattern =
-      options.scope === 'global-claude-folder'
+      options.scope === 'global-open-code-cli-folder'
         ? GLOBAL_OPEN_CODE_FOLDER_PERMISSION_PATTERN
         : OPEN_CODE_FOLDER_PERMISSION_PATTERN
     const suggestions: PermissionUpdate[] = [

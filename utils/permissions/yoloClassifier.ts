@@ -10,7 +10,7 @@ import { mkdir, writeFile } from 'fs/promises'
 import { dirname, join } from 'path'
 import { z } from 'zod/v4'
 import {
-  getCachedClaudeMdContent,
+  getCachedOpenCodeMdContent,
   getLastClassifierRequests,
   getSessionId,
   setLastClassifierRequests,
@@ -100,7 +100,7 @@ export type AutoModeRules = {
  * captured tag contents ARE the defaults. Bullet items are single-line in the
  * template; each line starting with `- ` becomes one array entry.
  * Used by `open-code-cli auto-mode defaults`. Always returns external defaults,
- * never the OpenAICompatibleProvider-internal template.
+ * never the OpenAICompatible-internal template.
  */
 export function getDefaultExternalAutoModeRules(): AutoModeRules {
   return {
@@ -152,7 +152,7 @@ function getAutoModeDumpDir(): string {
 
 /**
  * Dump the auto mode classifier request and response bodies to the per-user
- * claude temp directory when OPEN_CODE_CLI_DUMP_AUTO_MODE is set. Files are
+ * open-code-cli temp directory when OPEN_CODE_CLI_DUMP_AUTO_MODE is set. Files are
  * named by unix timestamp: {timestamp}[.{suffix}].req.json and .res.json
  */
 async function maybeDumpAutoMode(
@@ -210,7 +210,7 @@ export function getAutoModeClassifierTranscript(): string | null {
 
 /**
  * Dump classifier input prompts + context-comparison diagnostics on API error.
- * Written to a session-scoped file in the claude temp dir so /share can collect
+ * Written to a session-scoped file in the open-code-cli temp dir so /share can collect
  * it (replaces the old Desktop dump). Includes context numbers to help diagnose
  * projection divergence (classifier tokens >> main loop tokens).
  * Returns the dump path on success, null on failure.
@@ -455,16 +455,16 @@ export function buildTranscriptForClassifier(
  * stable cache prefix across classifier calls.
  *
  * Reads from bootstrap/state.ts cache (populated by context.ts) instead of
- * importing claudemd.ts directly — claudemd → permissions/filesystem →
+ * importing openCodeMd.ts directly — openCodeMd → permissions/filesystem →
  * permissions → yoloClassifier is a cycle. context.ts already gates on
  * OPEN_CODE_CLI_DISABLE_OPEN_CODE_MDS and normalizes '' to null before caching.
  * If the cache is unpopulated (tests, or an entrypoint that never calls
  * getUserContext), the classifier proceeds without OPEN_CODE.md — same as
  * pre-PR behavior.
  */
-function buildClaudeMdMessage(): MessageParam | null {
-  const claudeMd = getCachedClaudeMdContent()
-  if (claudeMd === null) return null
+function buildOpenCodeMdMessage(): MessageParam | null {
+  const openCodeMd = getCachedOpenCodeMdContent()
+  if (openCodeMd === null) return null
   return {
     role: 'user',
     content: [
@@ -474,7 +474,7 @@ function buildClaudeMdMessage(): MessageParam | null {
           `The following is the user's OPEN_CODE.md configuration. These are ` +
           `instructions the user provided to the agent and should be treated ` +
           `as part of the user's intent when evaluating actions.\n\n` +
-          `<user_claude_md>\n${claudeMd}\n</user_claude_md>`,
+          `<user_openCodeCliMd>\n${openCodeMd}\n</user_openCodeCliMd>`,
         cache_control: getCacheControl({ querySource: 'auto_mode' }),
       },
     ],
@@ -1035,9 +1035,9 @@ export async function classifyYoloAction(
 
   const systemPrompt = await buildYoloSystemPrompt(context)
   const transcriptEntries = buildTranscriptEntries(messages)
-  const claudeMdMessage = buildClaudeMdMessage()
-  const prefixMessages: MessageParam[] = claudeMdMessage
-    ? [claudeMdMessage]
+  const openCodeMdMessage = buildOpenCodeMdMessage()
+  const prefixMessages: MessageParam[] = openCodeMdMessage
+    ? [openCodeMdMessage]
     : []
 
   let toolCallsLength = actionCompact.length

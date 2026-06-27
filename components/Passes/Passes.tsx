@@ -146,7 +146,7 @@ export function Passes({
         <Text>{'┌──────────┐'}</Text>
         <Text>
           {' ) CC '}
-          <Text color="claude">{TEARDROP_ASTERISK}</Text>
+          <Text color="open-code-cli">{TEARDROP_ASTERISK}</Text>
           {' ┊ ( '}
         </Text>
         <Text>{'└──────────┘'}</Text>

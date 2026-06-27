@@ -24,7 +24,7 @@ import { asSessionId } from './types/ids.js'
 import { isAgentSwarmsEnabled } from './utils/agentSwarmsEnabled.js'
 import { checkAndRestoreTerminalBackup } from './utils/appleTerminalBackup.js'
 import { prefetchApiKeyFromApiKeyHelperIfSafe } from './utils/auth.js'
-import { clearMemoryFileCaches } from './utils/claudemd.js'
+import { clearMemoryFileCaches } from './utils/openCodeMd.js'
 import { getCurrentProjectConfig, getGlobalConfig } from './utils/config.js'
 import { logForDiagnosticsNoPII } from './utils/diagLogs.js'
 import { env } from './utils/env.js'
@@ -416,12 +416,12 @@ export async function setup(
     if (
       process.env.USER_TYPE === 'ant' &&
       // Skip for Desktop's local agent mode — same trust model as CCR/BYOC
-      // (trusted OpenAICompatibleProvider-managed launcher intentionally pre-approving everything).
+      // (trusted OpenAICompatible-managed launcher intentionally pre-approving everything).
       // Precedent: permissionSetup.ts:861, applySettingsChange.ts:55 (PR #19116)
       getOpenCodeCliEnv('ENTRYPOINT') !== 'local-agent' &&
       // Same for CCD (Open Code CLI in Desktop) — apps#29127 passes the flag
       // unconditionally to unlock mid-session bypass switching
-      getOpenCodeCliEnv('ENTRYPOINT') !== 'claude-desktop'
+      getOpenCodeCliEnv('ENTRYPOINT') !== 'open-code-desktop'
     ) {
       // Only await if permission mode is set to bypass
       const [isDocker, hasInternet] = await Promise.all([

@@ -28,8 +28,8 @@ function isDevMode(): boolean {
 }
 
 /**
- * Builds a deep link URL for Claude Desktop to resume a CLI session.
- * Format: claude://resume?session={sessionId}&cwd={cwd}
+ * Builds a deep link URL for Open Code Desktop to resume a CLI session.
+ * Format: open-code-cli://resume?session={sessionId}&cwd={cwd}
  * In dev mode: open-code-cli-dev://resume?session={sessionId}&cwd={cwd}
  */
 function buildDesktopDeepLink(sessionId: string): string {
@@ -41,9 +41,9 @@ function buildDesktopDeepLink(sessionId: string): string {
 }
 
 /**
- * Check if Claude Desktop app is installed.
- * On macOS, checks for /Applications/Claude.app.
- * On Linux, checks if xdg-open can handle claude:// protocol.
+ * Check if Open Code Desktop app is installed.
+ * On macOS, checks for /Applications/Open Code CLI.app.
+ * On Linux, checks if xdg-open can handle open-code-cli:// protocol.
  * On Windows, checks if the protocol handler exists.
  * In dev mode, always returns true (assumes dev Desktop is running).
  */
@@ -56,10 +56,10 @@ async function isDesktopInstalled(): Promise<boolean> {
   const platform = process.platform
 
   if (platform === 'darwin') {
-    // Check for Claude.app in /Applications
-    return pathExists('/Applications/Claude.app')
+    // Check for Open Code CLI.app in /Applications
+    return pathExists('/Applications/Open Code CLI.app')
   } else if (platform === 'linux') {
-    // Check if xdg-mime can find a handler for claude://
+    // Check if xdg-mime can find a handler for open-code-cli://
     // Note: xdg-mime returns exit code 0 even with no handler, so check stdout too
     const { code, stdout } = await execFileNoThrow('xdg-mime', [
       'query',
@@ -81,7 +81,7 @@ async function isDesktopInstalled(): Promise<boolean> {
 }
 
 /**
- * Detect the installed Claude Desktop version.
+ * Detect the installed Open Code Desktop version.
  * On macOS, reads CFBundleShortVersionString from the app plist.
  * On Windows, finds the highest app-X.Y.Z directory in the Squirrel install.
  * Returns null if version cannot be determined.
@@ -92,7 +92,7 @@ async function getDesktopVersion(): Promise<string | null> {
   if (platform === 'darwin') {
     const { code, stdout } = await execFileNoThrow('defaults', [
       'read',
-      '/Applications/Claude.app/Contents/Info.plist',
+      '/Applications/Open Code CLI.app/Contents/Info.plist',
       'CFBundleShortVersionString',
     ])
     if (code !== 0) {
@@ -105,7 +105,7 @@ async function getDesktopVersion(): Promise<string | null> {
     if (!localAppData) {
       return null
     }
-    const installDir = join(localAppData, 'OpenAICompatibleProviderClaude')
+    const installDir = join(localAppData, 'OpenAICompatibleOpen Code CLI')
     try {
       const entries = await readdir(installDir)
       const versions = entries
@@ -200,7 +200,7 @@ async function openDeepLink(deepLinkUrl: string): Promise<boolean> {
 }
 
 /**
- * Build and open a deep link to resume the current session in Claude Desktop.
+ * Build and open a deep link to resume the current session in Open Code Desktop.
  * Returns an object with success status and any error message.
  */
 export async function openCurrentSessionInDesktop(): Promise<{
@@ -216,7 +216,7 @@ export async function openCurrentSessionInDesktop(): Promise<{
     return {
       success: false,
       error:
-        'Claude Desktop is not installed. Install it from https://claude.ai/download',
+        'Open Code Desktop is not installed. Install it from https://Open Code CLI/download',
     }
   }
 
@@ -227,7 +227,7 @@ export async function openCurrentSessionInDesktop(): Promise<{
   if (!opened) {
     return {
       success: false,
-      error: 'Failed to open Claude Desktop. Please try opening it manually.',
+      error: 'Failed to open Open Code Desktop. Please try opening it manually.',
       deepLinkUrl,
     }
   }

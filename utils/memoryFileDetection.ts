@@ -124,7 +124,7 @@ function isAgentMemFile(filePath: string): boolean {
 }
 
 /**
- * Check if a file is a Claude-managed memory file (NOT user-managed instruction files).
+ * Check if a file is a Open Code CLI-managed memory file (NOT user-managed instruction files).
  * Includes: auto-memory (memdir), agent memory, session memory/transcripts.
  * Excludes: OPEN_CODE.md, OPEN_CODE.local.md, .open-code-cli/rules/*.md (user-managed).
  *

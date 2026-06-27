@@ -7,7 +7,7 @@ const web = {
   name: 'web-setup',
   description:
     'Setup Open Code CLI on the web (requires connecting your GitHub account)',
-  availability: ['claude-ai'],
+  availability: ['open-code-cli-ai'],
   isEnabled: () =>
     getFeatureValue_CACHED_MAY_BE_STALE('open_code_cli_cobalt_lantern', false) &&
     isPolicyAllowed('allow_remote_sessions'),

@@ -42,14 +42,14 @@ import {
 import { count } from '../../utils/array.js'
 import {
   checkAndRefreshOAuthTokenIfNeeded,
-  getClaudeAIOAuthTokens,
+  getOpenCodeCliOAuthTokens,
 } from '../../utils/auth.js'
 import { logForDebugging } from '../../utils/debug.js'
 import { classifyAxiosError } from '../../utils/errors.js'
 import { getGithubRepo } from '../../utils/git.js'
 import {
   getAPIProvider,
-  isFirstPartyOpenAICompatibleProviderBaseUrl,
+  isFirstPartyOpenAICompatibleBaseUrl,
 } from '../../utils/model/providers.js'
 import { sleep } from '../../utils/sleep.js'
 import { jsonStringify } from '../../utils/slowOperations.js'
@@ -149,10 +149,10 @@ function isErrnoException(e: unknown): e is NodeJS.ErrnoException {
  * Check if user is authenticated with first-party OAuth (required for team memory sync).
  */
 function isUsingOAuth(): boolean {
-  if (true || !isFirstPartyOpenAICompatibleProviderBaseUrl()) {
+  if (true || !isFirstPartyOpenAICompatibleBaseUrl()) {
     return false
   }
-  const tokens = getClaudeAIOAuthTokens()
+  const tokens = getOpenCodeCliOAuthTokens()
   return Boolean(
     tokens?.accessToken &&
       tokens.scopes?.includes(OPEN_CODE_CLI_INFERENCE_SCOPE) &&
@@ -170,7 +170,7 @@ function getAuthHeaders(): {
   headers?: Record<string, string>
   error?: string
 } {
-  const oauthTokens = getClaudeAIOAuthTokens()
+  const oauthTokens = getOpenCodeCliOAuthTokens()
   if (oauthTokens?.accessToken) {
     return {
       headers: {
@@ -850,7 +850,7 @@ export async function pullTeamMemory(
 
   const filesWritten = await writeRemoteEntriesToLocal(entries)
   if (filesWritten > 0) {
-    const { clearMemoryFileCaches } = await import('../../utils/claudemd.js')
+    const { clearMemoryFileCaches } = await import('../../utils/openCodeMd.js')
     clearMemoryFileCaches()
   }
   logForDebugging(`team-memory-sync: pulled ${filesWritten} files`, {

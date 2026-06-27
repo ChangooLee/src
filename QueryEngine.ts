@@ -310,7 +310,7 @@ export class QueryEngine {
     // When an SDK caller provides a custom system prompt AND has set
     // OPEN_CODE_COWORK_MEMORY_PATH_OVERRIDE, inject the memory-mechanics prompt.
     // The env var is an explicit opt-in signal — the caller has wired up
-    // a memory directory and needs Claude to know how to use it (which
+    // a memory directory and needs Open Code CLI to know how to use it (which
     // Write/Edit tools to call, MEMORY.md filename, loading semantics).
     // The caller can layer their own policy text via appendSystemPrompt.
     const memoryMechanicsPrompt =
@@ -694,7 +694,7 @@ export class QueryEngine {
         // messages up through the preservedSegment tail. Attachments and
         // progress are now recorded inline (their switch cases below), but
         // this flush still matters for the preservedSegment tail walk.
-        // If the SDK subprocess restarts before then (claude-desktop kills
+        // If the SDK subprocess restarts before then (open-code-desktop kills
         // between turns), tailUuid points to a never-written message →
         // applyPreservedSegmentRelinks fails its tail→head walk → returns
         // without pruning → resume loads full pre-compact history.
@@ -715,7 +715,7 @@ export class QueryEngine {
         }
         messages.push(message)
         if (persistSession) {
-          // Fire-and-forget for assistant messages. claude.ts yields one
+          // Fire-and-forget for assistant messages. open-code-cli.ts yields one
           // assistant message per content block, then mutates the last
           // one's message.usage/stop_reason on message_delta — relying on
           // the write queue's 100ms lazy jsonStringify. Awaiting here
@@ -801,7 +801,7 @@ export class QueryEngine {
             )
             // Capture stop_reason from message_delta. The assistant message
             // is yielded at content_block_stop with stop_reason=null; the
-            // real value only arrives here (see claude.ts message_delta
+            // real value only arrives here (see open-code-cli.ts message_delta
             // handler). Without this, result.stop_reason is always null.
             if (message.event.delta.stop_reason != null) {
               lastStopReason = message.event.delta.stop_reason
@@ -1178,7 +1178,7 @@ export class QueryEngine {
 
 /**
  * Sends a single prompt to the OpenAI-compatible API and returns the response.
- * Assumes that claude is being used non-interactively -- will not
+ * Assumes that open-code-cli is being used non-interactively -- will not
  * ask the user for permissions or further input.
  *
  * Convenience wrapper around QueryEngine for one-shot usage.

@@ -138,7 +138,7 @@ function detectGateway({
   return undefined
 }
 
-function getOpenAICompatibleProviderEnvMetadata() {
+function getOpenAICompatibleEnvMetadata() {
   return {
     ...(process.env.OPEN_CODE_CLI_BASE_URL
       ? {
@@ -228,7 +228,7 @@ export function logAPIQuery({
             previousRequestId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
         }
       : {}),
-    ...getOpenAICompatibleProviderEnvMetadata(),
+    ...getOpenAICompatibleEnvMetadata(),
   })
 }
 
@@ -361,7 +361,7 @@ export function logAPIError({
             previousRequestId as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
         }
       : {}),
-    ...getOpenAICompatibleProviderEnvMetadata(),
+    ...getOpenAICompatibleEnvMetadata(),
   })
 
   // Log API error event for OTLP
@@ -571,7 +571,7 @@ function logAPISuccess({
         }
       : {}),
     ...(isPostCompaction ? { isPostCompaction } : {}),
-    ...getOpenAICompatibleProviderEnvMetadata(),
+    ...getOpenAICompatibleEnvMetadata(),
     timeSinceLastApiCallMs,
   })
 

@@ -26,7 +26,7 @@ import { getOauthConfig } from '../constants/oauth.js'
 
 let fired = false
 
-export function preconnectOpenAICompatibleProviderApi(): void {
+export function preconnectOpenAICompatibleApi(): void {
   if (fired) return
   fired = true
 

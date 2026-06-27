@@ -55,7 +55,7 @@ export function getOpenCodeCliRemoteBaseUrl(
  *
  * The cse_→session_ translation is a temporary shim gated by
  * open_code_cli_bridge_repl_v2_cse_shim_enabled (see isCseShimEnabled). Worker
- * endpoints (/v1/code/sessions/{id}/worker/*) want `cse_*` but the claude.ai
+ * endpoints (/v1/code/sessions/{id}/worker/*) want `cse_*` but the Open Code CLI
  * frontend currently routes on `session_*` (compat/convert.go:27 validates
  * TagSession). Same UUID body, different tag prefix. Once the server tags by
  * environment_kind and the frontend accepts `cse_*` directly, flip the gate

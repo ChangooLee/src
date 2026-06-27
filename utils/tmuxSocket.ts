@@ -1,25 +1,25 @@
 /**
  * TMUX SOCKET ISOLATION
  * =====================
- * This module manages an isolated tmux socket for Claude's operations.
+ * This module manages an isolated tmux socket for Open Code CLI's operations.
  *
  * WHY THIS EXISTS:
- * Without isolation, Claude could accidentally affect the user's tmux sessions.
+ * Without isolation, Open Code CLI could accidentally affect the user's tmux sessions.
  * For example, running `tmux kill-session` via the Bash tool would kill the
- * user's current session if they started Claude from within tmux.
+ * user's current session if they started Open Code CLI from within tmux.
  *
  * HOW IT WORKS:
- * 1. Claude creates its own tmux socket: `claude-<PID>` (e.g., `claude-12345`)
+ * 1. Open Code CLI creates its own tmux socket: `open-code-cli-<PID>` (e.g., `open-code-cli-12345`)
  * 2. ALL Tmux tool commands use this socket via the `-L` flag
  * 3. ALL Bash tool commands inherit TMUX env var pointing to this socket
- *    (set in Shell.ts via getClaudeTmuxEnv())
+ *    (set in Shell.ts via getOpenCodeCliTmuxEnv())
  *
- * This means ANY tmux command run through Claude - whether via the Tmux tool
- * directly or via Bash - will operate on Claude's isolated socket, NOT the
+ * This means ANY tmux command run through Open Code CLI - whether via the Tmux tool
+ * directly or via Bash - will operate on Open Code CLI's isolated socket, NOT the
  * user's tmux session.
  *
  * IMPORTANT: The user's original TMUX env var is NOT used. After socket
- * initialization, getClaudeTmuxEnv() returns a value that overrides the
+ * initialization, getOpenCodeCliTmuxEnv() returns a value that overrides the
  * user's TMUX in all child processes spawned by Shell.ts.
  */
 
@@ -85,10 +85,10 @@ let tmuxAvailable = false
 let tmuxToolUsed = false
 
 /**
- * Gets the socket name for Claude's isolated tmux session.
- * Format: claude-<PID>
+ * Gets the socket name for Open Code CLI's isolated tmux session.
+ * Format: open-code-cli-<PID>
  */
-export function getClaudeSocketName(): string {
+export function getOpenCodeCliSocketName(): string {
   if (!socketName) {
     socketName = `${OPEN_CODE_CLI_SOCKET_PREFIX}-${process.pid}`
   }
@@ -99,7 +99,7 @@ export function getClaudeSocketName(): string {
  * Gets the socket path if the socket has been initialized.
  * Returns null if not yet initialized.
  */
-export function getClaudeSocketPath(): string | null {
+export function getOpenCodeCliSocketPath(): string | null {
   return socketPath
 }
 
@@ -107,7 +107,7 @@ export function getClaudeSocketPath(): string | null {
  * Sets socket info after initialization.
  * Called after the tmux session is created.
  */
-export function setClaudeSocketInfo(path: string, pid: number): void {
+export function setOpen Code CLISocketInfo(path: string, pid: number): void {
   socketPath = path
   serverPid = pid
 }
@@ -120,19 +120,19 @@ export function isSocketInitialized(): boolean {
 }
 
 /**
- * Gets the TMUX environment variable value for Claude's isolated socket.
+ * Gets the TMUX environment variable value for Open Code CLI's isolated socket.
  *
  * CRITICAL: This value is used by Shell.ts to override the TMUX env var
  * in ALL child processes. This ensures that any `tmux` command run via
- * the Bash tool will operate on Claude's socket, NOT the user's session.
+ * the Bash tool will operate on Open Code CLI's socket, NOT the user's session.
  *
  * Format: "socket_path,server_pid,pane_index" (matches tmux's TMUX env var)
- * Example: "/tmp/tmux-501/claude-12345,54321,0"
+ * Example: "/tmp/tmux-501/open-code-cli-12345,54321,0"
  *
  * Returns null if socket is not yet initialized.
  * When null, Shell.ts does not override TMUX, preserving user's environment.
  */
-export function getClaudeTmuxEnv(): string | null {
+export function getOpenCodeCliTmuxEnv(): string | null {
   if (!socketPath || serverPid === null) {
     return null
   }
@@ -202,7 +202,7 @@ export function hasTmuxToolBeenUsed(): boolean {
  * Safe to call multiple times; will only initialize once.
  *
  * If tmux is not installed, this function returns gracefully without
- * initializing the socket. getClaudeTmuxEnv() will return null, and
+ * initializing the socket. getOpenCodeCliTmuxEnv() will return null, and
  * Bash commands will run without tmux isolation.
  */
 export async function ensureSocketInitialized(): Promise<void> {
@@ -246,11 +246,11 @@ export async function ensureSocketInitialized(): Promise<void> {
 }
 
 /**
- * Kills the tmux server for Claude's isolated socket.
+ * Kills the tmux server for Open Code CLI's isolated socket.
  * Called during graceful shutdown to clean up resources.
  */
 async function killTmuxServer(): Promise<void> {
-  const socket = getClaudeSocketName()
+  const socket = getOpenCodeCliSocketName()
   logForDebugging(`[Socket] Killing tmux server for socket: ${socket}`)
 
   const result = await execTmux(['-L', socket, 'kill-server'])
@@ -266,7 +266,7 @@ async function killTmuxServer(): Promise<void> {
 }
 
 async function doInitialize(): Promise<void> {
-  const socket = getClaudeSocketName()
+  const socket = getOpenCodeCliSocketName()
 
   // Create a new session with our custom socket
   // Pass OPEN_CODE_CLI_SKIP_PROMPT_HISTORY via -e so it's set in the initial shell environment
@@ -358,7 +358,7 @@ async function doInitialize(): Promise<void> {
     if (path && pidStr) {
       const pid = parseInt(pidStr, 10)
       if (!isNaN(pid)) {
-        setClaudeSocketInfo(path, pid)
+        setOpen Code CLISocketInfo(path, pid)
         return
       }
     }
@@ -396,7 +396,7 @@ async function doInitialize(): Promise<void> {
       logForDebugging(
         `[Socket] Using fallback socket path: ${fallbackPath} (server PID: ${pid})`,
       )
-      setClaudeSocketInfo(fallbackPath, pid)
+      setOpen Code CLISocketInfo(fallbackPath, pid)
       return
     }
     // PID parsing failed

@@ -9,12 +9,12 @@
 
 import { OPEN_CODE_CLI_INFERENCE_SCOPE } from '../../constants/oauth.js'
 import {
-  getOpenAICompatibleProviderApiKeyWithSource,
-  getClaudeAIOAuthTokens,
+  getOpenAICompatibleApiKeyWithSource,
+  getOpenCodeCliOAuthTokens,
 } from '../../utils/auth.js'
 import {
   getAPIProvider,
-  isFirstPartyOpenAICompatibleProviderBaseUrl,
+  isFirstPartyOpenAICompatibleBaseUrl,
 } from '../../utils/model/providers.js'
 import { getOpenCodeCliEnv } from '../../utils/envUtils.js'
 
@@ -56,7 +56,7 @@ export function isRemoteManagedSettingsEligible(): boolean {
   }
 
   // Custom base URL users should not hit the settings endpoint
-  if (!isFirstPartyOpenAICompatibleProviderBaseUrl()) {
+  if (!isFirstPartyOpenAICompatibleBaseUrl()) {
     return (cached = setEligibility(false))
   }
 
@@ -68,15 +68,15 @@ export function isRemoteManagedSettingsEligible(): boolean {
     return (cached = setEligibility(false))
   }
 
-  // Check OAuth first: most Claude.ai users have no API key in the keychain.
+  // Check OAuth first: most Open Code CLI users have no API key in the keychain.
   // The API key check spawns `security find-generic-password` (~20-50ms) which
   // returns null for OAuth-only users. Checking OAuth first short-circuits
   // that subprocess for the common case.
-  const tokens = getClaudeAIOAuthTokens()
+  const tokens = getOpenCodeCliOAuthTokens()
 
   // Externally-injected tokens (CCD via OPEN_CODE_CLI_OAUTH_TOKEN, CCR via
   // OPEN_CODE_CLI_OAUTH_TOKEN_FILE_DESCRIPTOR, Agent SDK, CI) carry no
-  // subscriptionType metadata — getClaudeAIOAuthTokens() constructs them with
+  // subscriptionType metadata — getOpenCodeCliOAuthTokens() constructs them with
   // subscriptionType: null. The token itself is valid; let the API decide.
   // fetchRemoteManagedSettings handles 204/404 gracefully (returns {}), and
   // settings.ts falls through to MDM/file when remote is empty, so ineligible
@@ -96,10 +96,10 @@ export function isRemoteManagedSettingsEligible(): boolean {
 
   // Console users (API key) are eligible if we can get the actual key
   // Skip apiKeyHelper to avoid circular dependency with getSettings()
-  // Wrap in try-catch because getOpenAICompatibleProviderApiKeyWithSource throws in CI/test environments
+  // Wrap in try-catch because getOpenAICompatibleApiKeyWithSource throws in CI/test environments
   // when no API key is available
   try {
-    const { key: apiKey } = getOpenAICompatibleProviderApiKeyWithSource({
+    const { key: apiKey } = getOpenAICompatibleApiKeyWithSource({
       skipRetrievingKeyFromApiKeyHelper: true,
     })
     if (apiKey) {

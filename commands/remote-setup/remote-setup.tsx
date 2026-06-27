@@ -95,7 +95,7 @@ function Web({
           logEvent('open_code_cli_remote_setup_result', {
             result: 'not_signed_in' as SafeString
           });
-          onDone('Not signed in to Claude. Run /login first.');
+          onDone('Not signed in to Open Code CLI. Run /login first.');
           return;
         case 'gh_not_installed':
         case 'gh_not_authenticated':

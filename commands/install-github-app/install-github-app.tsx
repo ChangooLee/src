@@ -7,7 +7,7 @@ import { useExitOnCtrlCDWithKeybindings } from '../../hooks/useExitOnCtrlCDWithK
 import type { KeyboardEvent } from '../../ink/events/keyboard-event.js';
 import { Box } from '../../ink.js';
 import type { LocalJSXCommandOnDone } from '../../types/command.js';
-import { getOpenAICompatibleProviderApiKey, isOpenAICompatibleProviderAuthEnabled } from '../../utils/auth.js';
+import { getOpenAICompatibleApiKey, isOpenAICompatibleAuthEnabled } from '../../utils/auth.js';
 import { openBrowser } from '../../utils/browser.js';
 import { execFileNoThrow } from '../../utils/execFileNoThrow.js';
 import { getGithubRepo } from '../../utils/git.js';
@@ -46,11 +46,11 @@ const INITIAL_STATE: State = {
 function InstallGitHubApp(props: {
   onDone: (message: string) => void;
 }): React.ReactNode {
-  const [existingApiKey] = useState(() => getOpenAICompatibleProviderApiKey());
+  const [existingApiKey] = useState(() => getOpenAICompatibleApiKey());
   const [state, setState] = useState({
     ...INITIAL_STATE,
     useExistingKey: !!existingApiKey,
-    selectedApiKeyOption: (existingApiKey ? 'existing' : isOpenAICompatibleProviderAuthEnabled() ? 'oauth' : 'new') as 'existing' | 'new' | 'oauth'
+    selectedApiKeyOption: (existingApiKey ? 'existing' : isOpenAICompatibleAuthEnabled() ? 'oauth' : 'new') as 'existing' | 'new' | 'oauth'
   });
   useExitOnCtrlCDWithKeybindings();
   React.useEffect(() => {
@@ -222,10 +222,10 @@ function InstallGitHubApp(props: {
     const checkSecretsResult = await execFileNoThrow('gh', ['secret', 'list', '--app', 'actions', '--repo', state.selectedRepoName]);
     if (checkSecretsResult.code === 0) {
       const lines = checkSecretsResult.stdout.split('\n');
-      const hasOpenAICompatibleProviderKey = lines.some((line: string) => {
+      const hasOpenAICompatibleKey = lines.some((line: string) => {
         return /^OPEN_CODE_CLI_API_KEY\s+/.test(line);
       });
-      if (hasOpenAICompatibleProviderKey) {
+      if (hasOpenAICompatibleKey) {
         setState(prev_6 => ({
           ...prev_6,
           secretExists: true,
@@ -290,7 +290,7 @@ function InstallGitHubApp(props: {
           repoWarnings.push({
             title: 'Invalid GitHub URL format',
             message: 'The repository URL format appears to be invalid.',
-            instructions: ['Use format: owner/repo or https://github.com/owner/repo', 'Example: anthropics/open-code-cli']
+            instructions: ['Use format: owner/repo or https://github.com/owner/repo', 'Example: open-code-cli/open-code-cli']
           });
         } else {
           repoName_1 = match[1]?.replace(/\.git$/, '') || '';
@@ -300,7 +300,7 @@ function InstallGitHubApp(props: {
         repoWarnings.push({
           title: 'Repository format warning',
           message: 'Repository should be in format "owner/repo"',
-          instructions: ['Use format: owner/repo', 'Example: anthropics/open-code-cli']
+          instructions: ['Use format: owner/repo', 'Example: open-code-cli/open-code-cli']
         });
       }
       const permissionCheck = await checkRepositoryPermissions(repoName_1);
@@ -402,10 +402,10 @@ function InstallGitHubApp(props: {
       const checkSecretsResult_0 = await execFileNoThrow('gh', ['secret', 'list', '--app', 'actions', '--repo', state.selectedRepoName]);
       if (checkSecretsResult_0.code === 0) {
         const lines_0 = checkSecretsResult_0.stdout.split('\n');
-        const hasOpenAICompatibleProviderKey_0 = lines_0.some((line_0: string) => {
+        const hasOpenAICompatibleKey_0 = lines_0.some((line_0: string) => {
           return /^OPEN_CODE_CLI_API_KEY\s+/.test(line_0);
         });
-        if (hasOpenAICompatibleProviderKey_0) {
+        if (hasOpenAICompatibleKey_0) {
           logEvent('open_code_cli_install_github_app_step_completed', {
             step: 'api-key' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS
           });
@@ -549,7 +549,7 @@ function InstallGitHubApp(props: {
     case 'check-existing-secret':
       return <CheckExistingSecretStep useExistingSecret={state.useExistingSecret} secretName={state.secretName} onToggleUseExistingSecret={handleToggleUseExistingSecret} onSecretNameChange={handleSecretNameChange} onSubmit={handleSubmit} />;
     case 'api-key':
-      return <ApiKeyStep existingApiKey={existingApiKey} useExistingKey={state.useExistingKey} apiKeyOrOAuthToken={state.apiKeyOrOAuthToken} onApiKeyChange={handleApiKeyChange} onToggleUseExistingKey={handleToggleUseExistingKey} onSubmit={handleSubmit} onCreateOAuthToken={isOpenAICompatibleProviderAuthEnabled() ? handleCreateOAuthToken : undefined} selectedOption={state.selectedApiKeyOption} onSelectOption={handleApiKeyOptionChange} />;
+      return <ApiKeyStep existingApiKey={existingApiKey} useExistingKey={state.useExistingKey} apiKeyOrOAuthToken={state.apiKeyOrOAuthToken} onApiKeyChange={handleApiKeyChange} onToggleUseExistingKey={handleToggleUseExistingKey} onSubmit={handleSubmit} onCreateOAuthToken={isOpenAICompatibleAuthEnabled() ? handleCreateOAuthToken : undefined} selectedOption={state.selectedApiKeyOption} onSelectOption={handleApiKeyOptionChange} />;
     case 'creating':
       return <CreatingStep currentWorkflowInstallStep={state.currentWorkflowInstallStep} secretExists={state.secretExists} useExistingSecret={state.useExistingSecret} secretName={state.secretName} skipWorkflow={state.workflowAction === 'skip'} selectedWorkflows={state.selectedWorkflows} />;
     case 'success':

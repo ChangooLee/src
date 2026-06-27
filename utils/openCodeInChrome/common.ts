@@ -9,7 +9,7 @@ import { execFileNoThrow } from '../execFileNoThrow.js'
 import { getPlatform } from '../platform.js'
 import { which } from '../which.js'
 
-export const OPEN_CODE_IN_CHROME_MCP_SERVER_NAME = 'claude-in-chrome'
+export const OPEN_CODE_IN_CHROME_MCP_SERVER_NAME = 'open-code-in-chrome'
 
 // Re-export ChromiumBrowser type for setup.ts
 export type { ChromiumBrowser } from './setupPortable.js'
@@ -356,7 +356,7 @@ export async function detectAvailableBrowser(): Promise<ChromiumBrowser | null> 
           const stats = await stat(appPath)
           if (stats.isDirectory()) {
             logForDebugging(
-              `[Claude in Chrome] Detected browser: ${config.name}`,
+              `[Open Code in Chrome] Detected browser: ${config.name}`,
             )
             return browserId
           }
@@ -372,7 +372,7 @@ export async function detectAvailableBrowser(): Promise<ChromiumBrowser | null> 
         for (const binary of config.linux.binaries) {
           if (await which(binary).catch(() => null)) {
             logForDebugging(
-              `[Claude in Chrome] Detected browser: ${config.name}`,
+              `[Open Code in Chrome] Detected browser: ${config.name}`,
             )
             return browserId
           }
@@ -391,7 +391,7 @@ export async function detectAvailableBrowser(): Promise<ChromiumBrowser | null> 
             const stats = await stat(dataPath)
             if (stats.isDirectory()) {
               logForDebugging(
-                `[Claude in Chrome] Detected browser: ${config.name}`,
+                `[Open Code in Chrome] Detected browser: ${config.name}`,
               )
               return browserId
             }
@@ -408,21 +408,21 @@ export async function detectAvailableBrowser(): Promise<ChromiumBrowser | null> 
   return null
 }
 
-export function isClaudeInChromeMCPServer(name: string): boolean {
+export function isOpenCodeInChromeMCPServer(name: string): boolean {
   return normalizeNameForMCP(name) === OPEN_CODE_IN_CHROME_MCP_SERVER_NAME
 }
 
 const MAX_TRACKED_TABS = 200
 const trackedTabIds = new Set<number>()
 
-export function trackClaudeInChromeTabId(tabId: number): void {
+export function trackOpenCodeInChromeTabId(tabId: number): void {
   if (trackedTabIds.size >= MAX_TRACKED_TABS && !trackedTabIds.has(tabId)) {
     trackedTabIds.clear()
   }
   trackedTabIds.add(tabId)
 }
 
-export function isTrackedClaudeInChromeTabId(tabId: number): boolean {
+export function isTrackedOpenCodeInChromeTabId(tabId: number): boolean {
   return trackedTabIds.has(tabId)
 }
 
@@ -433,7 +433,7 @@ export async function openInChrome(url: string): Promise<boolean> {
   const browser = await detectAvailableBrowser()
 
   if (!browser) {
-    logForDebugging('[Claude in Chrome] No compatible browser found')
+    logForDebugging('[Open Code in Chrome] No compatible browser found')
     return false
   }
 
@@ -500,7 +500,7 @@ export function getAllSocketPaths(): string[] {
 
   // Scan for *.sock files in the socket directory
   try {
-    // eslint-disable-next-line custom-rules/no-sync-fs -- ClaudeForChromeContext.getSocketPaths (external @ant/claude-for-chrome-mcp) requires a sync () => string[] callback
+    // eslint-disable-next-line custom-rules/no-sync-fs -- Open Code CLIForChromeContext.getSocketPaths (external @ant/open-code-cli-for-chrome-mcp) requires a sync () => string[] callback
     const files = readdirSync(socketDir)
     for (const file of files) {
       if (file.endsWith('.sock')) {
@@ -512,7 +512,7 @@ export function getAllSocketPaths(): string[] {
   }
 
   // Legacy fallback paths
-  const legacyName = `claude-mcp-browser-bridge-${getUsername()}`
+  const legacyName = `open-code-cli-mcp-browser-bridge-${getUsername()}`
   const legacyTmpdir = join(tmpdir(), legacyName)
   const legacyTmp = `/tmp/${legacyName}`
 
@@ -527,8 +527,8 @@ export function getAllSocketPaths(): string[] {
 }
 
 function getSocketName(): string {
-  // NOTE: This must match the one used in the Claude in Chrome MCP
-  return `claude-mcp-browser-bridge-${getUsername()}`
+  // NOTE: This must match the one used in the Open Code in Chrome MCP
+  return `open-code-cli-mcp-browser-bridge-${getUsername()}`
 }
 
 function getUsername(): string {

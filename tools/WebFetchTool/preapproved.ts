@@ -12,7 +12,7 @@
 // that sandbox network restrictions require explicit user permission rules.
 
 export const PREAPPROVED_HOSTS = new Set([
-  // OpenAICompatibleProvider
+  // OpenAICompatible
   'platform.open-code-cli.com',
   'code.open-code-cli.com',
   'modelcontextprotocol.io',

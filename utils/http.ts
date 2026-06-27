@@ -5,10 +5,10 @@
 import axios from 'axios'
 import { OAUTH_BETA_HEADER } from '../constants/oauth.js'
 import {
-  getOpenAICompatibleProviderApiKey,
-  getClaudeAIOAuthTokens,
+  getOpenAICompatibleApiKey,
+  getOpenCodeCliOAuthTokens,
   handleOAuth401Error,
-  isClaudeAISubscriber,
+  isOpenCodeCliSubscriber,
 } from './auth.js'
 import { getOpenCodeCliUserAgent } from './userAgent.js'
 import { getOpenCodeCliEnv } from './envUtils.js'
@@ -54,12 +54,12 @@ export function getMCPUserAgent(): string {
   return `open-code-cli/${MACRO.VERSION}${suffix}`
 }
 
-// User-Agent for WebFetch requests to arbitrary sites. `Claude-User` is
-// OpenAICompatibleProvider's publicly documented agent for user-initiated fetches (what site
+// User-Agent for WebFetch requests to arbitrary sites. `Open Code CLI-User` is
+// OpenAICompatible's publicly documented agent for user-initiated fetches (what site
 // operators match in robots.txt); the open-code-cli suffix lets them distinguish
-// local CLI traffic from claude.ai server-side fetches.
+// local CLI traffic from Open Code CLI server-side fetches.
 export function getWebFetchUserAgent(): string {
-  return `Claude-User (${getOpenCodeCliUserAgent()}; +https://support.openai-compatible.com/)`
+  return `Open Code CLI-User (${getOpenCodeCliUserAgent()}; +https://support.openai-compatible.com/)`
 }
 
 export type AuthHeaders = {
@@ -72,8 +72,8 @@ export type AuthHeaders = {
  * Returns either OAuth headers for Max/Pro users or API key headers for regular users
  */
 export function getAuthHeaders(): AuthHeaders {
-  if (isClaudeAISubscriber()) {
-    const oauthTokens = getClaudeAIOAuthTokens()
+  if (isOpenCodeCliSubscriber()) {
+    const oauthTokens = getOpenCodeCliOAuthTokens()
     if (!oauthTokens?.accessToken) {
       return {
         headers: {},
@@ -88,8 +88,8 @@ export function getAuthHeaders(): AuthHeaders {
     }
   }
   // TODO: this will fail if the API key is being set to an LLM Gateway key
-  // should we try to query keychain / credentials for a valid OpenAICompatibleProvider key?
-  const apiKey = getOpenAICompatibleProviderApiKey()
+  // should we try to query keychain / credentials for a valid OpenAICompatible key?
+  const apiKey = getOpenAICompatibleApiKey()
   if (!apiKey) {
     return {
       headers: {},
@@ -133,7 +133,7 @@ export async function withOAuth401Retry<T>(
         typeof err.response?.data === 'string' &&
         err.response.data.includes('OAuth token has been revoked'))
     if (!isAuthError) throw err
-    const failedAccessToken = getClaudeAIOAuthTokens()?.accessToken
+    const failedAccessToken = getOpenCodeCliOAuthTokens()?.accessToken
     if (!failedAccessToken) throw err
     await handleOAuth401Error(failedAccessToken)
     return await request()

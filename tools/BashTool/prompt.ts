@@ -186,9 +186,9 @@ function getSimpleSandboxSection(): string {
   // Replace the per-UID temp dir literal (e.g. /private/tmp/open-code-cli-1001/) with
   // "$TMPDIR" so the prompt is identical across users — avoids busting the
   // cross-user global prompt cache. The sandbox already sets $TMPDIR at runtime.
-  const claudeTempDir = getOpenCodeCliTempDir()
+  const openCodeCliTempDir = getOpenCodeCliTempDir()
   const normalizeAllowOnly = (paths: string[]): string[] =>
-    [...new Set(paths)].map(p => (p === claudeTempDir ? '$TMPDIR' : p))
+    [...new Set(paths)].map(p => (p === openCodeCliTempDir ? '$TMPDIR' : p))
 
   const filesystemConfig = {
     read: {
@@ -274,7 +274,7 @@ function getSimpleSandboxSection(): string {
 }
 
 export function getSimplePrompt(): string {
-  // Ant-native builds alias find/grep to embedded bfs/ugrep in Claude's shell,
+  // Ant-native builds alias find/grep to embedded bfs/ugrep in Open Code CLI's shell,
   // so we don't steer away from them (and Glob/Grep tools are removed).
   const embedded = hasEmbeddedSearchTools()
 

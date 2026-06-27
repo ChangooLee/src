@@ -86,6 +86,6 @@ export const PLAN_AGENT: BuiltInAgentDefinition = {
   model: 'inherit',
   // Plan is read-only and can Read OPEN_CODE.md directly if it needs conventions.
   // Dropping it from context saves tokens without blocking access.
-  omitClaudeMd: true,
+  omitOpenCodeMd: true,
   getSystemPrompt: () => getPlanV2SystemPrompt(),
 }

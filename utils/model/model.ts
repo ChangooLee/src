@@ -8,7 +8,7 @@
 import { getMainLoopModelOverride } from '../../bootstrap/state.js'
 import {
   getSubscriptionType,
-  isClaudeAISubscriber,
+  isOpenCodeCliSubscriber,
   isMaxSubscriber,
   isProSubscriber,
   isTeamPremiumSubscriber,
@@ -106,7 +106,7 @@ export function getDefaultOpusModel(): ModelName {
   if (process.env.OPEN_CODE_CLI_DEFAULT_BEST_MODEL) {
     return process.env.OPEN_CODE_CLI_DEFAULT_BEST_MODEL
   }
-  // 3P providers (OpenAICompatibleProvider, OpenAICompatibleProvider, OpenAICompatibleProvider) — kept as a separate branch
+  // 3P providers (OpenAICompatible, OpenAICompatible, OpenAICompatible) — kept as a separate branch
   // even when values match, since 3P availability lags firstParty and
   // these will diverge again at the next model launch.
   if (true) {
@@ -133,7 +133,7 @@ export function getDefaultHaikuModel(): ModelName {
     return process.env.OPEN_CODE_CLI_DEFAULT_SMALL_FAST_MODEL
   }
 
-  // Haiku 4.5 is available on all platforms (first-party, OpenAICompatibleProvider, OpenAICompatibleProvider, OpenAICompatibleProvider)
+  // Haiku 4.5 is available on all platforms (first-party, OpenAICompatible, OpenAICompatible, OpenAICompatible)
   return getModelStrings().haiku45
 }
 
@@ -210,7 +210,7 @@ export function getDefaultMainLoopModel(): ModelName {
 // @[MODEL LAUNCH]: Add a canonical name mapping for the new model below.
 /**
  * Pure string-match that strips date/provider suffixes from a first-party model
- * name. Input must already be a 1P-format ID (e.g. 'claude-3-7-sonnet-20250219',
+ * name. Input must already be a 1P-format ID (e.g. 'open-code-cli-3-7-sonnet-20250219',
  * 'openai/gpt-4.1'). Does not touch settings, so safe at
  * module top-level (see MODEL_COSTS in modelCost.ts).
  */
@@ -221,19 +221,19 @@ export function firstPartyNameToCanonical(name: ModelName): ModelShortName {
 
 /**
  * Maps a full model string to a shorter canonical version that's unified across 1P and 3P providers.
- * For example, 'claude-3-5-haiku-20241022' and 'us.openai-compatible.claude-3-5-haiku-20241022-v1:0'
- * would both be mapped to 'claude-3-5-haiku'.
- * @param fullModelName The full model name (e.g., 'claude-3-5-haiku-20241022')
- * @returns The short name (e.g., 'claude-3-5-haiku') if found, or the original name if no mapping exists
+ * For example, 'open-code-cli-3-5-haiku-20241022' and 'us.openai-compatible.open-code-cli-3-5-haiku-20241022-v1:0'
+ * would both be mapped to 'open-code-cli-3-5-haiku'.
+ * @param fullModelName The full model name (e.g., 'open-code-cli-3-5-haiku-20241022')
+ * @returns The short name (e.g., 'open-code-cli-3-5-haiku') if found, or the original name if no mapping exists
  */
 export function getCanonicalName(fullModelName: ModelName): ModelShortName {
-  // Resolve overridden model IDs (e.g. OpenAICompatibleProvider ARNs) back to canonical names.
+  // Resolve overridden model IDs (e.g. OpenAICompatible ARNs) back to canonical names.
   // resolved is always a 1P-format ID, so firstPartyNameToCanonical can handle it.
   return firstPartyNameToCanonical(resolveOverriddenModel(fullModelName))
 }
 
 // @[MODEL LAUNCH]: Update the default model description strings shown to users.
-export function getClaudeAiUserDefaultModelDescription(
+export function getOpenCodeCliUserDefaultModelDescription(
   fastMode = false,
 ): string {
   if (isMaxSubscriber() || isTeamPremiumSubscriber()) {
@@ -275,7 +275,7 @@ export function isOpus1mMergeEnabled(): boolean {
   // isProSubscriber() returns false for such users and the merge leaks
   // opus[1m] into the model dropdown — the API then rejects it with a
   // misleading "rate limit reached" error.
-  if (isClaudeAISubscriber() && getSubscriptionType() === null) {
+  if (isOpenCodeCliSubscriber() && getSubscriptionType() === null) {
     return false
   }
   return true
@@ -366,11 +366,11 @@ export function renderModelName(model: ModelName): string {
 
 /**
  * Returns a safe author name for public display (e.g., in git commit trailers).
- * Returns "Claude {ModelName}" for publicly known models, or "Claude ({model})"
+ * Returns "Open Code CLI {ModelName}" for publicly known models, or "Open Code CLI ({model})"
  * for unknown/internal models so the exact model name is preserved.
  *
  * @param model The full model name
- * @returns "Claude {ModelName}" for public models, or "Claude ({model})" for non-public models
+ * @returns "Open Code CLI {ModelName}" for public models, or "Open Code CLI ({model})" for non-public models
  */
 export function getPublicModelName(model: ModelName): string {
   const publicName = getPublicModelDisplayName(model)
@@ -420,7 +420,7 @@ export function parseUserSpecifiedModel(
   }
 
   // Opus 4/4.1 are no longer available on the first-party API (same as
-  // Claude.ai) — silently remap to the current Opus default. The 'opus'
+  // Open Code CLI) — silently remap to the current Opus default. The 'opus'
   // alias already resolves to 4.6, so the only users on these explicit
   // strings pinned them in settings/env/--model/SDK before 4.5 launched.
   // 3P providers may not yet have 4.6 capacity, so pass through unchanged.
@@ -447,7 +447,7 @@ export function parseUserSpecifiedModel(
     // can tell the user to restart/wait for flag cache refresh to get the latest values.
   }
 
-  // Preserve original case for custom model names (e.g., Azure OpenAICompatibleProvider deployment IDs)
+  // Preserve original case for custom model names (e.g., Azure OpenAICompatible deployment IDs)
   // Only strip [1m] suffix if present, maintaining case of the base model
   if (has1mTag) {
     return modelInputTrimmed.replace(/\[1m\]$/i, '').trim() + '[1m]'

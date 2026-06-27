@@ -1,7 +1,7 @@
 // biome-ignore-all assist/source/organizeImports: ANT-ONLY import markers must not be reordered
 import { getInitialMainLoopModel } from '../../bootstrap/state.js'
 import {
-  isClaudeAISubscriber,
+  isOpenCodeCliSubscriber,
   isMaxSubscriber,
   isTeamPremiumSubscriber,
 } from '../auth.js'
@@ -21,7 +21,7 @@ import { getAPIProvider } from './providers.js'
 import { isModelAllowed } from './modelAllowlist.js'
 import {
   getCanonicalName,
-  getClaudeAiUserDefaultModelDescription,
+  getOpenCodeCliUserDefaultModelDescription,
   getDefaultSonnetModel,
   getDefaultOpusModel,
   getDefaultHaikuModel,
@@ -59,11 +59,11 @@ export function getDefaultOptionForUser(fastMode = false): ModelOption {
   }
 
   // Subscribers
-  if (isClaudeAISubscriber()) {
+  if (isOpenCodeCliSubscriber()) {
     return {
       value: null,
       label: 'Default (recommended)',
-      description: getClaudeAiUserDefaultModelDescription(fastMode),
+      description: getOpenCodeCliUserDefaultModelDescription(fastMode),
     }
   }
 
@@ -221,7 +221,7 @@ function getMaxOpusOption(fastMode = false): ModelOption {
 
 export function getMaxSonnet46_1MOption(): ModelOption {
   const is3P = true
-  const billingInfo = isClaudeAISubscriber() ? ' · Billed as extra usage' : ''
+  const billingInfo = isOpenCodeCliSubscriber() ? ' · Billed as extra usage' : ''
   return {
     value: 'sonnet[1m]',
     label: 'GPT-4o (1M context)',
@@ -230,7 +230,7 @@ export function getMaxSonnet46_1MOption(): ModelOption {
 }
 
 export function getMaxOpus46_1MOption(fastMode = false): ModelOption {
-  const billingInfo = isClaudeAISubscriber() ? ' · Billed as extra usage' : ''
+  const billingInfo = isOpenCodeCliSubscriber() ? ' · Billed as extra usage' : ''
   return {
     value: 'opus[1m]',
     label: 'GPT-4.1 (1M context)',
@@ -290,7 +290,7 @@ function getModelOptionsBase(fastMode = false): ModelOption[] {
     ]
   }
 
-  if (isClaudeAISubscriber()) {
+  if (isOpenCodeCliSubscriber()) {
     if (isMaxSubscriber() || isTeamPremiumSubscriber()) {
       // Max and Team Premium users: GPT-4.1 is default, show GPT-4o as alternative
       const premiumOptions = [getDefaultOptionForUser(fastMode)]
@@ -395,8 +395,8 @@ function getModelFamilyInfo(
     canonical.includes('gpt-4o-4-6') ||
     canonical.includes('gpt-4o-4-5') ||
     canonical.includes('gpt-4o-4-') ||
-    canonical.includes('claude-3-7-sonnet') ||
-    canonical.includes('claude-3-5-sonnet')
+    canonical.includes('open-code-cli-3-7-sonnet') ||
+    canonical.includes('open-code-cli-3-5-sonnet')
   ) {
     const currentName = getMarketingNameForModel(getDefaultSonnetModel())
     if (currentName) {
@@ -415,7 +415,7 @@ function getModelFamilyInfo(
   // GPT-4o mini family
   if (
     canonical.includes('gpt-4o-mini') ||
-    canonical.includes('claude-3-5-haiku')
+    canonical.includes('open-code-cli-3-5-haiku')
   ) {
     const currentName = getMarketingNameForModel(getDefaultHaikuModel())
     if (currentName) {
@@ -427,7 +427,7 @@ function getModelFamilyInfo(
 }
 
 /**
- * Returns a ModelOption for a known OpenAICompatibleProvider model with a human-readable
+ * Returns a ModelOption for a known OpenAICompatible model with a human-readable
  * label, and an upgrade hint if a newer version is available via the alias.
  * Returns null if the model is not recognized.
  */
@@ -511,7 +511,7 @@ export function getModelOptions(fastMode = false): ModelOption[] {
       getMergedOpus1MOption(fastMode),
     ])
   } else {
-    // Try to show a human-readable label for known OpenAICompatibleProvider models, with an
+    // Try to show a human-readable label for known OpenAICompatible models, with an
     // upgrade hint if the alias now resolves to a newer version.
     const knownOption = getKnownModelOption(customModel)
     if (knownOption) {

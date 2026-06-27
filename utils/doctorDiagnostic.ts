@@ -215,8 +215,8 @@ async function detectMultipleInstallations(): Promise<
   }
 
   // Check for global npm installation
-  const packagesToCheck = ['@anthropic-ai/open-code-cli']
-  if (MACRO.PACKAGE_URL && MACRO.PACKAGE_URL !== '@anthropic-ai/open-code-cli') {
+  const packagesToCheck = ['@open-code-cli/open-code-cli']
+  if (MACRO.PACKAGE_URL && MACRO.PACKAGE_URL !== '@open-code-cli/open-code-cli') {
     packagesToCheck.push(MACRO.PACKAGE_URL)
   }
   const npmResult = await execFileNoThrow('npm', [
@@ -461,10 +461,10 @@ async function detectConfigurationIssues(
   if (type === 'npm-local') {
     // Check if open-code-cli is already accessible via PATH
     const whichResult = await which('open-code-cli')
-    const claudeInPath = !!whichResult
+    const openCodeCliInPath = !!whichResult
 
     // Only show warning if open-code-cli is NOT in PATH AND no valid alias exists
-    if (!claudeInPath && !validAlias) {
+    if (!openCodeCliInPath && !validAlias) {
       if (existingAlias) {
         // Alias exists but points to invalid target
         warnings.push({
@@ -536,10 +536,10 @@ export async function getDoctorDiagnostic(): Promise<DiagnosticInfo> {
 
     for (const install of npmInstalls) {
       if (install.type === 'npm-global') {
-        let uninstallCmd = 'npm -g uninstall @anthropic-ai/open-code-cli'
+        let uninstallCmd = 'npm -g uninstall @open-code-cli/open-code-cli'
         if (
           MACRO.PACKAGE_URL &&
-          MACRO.PACKAGE_URL !== '@anthropic-ai/open-code-cli'
+          MACRO.PACKAGE_URL !== '@open-code-cli/open-code-cli'
         ) {
           uninstallCmd += ` && npm -g uninstall ${MACRO.PACKAGE_URL}`
         }

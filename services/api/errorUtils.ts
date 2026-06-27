@@ -36,7 +36,7 @@ export type ConnectionErrorDetails = {
 
 /**
  * Extracts connection error details from the error cause chain.
- * The OpenAICompatibleProvider SDK wraps underlying errors in the `cause` property.
+ * The OpenAICompatible SDK wraps underlying errors in the `cause` property.
  * This function walks the cause chain to find the root error code/message.
  */
 export function extractConnectionErrorDetails(
@@ -135,8 +135,8 @@ export function sanitizeAPIError(apiError: APIError): string {
  * After JSON round-tripping, the SDK's APIError loses its `.message` property.
  * The actual message lives at different nesting levels depending on the provider:
  *
- * - OpenAICompatibleProvider/proxy: `{ error: { message: "..." } }`
- * - Standard OpenAICompatibleProvider API: `{ error: { error: { message: "..." } } }`
+ * - OpenAICompatible/proxy: `{ error: { message: "..." } }`
+ * - Standard OpenAICompatible API: `{ error: { error: { message: "..." } } }`
  *   (the outer `.error` is the response body, the inner `.error` is the API error)
  *
  * See also: `getErrorMessage` in `logging.ts` which handles the same shapes.
@@ -163,8 +163,8 @@ function hasNestedError(value: unknown): value is NestedAPIError {
  * a top-level `.message`.
  *
  * Checks two nesting levels (deeper first for specificity):
- * 1. `error.error.error.message` — standard OpenAICompatibleProvider API shape
- * 2. `error.error.message` — OpenAICompatibleProvider shape
+ * 1. `error.error.error.message` — standard OpenAICompatible API shape
+ * 2. `error.error.message` — OpenAICompatible shape
  */
 function extractNestedErrorMessage(error: APIError): string | null {
   if (!hasNestedError(error)) {
@@ -176,7 +176,7 @@ function extractNestedErrorMessage(error: APIError): string | null {
   const narrowed: NestedAPIError = error
   const nested = narrowed.error
 
-  // Standard OpenAICompatibleProvider API shape: { error: { error: { message } } }
+  // Standard OpenAICompatible API shape: { error: { error: { message } } }
   const deepMsg = nested?.error?.message
   if (typeof deepMsg === 'string' && deepMsg.length > 0) {
     const sanitized = sanitizeMessageHTML(deepMsg)
@@ -185,7 +185,7 @@ function extractNestedErrorMessage(error: APIError): string | null {
     }
   }
 
-  // OpenAICompatibleProvider shape: { error: { message } }
+  // OpenAICompatible shape: { error: { message } }
   const msg = nested?.message
   if (typeof msg === 'string' && msg.length > 0) {
     const sanitized = sanitizeMessageHTML(msg)

@@ -33,7 +33,7 @@ export function createFallbackStorage(
       if (result.success) {
         // Delete secondary when migrating to primary for the first time
         // This preserves credentials when sharing .open-code-cli between host and containers
-        // See: https://github.com/anthropics/open-code-cli/issues/1414
+        // See: https://github.com/open-code-cli/open-code-cli/issues/1414
         if (primaryDataBefore === null) {
           secondary.delete()
         }

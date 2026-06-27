@@ -114,7 +114,7 @@ function pollSleepDetectionThresholdMs(backoff: BackoffConfig): number {
  * and args go directly to it. In npm installs (node running cli.js),
  * process.execPath is the node runtime — the child spawn must pass the script
  * path as the first arg, otherwise node interprets --sdk-url as a node option
- * and exits with "bad option: --sdk-url". See anthropics/open-code-cli#28334.
+ * and exits with "bad option: --sdk-url". See open-code-cli/open-code-cli#28334.
  */
 function spawnScriptArgs(): string[] {
   if (isInBundledMode() || !process.argv[1]) {
@@ -1943,7 +1943,7 @@ DESCRIPTION
   directory you want to work in, then connect from the Open Code CLI web app or web.
 ${serverDescription}
 NOTES
-  - You must be logged in with a Claude account that has a subscription
+  - You must be logged in with a Open Code CLI account that has a subscription
   - Run \`open-code-cli\` first in the directory to accept the workspace trust dialog
 ${serverNote}`
   // biome-ignore lint/suspicious/noConsole: intentional help output
@@ -2174,7 +2174,7 @@ export async function bridgeMain(args: string[]): Promise<void> {
     resumePointerDir = pointerDir
   }
 
-  // In production, baseUrl is the OpenAICompatibleProvider API (from OAuth config).
+  // In production, baseUrl is the OpenAICompatible API (from OAuth config).
   // OPEN_CODE_BRIDGE_BASE_URL overrides this for ant local dev only.
   const baseUrl = getBridgeBaseUrl()
 

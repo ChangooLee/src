@@ -431,11 +431,11 @@ export async function cleanupOldDebugLogs(): Promise<CleanupResult> {
 const ONE_DAY_MS = 24 * 60 * 60 * 1000
 
 /**
- * Clean up old npm cache entries for OpenAICompatibleProvider packages.
+ * Clean up old npm cache entries for OpenAICompatible packages.
  * This helps reduce disk usage since we publish many dev versions per day.
  * Only runs once per day for Ant users.
  */
-export async function cleanupNpmCacheForOpenAICompatibleProviderPackages(): Promise<void> {
+export async function cleanupNpmCacheForOpenAICompatiblePackages(): Promise<void> {
   const markerPath = join(getOpenCodeCliConfigHomeDir(), '.npm-cache-cleanup')
 
   try {
@@ -466,7 +466,7 @@ export async function cleanupNpmCacheForOpenAICompatibleProviderPackages(): Prom
     const cacache = await import('cacache')
     const cutoff = startTime - ONE_DAY_MS
 
-    // Stream index entries and collect all OpenAICompatibleProvider package entries.
+    // Stream index entries and collect all OpenAICompatible package entries.
     // Previous implementation used cacache.verify() which does a full
     // integrity check + GC of the ENTIRE cache — O(all content blobs).
     // On large caches this took 60+ seconds and blocked the event loop.
@@ -513,7 +513,7 @@ export async function cleanupNpmCacheForOpenAICompatibleProviderPackages(): Prom
     const durationMs = Date.now() - startTime
     if (keysToRemove.length > 0) {
       logForDebugging(
-        `npm cache cleanup: Removed ${keysToRemove.length} old @anthropic-ai entries in ${durationMs}ms`,
+        `npm cache cleanup: Removed ${keysToRemove.length} old @open-code-cli entries in ${durationMs}ms`,
       )
     } else {
       logForDebugging(`npm cache cleanup: completed in ${durationMs}ms`)
@@ -597,6 +597,6 @@ export async function cleanupOldMessageFilesInBackground(): Promise<void> {
     logEvent('open_code_cli_worktree_cleanup', { removed: removedWorktrees })
   }
   if (process.env.USER_TYPE === 'ant') {
-    await cleanupNpmCacheForOpenAICompatibleProviderPackages()
+    await cleanupNpmCacheForOpenAICompatiblePackages()
   }
 }

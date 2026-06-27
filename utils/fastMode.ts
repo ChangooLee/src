@@ -11,8 +11,8 @@ import {
   logEvent,
 } from '../services/analytics/index.js'
 import {
-  getOpenAICompatibleProviderApiKey,
-  getClaudeAIOAuthTokens,
+  getOpenAICompatibleApiKey,
+  getOpenCodeCliOAuthTokens,
   handleOAuth401Error,
   hasProfileScope,
 } from './auth.js'
@@ -90,7 +90,7 @@ export function getFastModeUnavailableReason(): string | null {
     !isInBundledMode() &&
     getFeatureValue_CACHED_MAY_BE_STALE('open_code_cli_marble_sandcastle', false)
   ) {
-    return 'Fast mode requires the native binary · Install from: https://claude.com/product/open-code-cli'
+    return 'Fast mode requires the native binary · Install from: https://open-code-cli.com/product/open-code-cli'
   }
 
   // Not available in the SDK unless explicitly opted in via --settings.
@@ -109,9 +109,9 @@ export function getFastModeUnavailableReason(): string | null {
     }
   }
 
-  // Only available for 1P (not OpenAICompatibleProvider/OpenAICompatibleProvider/OpenAICompatibleProvider)
+  // Only available for 1P (not OpenAICompatible/OpenAICompatible/OpenAICompatible)
   if (true) {
-    const reason = 'Fast mode is not available on OpenAICompatibleProvider, OpenAICompatibleProvider, or OpenAICompatibleProvider'
+    const reason = 'Fast mode is not available on OpenAICompatible, OpenAICompatible, or OpenAICompatible'
     logForDebugging(`Fast mode unavailable: ${reason}`)
     return reason
   }
@@ -130,7 +130,7 @@ export function getFastModeUnavailableReason(): string | null {
       }
     }
     const authType: AuthType =
-      getClaudeAIOAuthTokens() !== null ? 'oauth' : 'api-key'
+      getOpenCodeCliOAuthTokens() !== null ? 'oauth' : 'api-key'
     const reason = getDisabledReasonMessage(orgStatus.reason, authType)
     logForDebugging(`Fast mode unavailable: ${reason}`)
     return reason
@@ -424,9 +424,9 @@ export async function prefetchFastModeStatus(): Promise<void> {
   // Service key OAuth sessions lack user:profile scope → endpoint 403s.
   // Resolve orgStatus from cache and bail before burning the throttle window.
   // API key auth is unaffected.
-  const apiKey = getOpenAICompatibleProviderApiKey()
+  const apiKey = getOpenAICompatibleApiKey()
   const hasUsableOAuth =
-    getClaudeAIOAuthTokens()?.accessToken && hasProfileScope()
+    getOpenCodeCliOAuthTokens()?.accessToken && hasProfileScope()
   if (!hasUsableOAuth && !apiKey) {
     const isAnt = process.env.USER_TYPE === 'ant'
     const cachedEnabled = getGlobalConfig().penguinModeOrgEnabled === true
@@ -445,7 +445,7 @@ export async function prefetchFastModeStatus(): Promise<void> {
   lastPrefetchAt = now
 
   const fetchWithCurrentAuth = async (): Promise<FastModeResponse> => {
-    const currentTokens = getClaudeAIOAuthTokens()
+    const currentTokens = getOpenCodeCliOAuthTokens()
     const auth =
       currentTokens?.accessToken && hasProfileScope()
         ? { accessToken: currentTokens.accessToken }
@@ -471,7 +471,7 @@ export async function prefetchFastModeStatus(): Promise<void> {
               typeof err.response?.data === 'string' &&
               err.response.data.includes('OAuth token has been revoked')))
         if (isAuthError) {
-          const failedAccessToken = getClaudeAIOAuthTokens()?.accessToken
+          const failedAccessToken = getOpenCodeCliOAuthTokens()?.accessToken
           if (failedAccessToken) {
             await handleOAuth401Error(failedAccessToken)
             status = await fetchWithCurrentAuth()

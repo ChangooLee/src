@@ -254,8 +254,8 @@ export async function launchInTerminal(
 
 async function launchMacosTerminal(
   terminal: TerminalInfo,
-  claudePath: string,
-  claudeArgs: string[],
+  openCodeCliPath: string,
+  openCodeCliArgs: string[],
   cwd?: string,
 ): Promise<boolean> {
   switch (terminal.command) {
@@ -264,7 +264,7 @@ async function launchMacosTerminal(
     // macOS paths where shellQuote() correctness is load-bearing.
 
     case 'iTerm': {
-      const shCmd = buildShellCommand(claudePath, claudeArgs, cwd)
+      const shCmd = buildShellCommand(openCodeCliPath, openCodeCliArgs, cwd)
       // If iTerm isn't running, `tell application` launches it and iTerm's
       // default startup behavior opens a window — so `create window` would
       // make a second one. Check `running` first: if already running (even
@@ -288,7 +288,7 @@ end tell`
     }
 
     case 'Terminal': {
-      const shCmd = buildShellCommand(claudePath, claudeArgs, cwd)
+      const shCmd = buildShellCommand(openCodeCliPath, openCodeCliArgs, cwd)
       const script = `tell application "Terminal"
   do script ${appleScriptQuote(shCmd)}
   activate
@@ -311,7 +311,7 @@ end tell`
         '--window-save-state=never',
       ]
       if (cwd) args.push(`--working-directory=${cwd}`)
-      args.push('-e', claudePath, ...open-code-cliArgs)
+      args.push('-e', openCodeCliPath, ...openCodeCliArgs)
       const { code } = await execFileNoThrow('open', args, { useCwd: false })
       if (code === 0) return true
       break
@@ -320,7 +320,7 @@ end tell`
     case 'Alacritty': {
       const args = ['-na', terminal.command, '--args']
       if (cwd) args.push('--working-directory', cwd)
-      args.push('-e', claudePath, ...open-code-cliArgs)
+      args.push('-e', openCodeCliPath, ...openCodeCliArgs)
       const { code } = await execFileNoThrow('open', args, { useCwd: false })
       if (code === 0) return true
       break
@@ -329,7 +329,7 @@ end tell`
     case 'kitty': {
       const args = ['-na', terminal.command, '--args']
       if (cwd) args.push('--directory', cwd)
-      args.push(claudePath, ...open-code-cliArgs)
+      args.push(openCodeCliPath, ...openCodeCliArgs)
       const { code } = await execFileNoThrow('open', args, { useCwd: false })
       if (code === 0) return true
       break
@@ -338,7 +338,7 @@ end tell`
     case 'WezTerm': {
       const args = ['-na', terminal.command, '--args', 'start']
       if (cwd) args.push('--cwd', cwd)
-      args.push('--', claudePath, ...open-code-cliArgs)
+      args.push('--', openCodeCliPath, ...openCodeCliArgs)
       const { code } = await execFileNoThrow('open', args, { useCwd: false })
       if (code === 0) return true
       break
@@ -350,16 +350,16 @@ end tell`
   )
   return launchMacosTerminal(
     { name: 'Terminal.app', command: 'Terminal' },
-    claudePath,
-    claudeArgs,
+    openCodeCliPath,
+    openCodeCliArgs,
     cwd,
   )
 }
 
 async function launchLinuxTerminal(
   terminal: TerminalInfo,
-  claudePath: string,
-  claudeArgs: string[],
+  openCodeCliPath: string,
+  openCodeCliArgs: string[],
   cwd?: string,
 ): Promise<boolean> {
   // All Linux paths are pure argv. Each terminal's --working-directory
@@ -374,41 +374,41 @@ async function launchLinuxTerminal(
   switch (terminal.name) {
     case 'gnome-terminal':
       args = cwd ? [`--working-directory=${cwd}`, '--'] : ['--']
-      args.push(claudePath, ...open-code-cliArgs)
+      args.push(openCodeCliPath, ...openCodeCliArgs)
       break
     case 'konsole':
       args = cwd ? ['--workdir', cwd, '-e'] : ['-e']
-      args.push(claudePath, ...open-code-cliArgs)
+      args.push(openCodeCliPath, ...openCodeCliArgs)
       break
     case 'kitty':
       args = cwd ? ['--directory', cwd] : []
-      args.push(claudePath, ...open-code-cliArgs)
+      args.push(openCodeCliPath, ...openCodeCliArgs)
       break
     case 'wezterm':
       args = cwd ? ['start', '--cwd', cwd, '--'] : ['start', '--']
-      args.push(claudePath, ...open-code-cliArgs)
+      args.push(openCodeCliPath, ...openCodeCliArgs)
       break
     case 'alacritty':
       args = cwd ? ['--working-directory', cwd, '-e'] : ['-e']
-      args.push(claudePath, ...open-code-cliArgs)
+      args.push(openCodeCliPath, ...openCodeCliArgs)
       break
     case 'ghostty':
       args = cwd ? [`--working-directory=${cwd}`, '-e'] : ['-e']
-      args.push(claudePath, ...open-code-cliArgs)
+      args.push(openCodeCliPath, ...openCodeCliArgs)
       break
     case 'xfce4-terminal':
     case 'mate-terminal':
       args = cwd ? [`--working-directory=${cwd}`, '-x'] : ['-x']
-      args.push(claudePath, ...open-code-cliArgs)
+      args.push(openCodeCliPath, ...openCodeCliArgs)
       break
     case 'tilix':
       args = cwd ? [`--working-directory=${cwd}`, '-e'] : ['-e']
-      args.push(claudePath, ...open-code-cliArgs)
+      args.push(openCodeCliPath, ...openCodeCliArgs)
       break
     default:
       // xterm, x-terminal-emulator, $TERMINAL — no reliable cwd flag.
       // spawn({cwd}) sets the terminal's own cwd; most inherit.
-      args = ['-e', claudePath, ...open-code-cliArgs]
+      args = ['-e', openCodeCliPath, ...openCodeCliArgs]
       spawnCwd = cwd
       break
   }
@@ -418,8 +418,8 @@ async function launchLinuxTerminal(
 
 async function launchWindowsTerminal(
   terminal: TerminalInfo,
-  claudePath: string,
-  claudeArgs: string[],
+  openCodeCliPath: string,
+  openCodeCliArgs: string[],
   cwd?: string,
 ): Promise<boolean> {
   const args: string[] = []
@@ -428,12 +428,12 @@ async function launchWindowsTerminal(
     // --- PURE ARGV PATH ---
     case 'Windows Terminal':
       if (cwd) args.push('-d', cwd)
-      args.push('--', claudePath, ...open-code-cliArgs)
+      args.push('--', openCodeCliPath, ...openCodeCliArgs)
       break
 
     // --- SHELL-STRING PATHS ---
     // PowerShell -Command and cmd /k take a command string. No argv exec
-    // mode that also keeps the session interactive after claude exits.
+    // mode that also keeps the session interactive after open-code-cli exits.
     // User input is escaped per-shell; correctness of that escaping is
     // load-bearing here.
 
@@ -445,7 +445,7 @@ async function launchWindowsTerminal(
       args.push(
         '-NoExit',
         '-Command',
-        `${cdCmd}& ${psQuote(claudePath)} ${claudeArgs.map(psQuote).join(' ')}`,
+        `${cdCmd}& ${psQuote(openCodeCliPath)} ${openCodeCliArgs.map(psQuote).join(' ')}`,
       )
       break
     }
@@ -454,7 +454,7 @@ async function launchWindowsTerminal(
       const cdCmd = cwd ? `cd /d ${cmdQuote(cwd)} && ` : ''
       args.push(
         '/k',
-        `${cdCmd}${cmdQuote(claudePath)} ${claudeArgs.map(a => cmdQuote(a)).join(' ')}`,
+        `${cdCmd}${cmdQuote(openCodeCliPath)} ${openCodeCliArgs.map(a => cmdQuote(a)).join(' ')}`,
       )
       break
     }
@@ -503,12 +503,12 @@ function spawnDetached(
  * AppleScript paths (iTerm, Terminal.app) which have no argv interface.
  */
 function buildShellCommand(
-  claudePath: string,
-  claudeArgs: string[],
+  openCodeCliPath: string,
+  openCodeCliArgs: string[],
   cwd?: string,
 ): string {
   const cdPrefix = cwd ? `cd ${shellQuote(cwd)} && ` : ''
-  return `${cdPrefix}${[claudePath, ...open-code-cliArgs].map(shellQuote).join(' ')}`
+  return `${cdPrefix}${[openCodeCliPath, ...openCodeCliArgs].map(shellQuote).join(' ')}`
 }
 
 /**
@@ -547,7 +547,7 @@ function psQuote(s: string): string {
  * cmd.exe double-quoted string). Escape % as %% to prevent environment
  * variable expansion (%PATH% etc.) which cmd.exe performs even inside
  * double quotes. Trailing backslashes are still doubled because the
- * *child process* (claude.exe) uses CommandLineToArgvW, where a trailing
+ * *child process* (open-code-cli.exe) uses CommandLineToArgvW, where a trailing
  * \ before our closing " would eat the close-quote.
  */
 function cmdQuote(arg: string): string {

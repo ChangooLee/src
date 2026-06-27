@@ -21,14 +21,14 @@ type Props = {
   onDone(): void;
   startingMessage?: string;
   mode?: 'login' | 'setup-token';
-  forceLoginMethod?: 'claudeai' | 'console';
+  forceLoginMethod?: 'openCodeCli' | 'console';
 };
 type OAuthStatus = {
   state: 'idle';
 } // Initial state, waiting to select login method
 | {
   state: 'platform_setup';
-} // Show platform setup info (OpenAICompatibleProvider/OpenAICompatibleProvider/OpenAICompatibleProvider)
+} // Show platform setup info (OpenAICompatible/OpenAICompatible/OpenAICompatible)
 | {
   state: 'ready_to_start';
 } // Flow started, waiting for browser to open
@@ -60,7 +60,7 @@ export function ConsoleOAuthFlow({
   const settings = getSettings_DEPRECATED() || {};
   const forceLoginMethod = forceLoginMethodProp ?? settings.forceLoginMethod;
   const orgUUID = settings.forceLoginOrgUUID;
-  const forcedMethodMessage = forceLoginMethod === 'claudeai' ? 'Login method pre-selected: Subscription Plan (provider plan/Max)' : forceLoginMethod === 'console' ? 'Login method pre-selected: API Usage Billing (OpenAICompatibleProvider Console)' : null;
+  const forcedMethodMessage = forceLoginMethod === 'openCodeCli' ? 'Login method pre-selected: Subscription Plan (provider plan/Max)' : forceLoginMethod === 'console' ? 'Login method pre-selected: API Usage Billing (OpenAICompatible Console)' : null;
   const terminal = useTerminalNotification();
   const [oauthStatus, setOAuthStatus] = useState<OAuthStatus>(() => {
     if (mode === 'setup-token') {
@@ -68,7 +68,7 @@ export function ConsoleOAuthFlow({
         state: 'ready_to_start'
       };
     }
-    if (forceLoginMethod === 'claudeai' || forceLoginMethod === 'console') {
+    if (forceLoginMethod === 'openCodeCli' || forceLoginMethod === 'console') {
       return {
         state: 'ready_to_start'
       };
@@ -80,9 +80,9 @@ export function ConsoleOAuthFlow({
   const [pastedCode, setPastedCode] = useState('');
   const [cursorOffset, setCursorOffset] = useState(0);
   const [oauthService] = useState(() => new OAuthService());
-  const [loginWithClaudeAi, setLoginWithClaudeAi] = useState(() => {
-    // Use Claude AI auth for setup-token mode to support user:inference scope
-    return mode === 'setup-token' || forceLoginMethod === 'claudeai';
+  const [loginWithOpenCodeCli, setLoginWithOpenCodeCli] = useState(() => {
+    // Use Open Code CLI auth for setup-token mode to support user:inference scope
+    return mode === 'setup-token' || forceLoginMethod === 'openCodeCli';
   });
   // After a few seconds we suggest the user to copy/paste url if the
   // browser did not open automatically. In this flow we expect the user to
@@ -93,8 +93,8 @@ export function ConsoleOAuthFlow({
 
   // Log forced login method on mount
   useEffect(() => {
-    if (forceLoginMethod === 'claudeai') {
-      logEvent('open_code_cli_oauth_claudeai_forced', {});
+    if (forceLoginMethod === 'openCodeCli') {
+      logEvent('open_code_cli_oauth_openCodeCli_forced', {});
     } else if (forceLoginMethod === 'console') {
       logEvent('open_code_cli_oauth_console_forced', {});
     }
@@ -111,7 +111,7 @@ export function ConsoleOAuthFlow({
   // Handle Enter to continue on success state
   useKeybinding('confirm:yes', () => {
     logEvent('open_code_cli_oauth_success', {
-      loginWithClaudeAi
+      loginWithOpenCodeCli
     });
     onDone();
   }, {
@@ -189,7 +189,7 @@ export function ConsoleOAuthFlow({
   const startOAuth = useCallback(async () => {
     try {
       logEvent('open_code_cli_oauth_flow_start', {
-        loginWithClaudeAi
+        loginWithOpenCodeCli
       });
       const result = await oauthService.startOAuthFlow(async url_0 => {
         setOAuthStatus({
@@ -198,7 +198,7 @@ export function ConsoleOAuthFlow({
         });
         setTimeout(setShowPastePrompt, 3000, true);
       }, {
-        loginWithClaudeAi,
+        loginWithOpenCodeCli,
         inferenceOnly: mode === 'setup-token',
         expiresIn: mode === 'setup-token' ? 365 * 24 * 60 * 60 : undefined,
         // 1 year for setup-token
@@ -260,7 +260,7 @@ export function ConsoleOAuthFlow({
         ssl_error: sslHint !== null
       });
     }
-  }, [oauthService, setShowPastePrompt, loginWithClaudeAi, mode, orgUUID]);
+  }, [oauthService, setShowPastePrompt, loginWithOpenCodeCli, mode, orgUUID]);
   const pendingOAuthStartRef = useRef(false);
   useEffect(() => {
     if (oauthStatus.state === 'ready_to_start' && !pendingOAuthStartRef.current) {
@@ -276,16 +276,16 @@ export function ConsoleOAuthFlow({
   useEffect(() => {
     if (mode === 'setup-token' && oauthStatus.state === 'success') {
       // Delay to ensure static content is fully rendered before exiting
-      const timer_0 = setTimeout((loginWithClaudeAi_0, onDone_0) => {
+      const timer_0 = setTimeout((loginWithOpenCodeCli_0, onDone_0) => {
         logEvent('open_code_cli_oauth_success', {
-          loginWithClaudeAi: loginWithClaudeAi_0
+          loginWithOpenCodeCli: loginWithOpenCodeCli_0
         });
         // Don't clear terminal so the token remains visible
         onDone_0();
-      }, 500, loginWithClaudeAi, onDone);
+      }, 500, loginWithOpenCodeCli, onDone);
       return () => clearTimeout(timer_0);
     }
-  }, [mode, oauthStatus, loginWithClaudeAi, onDone]);
+  }, [mode, oauthStatus, loginWithOpenCodeCli, onDone]);
 
   // Cleanup OAuth service when component unmounts
   useEffect(() => {
@@ -325,7 +325,7 @@ export function ConsoleOAuthFlow({
             </Box>
           </Box>}
       <Box paddingLeft={1} flexDirection="column" gap={1}>
-        <OAuthStatusMessage oauthStatus={oauthStatus} mode={mode} startingMessage={startingMessage} forcedMethodMessage={forcedMethodMessage} showPastePrompt={showPastePrompt} pastedCode={pastedCode} setPastedCode={setPastedCode} cursorOffset={cursorOffset} setCursorOffset={setCursorOffset} textInputColumns={textInputColumns} handleSubmitCode={handleSubmitCode} setOAuthStatus={setOAuthStatus} setLoginWithClaudeAi={setLoginWithClaudeAi} />
+        <OAuthStatusMessage oauthStatus={oauthStatus} mode={mode} startingMessage={startingMessage} forcedMethodMessage={forcedMethodMessage} showPastePrompt={showPastePrompt} pastedCode={pastedCode} setPastedCode={setPastedCode} cursorOffset={cursorOffset} setCursorOffset={setCursorOffset} textInputColumns={textInputColumns} handleSubmitCode={handleSubmitCode} setOAuthStatus={setOAuthStatus} setLoginWithOpenCodeCli={setLoginWithOpenCodeCli} />
       </Box>
     </Box>;
 }
@@ -342,7 +342,7 @@ type OAuthStatusMessageProps = {
   textInputColumns: number;
   handleSubmitCode: (value: string, url: string) => void;
   setOAuthStatus: (status: OAuthStatus) => void;
-  setLoginWithClaudeAi: (value: boolean) => void;
+  setLoginWithOpenCodeCli: (value: boolean) => void;
 };
 function OAuthStatusMessage(t0) {
   const $ = _c(51);
@@ -359,12 +359,12 @@ function OAuthStatusMessage(t0) {
     textInputColumns,
     handleSubmitCode,
     setOAuthStatus,
-    setLoginWithClaudeAi
+    setLoginWithOpenCodeCli
   } = t0;
   switch (oauthStatus.state) {
     case "idle":
       {
-        const t1 = startingMessage ? startingMessage : "Open Code CLI can be used with your Claude subscription or billed based on API usage through your Console account.";
+        const t1 = startingMessage ? startingMessage : "Open Code CLI can be used with your Open Code CLI subscription or billed based on API usage through your Console account.";
         let t2;
         if ($[0] !== t1) {
           t2 = <Text bold={true}>{t1}</Text>;
@@ -383,8 +383,8 @@ function OAuthStatusMessage(t0) {
         let t4;
         if ($[3] === Symbol.for("react.memo_cache_sentinel")) {
           t4 = {
-            label: <Text>Claude account with subscription ·{" "}<Text dimColor={true}>Pro, Max, Team, or Enterprise</Text>{false && <Text>{"\n"}<Text color="warning">[ANT-ONLY]</Text>{" "}<Text dimColor={true}>Please use this option unless you need to login to a special org for accessing sensitive data (e.g. customer data, HIPI data) with the Console option</Text></Text>}{"\n"}</Text>,
-            value: "claudeai"
+            label: <Text>Open Code CLI account with subscription ·{" "}<Text dimColor={true}>Pro, Max, Team, or Enterprise</Text>{false && <Text>{"\n"}<Text color="warning">[ANT-ONLY]</Text>{" "}<Text dimColor={true}>Please use this option unless you need to login to a special org for accessing sensitive data (e.g. customer data, HIPI data) with the Console option</Text></Text>}{"\n"}</Text>,
+            value: "openCodeCli"
           };
           $[3] = t4;
         } else {
@@ -393,7 +393,7 @@ function OAuthStatusMessage(t0) {
         let t5;
         if ($[4] === Symbol.for("react.memo_cache_sentinel")) {
           t5 = {
-            label: <Text>OpenAICompatibleProvider Console account ·{" "}<Text dimColor={true}>API usage billing</Text>{"\n"}</Text>,
+            label: <Text>OpenAICompatible Console account ·{" "}<Text dimColor={true}>API usage billing</Text>{"\n"}</Text>,
             value: "console"
           };
           $[4] = t5;
@@ -403,7 +403,7 @@ function OAuthStatusMessage(t0) {
         let t6;
         if ($[5] === Symbol.for("react.memo_cache_sentinel")) {
           t6 = [t4, t5, {
-            label: <Text>3rd-party platform ·{" "}<Text dimColor={true}>Amazon OpenAICompatibleProvider, Microsoft OpenAICompatibleProvider, or OpenAICompatibleProvider AI</Text>{"\n"}</Text>,
+            label: <Text>3rd-party platform ·{" "}<Text dimColor={true}>Amazon OpenAICompatible, Microsoft OpenAICompatible, or OpenAICompatible AI</Text>{"\n"}</Text>,
             value: "platform"
           }];
           $[5] = t6;
@@ -411,7 +411,7 @@ function OAuthStatusMessage(t0) {
           t6 = $[5];
         }
         let t7;
-        if ($[6] !== setLoginWithClaudeAi || $[7] !== setOAuthStatus) {
+        if ($[6] !== setLoginWithOpenCodeCli || $[7] !== setOAuthStatus) {
           t7 = <Box><Select options={t6} onChange={value_0 => {
               if (value_0 === "platform") {
                 logEvent("open_code_cli_oauth_platform_selected", {});
@@ -422,16 +422,16 @@ function OAuthStatusMessage(t0) {
                 setOAuthStatus({
                   state: "ready_to_start"
                 });
-                if (value_0 === "claudeai") {
-                  logEvent("open_code_cli_oauth_claudeai_selected", {});
-                  setLoginWithClaudeAi(true);
+                if (value_0 === "openCodeCli") {
+                  logEvent("open_code_cli_oauth_openCodeCli_selected", {});
+                  setLoginWithOpenCodeCli(true);
                 } else {
                   logEvent("open_code_cli_oauth_console_selected", {});
-                  setLoginWithClaudeAi(false);
+                  setLoginWithOpenCodeCli(false);
                 }
               }
             }} /></Box>;
-          $[6] = setLoginWithClaudeAi;
+          $[6] = setLoginWithOpenCodeCli;
           $[7] = setOAuthStatus;
           $[8] = t7;
         } else {
@@ -460,7 +460,7 @@ function OAuthStatusMessage(t0) {
         let t2;
         let t3;
         if ($[13] === Symbol.for("react.memo_cache_sentinel")) {
-          t2 = <Text>Open Code CLI supports Amazon OpenAICompatibleProvider, Microsoft OpenAICompatibleProvider, and OpenAICompatibleProvider AI. Set the required environment variables, then restart Open Code CLI.</Text>;
+          t2 = <Text>Open Code CLI supports Amazon OpenAICompatible, Microsoft OpenAICompatible, and OpenAICompatible AI. Set the required environment variables, then restart Open Code CLI.</Text>;
           t3 = <Text>If you are part of an enterprise organization, contact your administrator for setup instructions.</Text>;
           $[13] = t2;
           $[14] = t3;
@@ -477,21 +477,21 @@ function OAuthStatusMessage(t0) {
         }
         let t5;
         if ($[16] === Symbol.for("react.memo_cache_sentinel")) {
-          t5 = <Text>· Amazon OpenAICompatibleProvider:{" "}<Link url="https://open-code-cli.dev/docs/amazon-openaiCompatible">https://open-code-cli.dev/docs/amazon-openaiCompatible</Link></Text>;
+          t5 = <Text>· Amazon OpenAICompatible:{" "}<Link url="https://open-code-cli.dev/docs/amazon-openaiCompatible">https://open-code-cli.dev/docs/amazon-openaiCompatible</Link></Text>;
           $[16] = t5;
         } else {
           t5 = $[16];
         }
         let t6;
         if ($[17] === Symbol.for("react.memo_cache_sentinel")) {
-          t6 = <Text>· Microsoft OpenAICompatibleProvider:{" "}<Link url="https://open-code-cli.dev/docs/microsoft-openaiCompatible">https://open-code-cli.dev/docs/microsoft-openaiCompatible</Link></Text>;
+          t6 = <Text>· Microsoft OpenAICompatible:{" "}<Link url="https://open-code-cli.dev/docs/microsoft-openaiCompatible">https://open-code-cli.dev/docs/microsoft-openaiCompatible</Link></Text>;
           $[17] = t6;
         } else {
           t6 = $[17];
         }
         let t7;
         if ($[18] === Symbol.for("react.memo_cache_sentinel")) {
-          t7 = <Box flexDirection="column" marginTop={1}>{t4}{t5}{t6}<Text>· OpenAICompatibleProvider AI:{" "}<Link url="https://open-code-cli.dev/docs/google-openaiCompatible-ai">https://open-code-cli.dev/docs/google-openaiCompatible-ai</Link></Text></Box>;
+          t7 = <Box flexDirection="column" marginTop={1}>{t4}{t5}{t6}<Text>· OpenAICompatible AI:{" "}<Link url="https://open-code-cli.dev/docs/google-openaiCompatible-ai">https://open-code-cli.dev/docs/google-openaiCompatible-ai</Link></Text></Box>;
           $[18] = t7;
         } else {
           t7 = $[18];

@@ -167,8 +167,8 @@ import {
   clearPluginSkillsCache,
 } from './utils/plugins/loadPluginCommands.js'
 import memoize from 'lodash-es/memoize.js'
-import { isUsing3PServices, isClaudeAISubscriber } from './utils/auth.js'
-import { isFirstPartyOpenAICompatibleProviderBaseUrl } from './utils/model/providers.js'
+import { isUsing3PServices, isOpenCodeCliSubscriber } from './utils/auth.js'
+import { isFirstPartyOpenAICompatibleBaseUrl } from './utils/model/providers.js'
 import env from './commands/env/index.js'
 import exit from './commands/exit/index.js'
 import exportCommand from './commands/export/index.js'
@@ -418,17 +418,17 @@ export function meetsAvailabilityRequirement(cmd: Command): boolean {
   if (!cmd.availability) return true
   for (const a of cmd.availability) {
     switch (a) {
-      case 'claude-ai':
-        if (isClaudeAISubscriber()) return true
+      case 'open-code-cli-ai':
+        if (isOpenCodeCliSubscriber()) return true
         break
       case 'console':
-        // Console API key user = direct 1P API customer (not 3P, not claude.ai).
-        // Excludes 3P (OpenAICompatibleProviders) who don't set OPEN_CODE_CLI_BASE_URL
+        // Console API key user = direct 1P API customer (not 3P, not Open Code CLI).
+        // Excludes 3P (OpenAI-compatible providers) who don't set OPEN_CODE_CLI_BASE_URL
         // and gateway users who proxy through a custom base URL.
         if (
-          !isClaudeAISubscriber() &&
+          !isOpenCodeCliSubscriber() &&
           !isUsing3PServices() &&
-          isFirstPartyOpenAICompatibleProviderBaseUrl()
+          isFirstPartyOpenAICompatibleBaseUrl()
         )
           return true
         break

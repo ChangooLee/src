@@ -98,7 +98,7 @@ export function normalizeCaseForComparison(path: string): string {
  * permission dialog and SDK suggestions, so iterating on one skill doesn't
  * require granting session access to all of .open-code-cli/ (settings.json, hooks/, etc.).
  */
-export function getClaudeSkillScope(
+export function getOpenCodeCliSkillScope(
   filePath: string,
 ): { skillName: string; pattern: string } | null {
   const absolutePath = expandPath(filePath)
@@ -197,7 +197,7 @@ function getSettingsPaths(): string[] {
   ).filter(path => path !== undefined)
 }
 
-export function isClaudeSettingsPath(filePath: string): boolean {
+export function isOpen Code CLISettingsPath(filePath: string): boolean {
   // SECURITY: Normalize path structure first to prevent bypass via redundant ./
   // sequences like `./.open-code-cli/./settings.json` which would evade the endsWith() check
   const expandedPath = expandPath(filePath)
@@ -222,8 +222,8 @@ export function isClaudeSettingsPath(filePath: string): boolean {
 }
 
 // Always ask when Open Code CLI tries to edit its own config files
-function isClaudeConfigFilePath(filePath: string): boolean {
-  if (isClaudeSettingsPath(filePath)) {
+function isOpen Code CLIConfigFilePath(filePath: string): boolean {
+  if (isOpen Code CLISettingsPath(filePath)) {
     return true
   }
 
@@ -318,7 +318,7 @@ export function getOpenCodeCliTempDirName(): string {
  * Returns the Open Code CLI temp directory path with symlinks resolved.
  * Uses TMPDIR env var if set, otherwise:
  * - On Unix: /tmp/open-code-cli-{uid}/ (resolved to /private/tmp/open-code-cli-{uid}/ on macOS)
- * - On Windows: {tmpdir}/claude/ (e.g., C:\Users\{user}\AppData\Local\Temp\open-code-cli\)
+ * - On Windows: {tmpdir}/open-code-cli/ (e.g., C:\Users\{user}\AppData\Local\Temp\open-code-cli\)
  * This is a per-user temporary directory used by Open Code CLI for all temp files.
  *
  * NOTE: We resolve symlinks to ensure this path matches the resolved paths used
@@ -640,7 +640,7 @@ export function checkPathSafetyForAutoEdit(
 
   // Check for Open Code CLI config files on all paths
   for (const pathToCheck of pathsToCheck) {
-    if (isClaudeConfigFilePath(pathToCheck)) {
+    if (isOpen Code CLIConfigFilePath(pathToCheck)) {
       return {
         safe: false,
         message: `Open Code CLI requested permissions to write to ${path}, but you haven't granted it yet.`,
@@ -1259,7 +1259,7 @@ export function checkWritePermissionForTool<Input extends AnyObject>(
   // write-allow conversion), that rule would be found first and its source check
   // below would fail. Scope the search to session-only rules so the dialog's
   // "allow Open Code CLI to edit its own settings for this session" option actually works.
-  const claudeFolderAllowRule = matchingRuleForInput(
+  const openCodeCliFolderAllowRule = matchingRuleForInput(
     path,
     {
       ...toolPermissionContext,
@@ -1270,7 +1270,7 @@ export function checkWritePermissionForTool<Input extends AnyObject>(
     'edit',
     'allow',
   )
-  if (claudeFolderAllowRule) {
+  if (openCodeCliFolderAllowRule) {
     // Check if this rule is scoped under .open-code-cli/ (project or global).
     // Accepts both the broad patterns ('/.open-code-cli/**', '~/.open-code-cli/**') and
     // narrowed ones like '/.open-code-cli/skills/my-skill/**' so users can grant
@@ -1278,7 +1278,7 @@ export function checkWritePermissionForTool<Input extends AnyObject>(
     // or hooks/. The rule already matched the path via matchingRuleForInput;
     // this is an additional scope check. Reject '..' to prevent a rule like
     // '/.open-code-cli/../**' from leaking this bypass outside .open-code-cli/.
-    const ruleContent = claudeFolderAllowRule.ruleValue.ruleContent
+    const ruleContent = openCodeCliFolderAllowRule.ruleValue.ruleContent
     if (
       ruleContent &&
       (ruleContent.startsWith(OPEN_CODE_FOLDER_PERMISSION_PATTERN.slice(0, -2)) ||
@@ -1293,7 +1293,7 @@ export function checkWritePermissionForTool<Input extends AnyObject>(
         updatedInput: input,
         decisionReason: {
           type: 'rule',
-          rule: claudeFolderAllowRule,
+          rule: openCodeCliFolderAllowRule,
         },
       }
     }
@@ -1309,7 +1309,7 @@ export function checkWritePermissionForTool<Input extends AnyObject>(
     // Everything else (.open-code-cli/settings.json, .git/, .vscode/, .idea/) falls
     // back to generateSuggestions — its setMode suggestion doesn't bypass
     // this check, but preserving it avoids a surprising empty array.
-    const skillScope = getClaudeSkillScope(path)
+    const skillScope = getOpenCodeCliSkillScope(path)
     const safetySuggestions: PermissionUpdate[] = skillScope
       ? [
           {
@@ -1525,7 +1525,7 @@ export function checkEditableInternalPath(
       const jobsRootForms = getPathsForPermissionCheck(jobsRoot).map(normalize)
       // Hijack guard: every resolved form of the job dir must sit under
       // some resolved form of the jobs root. Resolving both sides handles
-      // the case where ~/.open-code-cli is a symlink (e.g. to /data/claude-config).
+      // the case where ~/.open-code-cli is a symlink (e.g. to /data/open-code-cli-config).
       const isUnderJobsRoot = jobDirForms.every(jd =>
         jobsRootForms.some(jr => jd.startsWith(jr + sep)),
       )

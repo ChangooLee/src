@@ -9,12 +9,12 @@ import {
   logEvent,
 } from '../../services/analytics/index.js'
 import { getSSLErrorHint } from '../../services/api/errorUtils.js'
-import { fetchAndStoreClaudeCodeFirstTokenDate } from '../../services/api/firstTokenDate.js'
+import { fetchAndStoreOpen Code CLICodeFirstTokenDate } from '../../services/api/firstTokenDate.js'
 import {
   createAndStoreApiKey,
   fetchAndStoreUserRoles,
   refreshOAuthToken,
-  shouldUseClaudeAIAuth,
+  shouldUseOpenCodeCliAuth,
   storeOAuthAccountInfo,
 } from '../../services/oauth/client.js'
 import { getOauthProfileFromOauthToken } from '../../services/oauth/getOauthProfile.js'
@@ -22,7 +22,7 @@ import { OAuthService } from '../../services/oauth/index.js'
 import type { OAuthTokens } from '../../services/oauth/types.js'
 import {
   clearOAuthTokenCache,
-  getOpenAICompatibleProviderApiKeyWithSource,
+  getOpenAICompatibleApiKeyWithSource,
   getAuthTokenSource,
   getOauthAccountInfo,
   getSubscriptionType,
@@ -92,8 +92,8 @@ export async function installOAuthTokens(tokens: OAuthTokens): Promise<void> {
     logForDebugging(String(err), { level: 'error' }),
   )
 
-  if (shouldUseClaudeAIAuth(tokens.scopes)) {
-    await fetchAndStoreClaudeCodeFirstTokenDate().catch(err =>
+  if (shouldUseOpenCodeCliAuth(tokens.scopes)) {
+    await fetchAndStoreOpen Code CLICodeFirstTokenDate().catch(err =>
       logForDebugging(String(err), { level: 'error' }),
     )
   } else {
@@ -113,25 +113,25 @@ export async function authLogin({
   email,
   sso,
   console: useConsole,
-  claudeai,
+  openCodeCli,
 }: {
   email?: string
   sso?: boolean
   console?: boolean
-  claudeai?: boolean
+  openCodeCli?: boolean
 }): Promise<void> {
-  if (useConsole && claudeai) {
+  if (useConsole && openCodeCli) {
     process.stderr.write(
-      'Error: --console and --claudeai cannot be used together.\n',
+      'Error: --console and --openCodeCli cannot be used together.\n',
     )
     process.exit(1)
   }
 
   const settings = getInitialSettings()
   // forceLoginMethod is a hard constraint (enterprise setting) — matches ConsoleOAuthFlow behavior.
-  // Without it, --console selects Console; --claudeai (or no flag) selects claude.ai.
-  const loginWithClaudeAi = settings.forceLoginMethod
-    ? settings.forceLoginMethod === 'claudeai'
+  // Without it, --console selects Console; --openCodeCli (or no flag) selects Open Code CLI.
+  const loginWithOpenCodeCli = settings.forceLoginMethod
+    ? settings.forceLoginMethod === 'openCodeCli'
     : !useConsole
   const orgUUID = settings.forceLoginOrgUUID
 
@@ -171,7 +171,7 @@ export async function authLogin({
       })
 
       logEvent('open_code_cli_oauth_success', {
-        loginWithClaudeAi: shouldUseClaudeAIAuth(tokens.scopes),
+        loginWithOpenCodeCli: shouldUseOpenCodeCliAuth(tokens.scopes),
       })
       process.stdout.write('Login successful.\n')
       process.exit(0)
@@ -190,7 +190,7 @@ export async function authLogin({
   const oauthService = new OAuthService()
 
   try {
-    logEvent('open_code_cli_oauth_flow_start', { loginWithClaudeAi })
+    logEvent('open_code_cli_oauth_flow_start', { loginWithOpenCodeCli })
 
     const result = await oauthService.startOAuthFlow(
       async url => {
@@ -198,7 +198,7 @@ export async function authLogin({
         process.stdout.write(`If the browser didn't open, visit: ${url}\n`)
       },
       {
-        loginWithClaudeAi,
+        loginWithOpenCodeCli,
         loginHint: email,
         loginMethod: resolvedLoginMethod,
         orgUUID,
@@ -213,7 +213,7 @@ export async function authLogin({
       process.exit(1)
     }
 
-    logEvent('open_code_cli_oauth_success', { loginWithClaudeAi })
+    logEvent('open_code_cli_oauth_success', { loginWithOpenCodeCli })
 
     process.stdout.write('Login successful.\n')
     process.exit(0)
@@ -234,7 +234,7 @@ export async function authStatus(opts: {
   text?: boolean
 }): Promise<void> {
   const { source: authTokenSource, hasToken } = getAuthTokenSource()
-  const { source: apiKeySource } = getOpenAICompatibleProviderApiKeyWithSource()
+  const { source: apiKeySource } = getOpenAICompatibleApiKeyWithSource()
   const hasApiKeyEnvVar =
     !!process.env.OPEN_CODE_CLI_API_KEY && !isRunningOnHomespace()
   const oauthAccount = getOauthAccountInfo()
@@ -247,8 +247,8 @@ export async function authStatus(opts: {
   let authMethod: string = 'none'
   if (using3P) {
     authMethod = 'third_party'
-  } else if (authTokenSource === 'claude.ai') {
-    authMethod = 'claude.ai'
+  } else if (authTokenSource === 'Open Code CLI') {
+    authMethod = 'Open Code CLI'
   } else if (authTokenSource === 'apiKeyHelper') {
     authMethod = 'api_key_helper'
   } else if (authTokenSource !== 'none') {
@@ -256,7 +256,7 @@ export async function authStatus(opts: {
   } else if (apiKeySource === 'OPEN_CODE_CLI_API_KEY' || hasApiKeyEnvVar) {
     authMethod = 'api_key'
   } else if (apiKeySource === '/login managed key') {
-    authMethod = 'claude.ai'
+    authMethod = 'Open Code CLI'
   }
 
   if (opts.text) {
@@ -306,7 +306,7 @@ export async function authStatus(opts: {
     if (resolvedApiKeySource) {
       output.apiKeySource = resolvedApiKeySource
     }
-    if (authMethod === 'claude.ai') {
+    if (authMethod === 'Open Code CLI') {
       output.email = oauthAccount?.emailAddress ?? null
       output.orgId = oauthAccount?.organizationUuid ?? null
       output.orgName = oauthAccount?.organizationName ?? null
@@ -325,6 +325,6 @@ export async function authLogout(): Promise<void> {
     process.stderr.write('Failed to log out.\n')
     process.exit(1)
   }
-  process.stdout.write('Successfully logged out from your OpenAICompatibleProvider account.\n')
+  process.stdout.write('Successfully logged out from your OpenAICompatible account.\n')
   process.exit(0)
 }

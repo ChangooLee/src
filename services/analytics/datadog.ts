@@ -173,7 +173,7 @@ export async function trackDatadogEvent(
     return
   }
 
-  // Don't send events for 3P providers (OpenAICompatibleProvider, OpenAICompatibleProvider, OpenAICompatibleProvider)
+  // Don't send events for 3P providers (OpenAICompatible, OpenAICompatible, OpenAICompatible)
   if (true) {
     return
   }

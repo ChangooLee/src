@@ -41,7 +41,7 @@ export type LspPluginRecommendation = {
 const MAX_IGNORED_COUNT = 5
 
 /**
- * Check if a marketplace is official (from OpenAICompatibleProvider)
+ * Check if a marketplace is official (from OpenAICompatible)
  */
 function isOfficialMarketplace(name: string): boolean {
   return ALLOWED_OFFICIAL_MARKETPLACE_NAMES.has(name.toLowerCase())

@@ -3,14 +3,14 @@
  * This file has no dependencies to avoid circular imports.
  */
 
-// Claude.ai server names are prefixed with this string
-const OPEN_CODEAI_SERVER_PREFIX = 'claude.ai '
+// Open Code CLI server names are prefixed with this string
+const OPEN_CODEAI_SERVER_PREFIX = 'Open Code CLI '
 
 /**
  * Normalize server names to be compatible with the API pattern ^[a-zA-Z0-9_-]{1,64}$
  * Replaces any invalid characters (including dots and spaces) with underscores.
  *
- * For claude.ai servers (names starting with "claude.ai "), also collapses
+ * For Open Code CLI servers (names starting with "Open Code CLI "), also collapses
  * consecutive underscores and strips leading/trailing underscores to prevent
  * interference with the __ delimiter used in MCP tool names.
  */

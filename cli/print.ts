@@ -262,8 +262,8 @@ import { collectContextData } from 'src/commands/context/context-noninteractive.
 import { LOCAL_COMMAND_STDOUT_TAG } from 'src/constants/xml.js'
 import {
   statusListeners,
-  type ClaudeAILimits,
-} from 'src/services/claudeAiLimits.js'
+  type OpenCodeCliLimits,
+} from 'src/services/openCodeCliLimits.js'
 import {
   getDefaultMainLoopModel,
   getMainLoopModel,
@@ -838,7 +838,7 @@ export async function runHeadless(
   headlessProfilerCheckpoint('after_loadInitialMessages')
 
   // Ensure model strings are initialized before generating model options.
-  // For OpenAICompatibleProvider users, this waits for the profile fetch to get correct region strings.
+  // For OpenAICompatible users, this waits for the profile fetch to get correct region strings.
   await ensureModelStringsInitialized()
   headlessProfilerCheckpoint('after_modelStrings')
 
@@ -1127,7 +1127,7 @@ function runHeadlessStreaming(
   // Set up rate limit status listener to emit SDKRateLimitEvent for all status changes.
   // Emitting for all statuses (including 'allowed') ensures consumers can clear warnings
   // when rate limits reset. The upstream emitStatusChange already deduplicates via isEqual.
-  const rateLimitListener = (limits: ClaudeAILimits) => {
+  const rateLimitListener = (limits: OpenCodeCliLimits) => {
     const rateLimitInfo = toSDKRateLimitInfo(limits)
     if (rateLimitInfo) {
       output.enqueue({
@@ -1509,7 +1509,7 @@ function runHeadlessStreaming(
   let bridgeLastForwardedIndex = 0
 
   // Forward new messages from mutableMessages to the bridge.
-  // Called incrementally during each turn (so claude.ai sees progress
+  // Called incrementally during each turn (so Open Code CLI sees progress
   // and stays alive during permission waits) and again after the turn.
   //
   // writeMessages has its own UUID-based dedup (initialMessageUUIDs,
@@ -1637,9 +1637,9 @@ function runHeadlessStreaming(
           headers: connection.config.headers,
           oauth: connection.config.oauth,
         }
-      } else if (connection.config.type === 'claudeai-proxy') {
+      } else if (connection.config.type === 'openCodeCli-proxy') {
         config = {
-          type: 'claudeai-proxy' as const,
+          type: 'openCodeCli-proxy' as const,
           url: connection.config.url,
           id: connection.config.id,
         }
@@ -1665,7 +1665,7 @@ function runHeadlessStreaming(
             }))
           : undefined
       // Capabilities passthrough with allowlist pre-filter. The IDE reads
-      // experimental['claude/channel'] to decide whether to show the
+      // experimental['open-code-cli/channel'] to decide whether to show the
       // Enable-channel prompt — only echo it if channel_enable would
       // actually pass the allowlist. Not a security boundary (the
       // handler re-runs the full gate); just avoids dead buttons.
@@ -1677,11 +1677,11 @@ function runHeadlessStreaming(
       ) {
         const exp = { ...connection.capabilities.experimental }
         if (
-          exp['claude/channel'] &&
+          exp['open-code-cli/channel'] &&
           (!isChannelsEnabled() ||
             !isChannelAllowlisted(connection.config.pluginSource))
         ) {
-          delete exp['claude/channel']
+          delete exp['open-code-cli/channel']
         }
         if (Object.keys(exp).length > 0) {
           capabilities = { experimental: exp }
@@ -2210,7 +2210,7 @@ function runHeadlessStreaming(
               },
             })) {
               // Forward messages to bridge incrementally (mid-turn) so
-              // claude.ai sees progress and the connection stays alive
+              // Open Code CLI sees progress and the connection stays alive
               // while blocked on permission requests.
               forwardMessagesToBridge()
 
@@ -2795,12 +2795,12 @@ function runHeadlessStreaming(
   // extension via handleAuthDone → mcp_reconnect.
   const oauthAuthPromises = new Map<string, Promise<void>>()
 
-  // In-flight OpenAICompatibleProvider OAuth flow (claude_authenticate). Single-slot: a
+  // In-flight OpenAICompatible OAuth flow (open_code_cli_authenticate). Single-slot: a
   // second authenticate request cleans up the first. The service holds the
   // PKCE verifier + localhost listener; the promise settles after
   // installOAuthTokens — after it resolves, the in-process memoized token
   // cache is already cleared and the next API call picks up the new creds.
-  let claudeOAuth: {
+  let openCodeCliOAuth: {
     service: OAuthService
     flow: Promise<void>
   } | null = null
@@ -3512,23 +3512,23 @@ function runHeadlessStreaming(
               `No active OAuth flow for server: ${serverName}`,
             )
           }
-        } else if (message.request.subtype === 'claude_authenticate') {
-          // OpenAICompatibleProvider OAuth over the control channel. The SDK client owns
+        } else if (message.request.subtype === 'open_code_cli_authenticate') {
+          // OpenAICompatible OAuth over the control channel. The SDK client owns
           // the user's browser (we're headless in -p mode); we hand back
           // both URLs and wait. Automatic URL → localhost listener catches
           // the redirect if the browser is on this host; manual URL → the
-          // success page shows "code#state" for claude_oauth_callback.
-          const { loginWithClaudeAi } = message.request
+          // success page shows "code#state" for open_code_cli_oauth_callback.
+          const { loginWithOpenCodeCli } = message.request
 
           // Clean up any prior flow. cleanup() closes the localhost listener
           // and nulls the manual resolver. The prior `flow` promise is left
           // pending (AuthCodeListener.close() does not reject) but its object
           // graph becomes unreachable once the server handle is released and
           // is GC'd — no fd or port is held.
-          claudeOAuth?.service.cleanup()
+          openCodeCliOAuth?.service.cleanup()
 
           logEvent('open_code_cli_oauth_flow_start', {
-            loginWithClaudeAi: loginWithClaudeAi ?? true,
+            loginWithOpenCodeCli: loginWithOpenCodeCli ?? true,
           })
 
           const service = new OAuthService()
@@ -3551,7 +3551,7 @@ function runHeadlessStreaming(
                 urlResolver({ manualUrl, automaticUrl: automaticUrl! })
               },
               {
-                loginWithClaudeAi: loginWithClaudeAi ?? true,
+                loginWithOpenCodeCli: loginWithOpenCodeCli ?? true,
                 skipBrowserOpen: true,
               },
             )
@@ -3559,28 +3559,28 @@ function runHeadlessStreaming(
               // installOAuthTokens: performLogout (clear stale state) →
               // store profile → saveOAuthTokensIfNeeded → clearOAuthTokenCache
               // → clearAuthRelatedCaches. After this resolves, the memoized
-              // getClaudeAIOAuthTokens in this process is invalidated; the
+              // getOpenCodeCliOAuthTokens in this process is invalidated; the
               // next API call re-reads keychain/file and works. No respawn.
               await installOAuthTokens(tokens)
               logEvent('open_code_cli_oauth_success', {
-                loginWithClaudeAi: loginWithClaudeAi ?? true,
+                loginWithOpenCodeCli: loginWithOpenCodeCli ?? true,
               })
             })
             .finally(() => {
               service.cleanup()
-              if (claudeOAuth?.service === service) {
-                claudeOAuth = null
+              if (openCodeCliOAuth?.service === service) {
+                openCodeCliOAuth = null
               }
             })
 
-          claudeOAuth = { service, flow }
+          openCodeCliOAuth = { service, flow }
 
           // Attach the rejection handler before awaiting so a synchronous
           // startOAuthFlow failure doesn't surface as an unhandled rejection.
-          // The claude_oauth_callback handler re-awaits flow for the manual
+          // The open_code_cli_oauth_callback handler re-awaits flow for the manual
           // path and surfaces the real error to the client.
           void flow.catch(err =>
-            logForDebugging(`claude_authenticate flow ended: ${err}`, {
+            logForDebugging(`open_code_cli_authenticate flow ended: ${err}`, {
               level: 'info',
             }),
           )
@@ -3607,30 +3607,30 @@ function runHeadlessStreaming(
             sendControlResponseError(message, errorMessage(error))
           }
         } else if (
-          message.request.subtype === 'claude_oauth_callback' ||
-          message.request.subtype === 'claude_oauth_wait_for_completion'
+          message.request.subtype === 'open_code_cli_oauth_callback' ||
+          message.request.subtype === 'open_code_cli_oauth_wait_for_completion'
         ) {
-          if (!claudeOAuth) {
+          if (!openCodeCliOAuth) {
             sendControlResponseError(
               message,
-              'No active claude_authenticate flow',
+              'No active open_code_cli_authenticate flow',
             )
           } else {
             // Inject the manual code synchronously — must happen in stdin
-            // message order so a subsequent claude_authenticate doesn't
+            // message order so a subsequent open_code_cli_authenticate doesn't
             // replace the service before this code lands.
-            if (message.request.subtype === 'claude_oauth_callback') {
-              claudeOAuth.service.handleManualAuthCodeInput({
+            if (message.request.subtype === 'open_code_cli_oauth_callback') {
+              openCodeCliOAuth.service.handleManualAuthCodeInput({
                 authorizationCode: message.request.authorizationCode,
                 state: message.request.state,
               })
             }
             // Detach the await — the stdin reader is serial and blocking
-            // here deadlocks claude_oauth_wait_for_completion: flow may
-            // only resolve via a future claude_oauth_callback on stdin,
+            // here deadlocks open_code_cli_oauth_wait_for_completion: flow may
+            // only resolve via a future open_code_cli_oauth_callback on stdin,
             // which can't be read while we're parked. Capture the binding;
-            // claudeOAuth is nulled in flow's own .finally.
-            const { flow } = claudeOAuth
+            // openCodeCliOAuth is nulled in flow's own .finally.
+            const { flow } = openCodeCliOAuth
             void flow.then(
               () => {
                 const accountInfo = getAccountInformation()
@@ -3757,7 +3757,7 @@ function runHeadlessStreaming(
         } else if (message.request.subtype === 'get_settings') {
           const currentAppState = getAppState()
           const model = getMainLoopModel()
-          // modelSupportsEffort gate matches claude.ts — applied.effort must
+          // modelSupportsEffort gate matches open-code-cli.ts — applied.effort must
           // mirror what actually goes to the API, not just what's configured.
           const effort = modelSupportsEffort(model)
             ? resolveAppliedEffort(model, currentAppState.effortValue)
@@ -4650,7 +4650,7 @@ function handleSetPermissionMode(
  * handler that enqueues channel messages at priority:'next' — drainCommandQueue
  * picks them up between turns.
  *
- * Intentionally does NOT register the claude/channel/permission handler that
+ * Intentionally does NOT register the open-code-cli/channel/permission handler that
  * useManageMCPConnections sets up for interactive mode. That handler resolves
  * a pending dialog inside handleInteractivePermission — but print.ts never
  * calls handleInteractivePermission. When SDK permission lands on 'ask', it
@@ -4737,7 +4737,7 @@ function handleChannelEnable(
       const { content, meta } = notification.params
       logMCPDebug(
         serverName,
-        `notifications/claude/channel: ${content.slice(0, 80)}`,
+        `notifications/open-code-cli/channel: ${content.slice(0, 80)}`,
       )
       logEvent('open_code_cli_mcp_channel_message', {
         content_length: content.length,
@@ -4813,7 +4813,7 @@ function reregisterChannelHandlerAfterReconnect(
       const { content, meta } = notification.params
       logMCPDebug(
         connection.name,
-        `notifications/claude/channel: ${content.slice(0, 80)}`,
+        `notifications/open-code-cli/channel: ${content.slice(0, 80)}`,
       )
       logEvent('open_code_cli_mcp_channel_message', {
         content_length: content.length,

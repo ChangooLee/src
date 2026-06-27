@@ -440,9 +440,9 @@ function collectDirectoryNames(
 }
 
 /**
- * Gets additional files from Claude config directories
+ * Gets additional files from Open Code CLI config directories
  */
-async function getClaudeConfigFiles(cwd: string): Promise<string[]> {
+async function getOpenCodeCliConfigFiles(cwd: string): Promise<string[]> {
   const markdownFileArrays = await Promise.all(
     OPEN_CODE_CLI_CONFIG_DIRECTORIES.map(subdir =>
       loadMarkdownFilesForSubdir(subdir, cwd),
@@ -534,7 +534,7 @@ export async function getPathsForSuggestions(): Promise<FileIndex> {
     const cwd = getCwd()
     const [projectFiles, configFiles] = await Promise.all([
       getProjectFiles(signal, respectGitignore),
-      getClaudeConfigFiles(cwd),
+      getOpenCodeCliConfigFiles(cwd),
     ])
 
     // Cache for mergeUntrackedIntoNormalizedCache

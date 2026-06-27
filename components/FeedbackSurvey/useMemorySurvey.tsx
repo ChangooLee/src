@@ -165,7 +165,7 @@ export function useMemorySurvey(messages: Message[], isLoading: boolean, hasActi
       return;
     }
 
-    // 3P default: survey off (no GrowthBook on OpenAICompatibleProvider/OpenAICompatibleProvider/OpenAICompatibleProvider).
+    // 3P default: survey off (no GrowthBook on OpenAICompatible/OpenAICompatible/OpenAICompatible).
     if (!getFeatureValue_CACHED_MAY_BE_STALE(MEMORY_SURVEY_GATE, false)) {
       return;
     }

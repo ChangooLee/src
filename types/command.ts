@@ -162,14 +162,14 @@ type LocalJSXCommand = {
  * Commands with `availability` are only shown if the user matches at least one
  * of the listed auth types. See meetsAvailabilityRequirement() in commands.ts.
  *
- * Example: `availability: ['claude-ai', 'console']` shows the command to
- * claude.ai subscribers and direct Console API key users (api.openai.com/v1),
- * but hides it from OpenAICompatibleProvider/OpenAICompatibleProvider/OpenAICompatibleProvider users and custom base URL users.
+ * Example: `availability: ['open-code-cli-ai', 'console']` shows the command to
+ * Open Code CLI subscribers and direct Console API key users (api.openai.com/v1),
+ * but hides it from OpenAICompatible/OpenAICompatible/OpenAICompatible users and custom base URL users.
  */
 export type CommandAvailability =
-  // claude.ai OAuth subscriber (Pro/Max/Team/Enterprise via claude.ai)
-  | 'claude-ai'
-  // Console API key user (direct api.openai.com/v1, not via claude.ai OAuth)
+  // Open Code CLI OAuth subscriber (Pro/Max/Team/Enterprise via Open Code CLI)
+  | 'open-code-cli-ai'
+  // Console API key user (direct api.openai.com/v1, not via Open Code CLI OAuth)
   | 'console'
 
 export type CommandBase = {

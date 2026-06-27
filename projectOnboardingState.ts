@@ -17,7 +17,7 @@ export type Step = {
 }
 
 export function getSteps(): Step[] {
-  const hasClaudeMd = getFsImplementation().existsSync(
+  const hasOpenCodeMd = getFsImplementation().existsSync(
     join(getCwd(), 'OPEN_CODE.md'),
   )
   const isWorkspaceDirEmpty = isDirEmpty(getCwd())
@@ -31,9 +31,9 @@ export function getSteps(): Step[] {
       isEnabled: isWorkspaceDirEmpty,
     },
     {
-      key: 'claudemd',
+      key: 'openCodeMd',
       text: 'Run /init to create a OPEN_CODE.md file with instructions for Open Code CLI',
-      isComplete: hasClaudeMd,
+      isComplete: hasOpenCodeMd,
       isCompletable: true,
       isEnabled: !isWorkspaceDirEmpty,
     },

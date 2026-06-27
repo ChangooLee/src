@@ -339,7 +339,7 @@ export const FileWriteTool = buildTool({
 
     // Log when writing to OPEN_CODE.md
     if (fullFilePath.endsWith(`${sep}OPEN_CODE.md`)) {
-      logEvent('open_code_cli_write_claudemd', {})
+      logEvent('open_code_cli_write_openCodeMd', {})
     }
 
     let gitDiff: ToolUseDiff | undefined
