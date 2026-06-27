@@ -100,12 +100,16 @@ const skillSearchFeatureCheck = feature('EXPERIMENTAL_SKILL_SEARCH')
 import type { OutputStyleConfig } from './outputStyles.js'
 import { CYBER_RISK_INSTRUCTION } from './cyberRiskInstruction.js'
 
-export const CODE_AGENT_DOCS_MAP_URL =
+export const OPEN_CODE_CLI_DOCS_MAP_URL =
+  process.env.OPEN_CODE_CLI_DOCS_MAP_URL ??
   process.env.CODE_AGENT_DOCS_MAP_URL ??
-  'https://example.com/code-agent/docs-map.md'
+  'https://open-code-cli.dev/docs-map.md'
+export const CODE_AGENT_DOCS_MAP_URL = OPEN_CODE_CLI_DOCS_MAP_URL
 
 const SIMPLE_SYSTEM_PROMPT_ENV =
-  process.env.CODE_AGENT_SIMPLE ?? process.env.CLAUDE_CODE_SIMPLE
+  process.env.OPEN_CODE_CLI_SIMPLE ??
+  process.env.CODE_AGENT_SIMPLE ??
+  process.env.CLAUDE_CODE_SIMPLE
 
 /**
  * Boundary marker separating static (cross-org cacheable) content from dynamic content.
