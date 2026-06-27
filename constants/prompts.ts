@@ -111,19 +111,19 @@ export const OPEN_CODE_CLI_DOCS_MAP_URL =
  *
  * WARNING: Do not remove or reorder this marker without updating cache logic in:
  * - src/utils/api.ts (splitSysPromptPrefix)
- * - src/services/api/claude.ts (buildSystemPromptBlocks)
+ * - src/services/api/provider.ts (buildSystemPromptBlocks)
  */
 export const SYSTEM_PROMPT_DYNAMIC_BOUNDARY =
   '__SYSTEM_PROMPT_DYNAMIC_BOUNDARY__'
 
 // @[MODEL LAUNCH]: Update the latest frontier model.
-const FRONTIER_MODEL_NAME = 'Claude Opus 4.6'
+const FRONTIER_MODEL_NAME = 'configured model 4.6'
 
 // @[MODEL LAUNCH]: Update the model family IDs below to the latest in each tier.
-const CLAUDE_4_5_OR_4_6_MODEL_IDS = {
-  opus: 'claude-opus-4-6',
-  sonnet: 'claude-sonnet-4-6',
-  haiku: 'claude-haiku-4-5-20251001',
+const OPEN_CODE_4_5_OR_4_6_MODEL_IDS = {
+  opus: 'openai/gpt-4.1',
+  sonnet: 'openai/gpt-4o',
+  haiku: 'openai/gpt-4o-mini',
 }
 
 function getHooksSection(): string {
@@ -695,7 +695,7 @@ export async function computeSimpleEnvInfo(
     knowledgeCutoffMessage,
     process.env.USER_TYPE === 'ant' && isUndercover()
       ? null
-      : `The most recent Claude model family is Claude 4.5/4.6. Model IDs — Opus 4.6: '${CLAUDE_4_5_OR_4_6_MODEL_IDS.opus}', Sonnet 4.6: '${CLAUDE_4_5_OR_4_6_MODEL_IDS.sonnet}', Haiku 4.5: '${CLAUDE_4_5_OR_4_6_MODEL_IDS.haiku}'. When building AI applications, default to the latest and most capable Claude models.`,
+      : `The most recent Claude model family is Claude 4.5/4.6. Model IDs — Opus 4.6: '${OPEN_CODE_4_5_OR_4_6_MODEL_IDS.opus}', Sonnet 4.6: '${OPEN_CODE_4_5_OR_4_6_MODEL_IDS.sonnet}', Haiku 4.5: '${OPEN_CODE_4_5_OR_4_6_MODEL_IDS.haiku}'. When building AI applications, default to the latest and most capable Claude models.`,
     process.env.USER_TYPE === 'ant' && isUndercover()
       ? null
       : `This code agent is available through CLI, desktop, web, and IDE surfaces.`,
@@ -714,17 +714,17 @@ export async function computeSimpleEnvInfo(
 // @[MODEL LAUNCH]: Add a knowledge cutoff date for the new model.
 function getKnowledgeCutoff(modelId: string): string | null {
   const canonical = getCanonicalName(modelId)
-  if (canonical.includes('claude-sonnet-4-6')) {
+  if (canonical.includes('openai/gpt-4o')) {
     return 'August 2025'
-  } else if (canonical.includes('claude-opus-4-6')) {
+  } else if (canonical.includes('openai/gpt-4.1')) {
     return 'May 2025'
-  } else if (canonical.includes('claude-opus-4-5')) {
+  } else if (canonical.includes('openai/gpt-4.1')) {
     return 'May 2025'
-  } else if (canonical.includes('claude-haiku-4')) {
+  } else if (canonical.includes('openai/gpt-4o-mini')) {
     return 'February 2025'
   } else if (
-    canonical.includes('claude-opus-4') ||
-    canonical.includes('claude-sonnet-4')
+    canonical.includes('openai/gpt-4.1') ||
+    canonical.includes('openai/gpt-4o')
   ) {
     return 'January 2025'
   }

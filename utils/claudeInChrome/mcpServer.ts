@@ -89,15 +89,15 @@ export function createChromeContext(
   const chromeBridgeUrl = getChromeBridgeUrl()
   logger.info(`Bridge URL: ${chromeBridgeUrl ?? 'none (using native socket)'}`)
   const rawPermissionMode =
-    env?.CLAUDE_CHROME_PERMISSION_MODE ??
-    process.env.CLAUDE_CHROME_PERMISSION_MODE
+    env?.OPEN_CODE_CHROME_PERMISSION_MODE ??
+    process.env.OPEN_CODE_CHROME_PERMISSION_MODE
   let initialPermissionMode: PermissionMode | undefined
   if (rawPermissionMode) {
     if (isPermissionMode(rawPermissionMode)) {
       initialPermissionMode = rawPermissionMode
     } else {
       logger.warn(
-        `Invalid CLAUDE_CHROME_PERMISSION_MODE "${rawPermissionMode}". Valid values: ${PERMISSION_MODES.join(', ')}`,
+        `Invalid OPEN_CODE_CHROME_PERMISSION_MODE "${rawPermissionMode}". Valid values: ${PERMISSION_MODES.join(', ')}`,
       )
     }
   }
@@ -160,15 +160,15 @@ export function createChromeContext(
     // ListTools also filters browser_task + lightning_turn out, so external
     // users never see the tools advertised. Three independent gates.
     //
-    // Types inlined: AnthropicMessagesRequest/Response live in
+    // Types inlined: OpenAICompatibleProviderMessagesRequest/Response live in
     // @ant/claude-for-chrome-mcp@0.4.0 which isn't published yet. CI installs
-    // 0.3.0. The callAnthropicMessages field is also 0.4.0-only, but spreading
+    // 0.3.0. The callOpenAICompatibleProviderMessages field is also 0.4.0-only, but spreading
     // an extra property into ClaudeForChromeContext is fine against either
     // version — 0.3.0 sees an unknown field (allowed in spread), 0.4.0 sees a
     // structurally-matching one. Once 0.4.0 is published, this can switch to
     // the package's exported types and the dep can be bumped.
     ...(process.env.USER_TYPE === 'ant' && {
-      callAnthropicMessages: async (req: {
+      callOpenAICompatibleProviderMessages: async (req: {
         model: string
         max_tokens: number
         system: string

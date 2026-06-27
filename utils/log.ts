@@ -1,5 +1,5 @@
 import { feature } from 'bun:bundle'
-import type { BetaMessageStreamParams } from '@anthropic-ai/sdk/resources/beta/messages/messages.mjs'
+import type { BetaMessageStreamParams } from 'src/services/api/openaiCompatible.js'
 import { readdir, readFile, stat } from 'fs/promises'
 import memoize from 'lodash-es/memoize.js'
 import { join } from 'path'
@@ -166,7 +166,7 @@ export function logError(error: unknown): void {
   try {
     // Check if error reporting should be disabled
     if (
-      // Cloud providers (Bedrock/Vertex/Foundry) always disable features
+      // Cloud providers (OpenAICompatibleProvider/OpenAICompatibleProvider/OpenAICompatibleProvider) always disable features
       isEnvTruthy(process.env.OPEN_CODE_CLI_USE_BEDROCK) ||
       isEnvTruthy(process.env.OPEN_CODE_CLI_USE_VERTEX) ||
       isEnvTruthy(process.env.OPEN_CODE_CLI_USE_FOUNDRY) ||

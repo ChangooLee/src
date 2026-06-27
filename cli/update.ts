@@ -138,7 +138,7 @@ export async function update() {
         writeToStdout('\n')
         writeToStdout('To update, run:\n')
         writeToStdout(
-          chalk.bold('  winget upgrade Anthropic.ClaudeCode') + '\n',
+          chalk.bold('  winget upgrade OpenAICompatibleProvider.ClaudeCode') + '\n',
         )
       } else {
         writeToStdout('Open Code CLI is up to date!\n')
@@ -283,7 +283,7 @@ export async function update() {
     process.stderr.write('  • Network connectivity issues\n')
     process.stderr.write('  • npm registry is unreachable\n')
     process.stderr.write('  • Corporate proxy/firewall blocking npm\n')
-    if (MACRO.PACKAGE_URL && !MACRO.PACKAGE_URL.startsWith('@anthropic')) {
+    if (MACRO.PACKAGE_URL && !MACRO.PACKAGE_URL.startsWith('@openai-compatible')) {
       process.stderr.write(
         '  • Internal/development build not published to npm\n',
       )

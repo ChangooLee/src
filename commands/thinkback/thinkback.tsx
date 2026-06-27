@@ -27,7 +27,7 @@ import { installSelectedPlugins } from '../../utils/plugins/pluginStartupCheck.j
 // Marketplace and plugin identifiers - varies by user type
 const INTERNAL_MARKETPLACE_NAME = 'open-code-cli-marketplace';
 const INTERNAL_MARKETPLACE_REPO = 'anthropics/open-code-cli-marketplace';
-const OFFICIAL_MARKETPLACE_REPO = 'anthropics/claude-plugins-official';
+const OFFICIAL_MARKETPLACE_REPO = 'openai-compatibles/claude-plugins-official';
 function getMarketplaceName(): string {
   return "external" === 'ant' ? INTERNAL_MARKETPLACE_NAME : OFFICIAL_MARKETPLACE_NAME;
 }

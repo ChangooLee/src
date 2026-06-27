@@ -1788,7 +1788,7 @@ export function getMemoryPath(memoryType: MemoryType): string {
     case 'User':
       return join(getOpenCodeCliConfigHomeDir(), 'OPEN_CODE.md')
     case 'Local':
-      return join(cwd, 'CLAUDE.local.md')
+      return join(cwd, 'OPEN_CODE.local.md')
     case 'Project':
       return join(cwd, 'OPEN_CODE.md')
     case 'Managed':

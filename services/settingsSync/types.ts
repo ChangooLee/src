@@ -2,7 +2,7 @@
  * Settings Sync Types
  *
  * Zod schemas and types for the user settings sync API.
- * Based on the backend API contract from anthropic/anthropic#218817.
+ * Based on the backend API contract from openai-compatible/openai-compatible#218817.
  */
 
 import { z } from 'zod/v4'
@@ -63,5 +63,5 @@ export const SYNC_KEYS = {
   USER_MEMORY: '~/.open-code-cli/OPEN_CODE.md',
   projectSettings: (projectId: string) =>
     `projects/${projectId}/.open-code-cli/settings.local.json`,
-  projectMemory: (projectId: string) => `projects/${projectId}/CLAUDE.local.md`,
+  projectMemory: (projectId: string) => `projects/${projectId}/OPEN_CODE.local.md`,
 } as const

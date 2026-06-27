@@ -1,5 +1,5 @@
 import { feature } from 'bun:bundle'
-import type { ContentBlockParam } from '@anthropic-ai/sdk/resources/messages.mjs'
+import type { ContentBlockParam } from 'src/services/api/openaiCompatible.js'
 import { randomUUID } from 'crypto'
 import last from 'lodash-es/last.js'
 import {
@@ -14,7 +14,7 @@ import type {
   SDKStatus,
   SDKUserMessageReplay,
 } from 'src/entrypoints/agentSdkTypes.js'
-import { accumulateUsage, updateUsage } from 'src/services/api/claude.js'
+import { accumulateUsage, updateUsage } from 'src/services/api/provider.js'
 import type { NonNullableUsage } from 'src/services/api/logging.js'
 import { EMPTY_USAGE } from 'src/services/api/logging.js'
 import stripAnsi from 'strip-ansi'
@@ -308,7 +308,7 @@ export class QueryEngine {
     }
 
     // When an SDK caller provides a custom system prompt AND has set
-    // CLAUDE_COWORK_MEMORY_PATH_OVERRIDE, inject the memory-mechanics prompt.
+    // OPEN_CODE_COWORK_MEMORY_PATH_OVERRIDE, inject the memory-mechanics prompt.
     // The env var is an explicit opt-in signal — the caller has wired up
     // a memory directory and needs Claude to know how to use it (which
     // Write/Edit tools to call, MEMORY.md filename, loading semantics).
@@ -1177,7 +1177,7 @@ export class QueryEngine {
 }
 
 /**
- * Sends a single prompt to the Claude API and returns the response.
+ * Sends a single prompt to the OpenAI-compatible API and returns the response.
  * Assumes that claude is being used non-interactively -- will not
  * ask the user for permissions or further input.
  *

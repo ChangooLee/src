@@ -44,14 +44,14 @@ async function createWorkflowFile(
   if (secretName === 'OPEN_CODE_CLI_OAUTH_TOKEN') {
     // For OAuth tokens, use the open_code_cli_oauth_token parameter
     content = workflowContent.replace(
-      /anthropic_api_key: \$\{\{ secrets\.ANTHROPIC_API_KEY \}\}/g,
+      /open_code_cli_api_key: \$\{\{ secrets\.OPEN_CODE_CLI_API_KEY \}\}/g,
       `open_code_cli_oauth_token: \${{ secrets.OPEN_CODE_CLI_OAUTH_TOKEN }}`,
     )
-  } else if (secretName !== 'ANTHROPIC_API_KEY') {
-    // For other custom secret names, keep using anthropic_api_key parameter
+  } else if (secretName !== 'OPEN_CODE_CLI_API_KEY') {
+    // For other custom secret names, keep using open_code_cli_api_key parameter
     content = workflowContent.replace(
-      /anthropic_api_key: \$\{\{ secrets\.ANTHROPIC_API_KEY \}\}/g,
-      `anthropic_api_key: \${{ secrets.${secretName} }}`,
+      /open_code_cli_api_key: \$\{\{ secrets\.OPEN_CODE_CLI_API_KEY \}\}/g,
+      `open_code_cli_api_key: \${{ secrets.${secretName} }}`,
     )
   }
   const base64Content = Buffer.from(content).toString('base64')
@@ -127,7 +127,7 @@ export async function setupGitHubActions(
     logEvent('open_code_cli_setup_github_actions_started', {
       skip_workflow: skipWorkflow,
       has_api_key: !!apiKeyOrOAuthToken,
-      using_default_secret_name: secretName === 'ANTHROPIC_API_KEY',
+      using_default_secret_name: secretName === 'OPEN_CODE_CLI_API_KEY',
       selected_open_code_cli_workflow: selectedWorkflows.includes('open-code-cli'),
       selected_open_code_cli_review_workflow:
         selectedWorkflows.includes('open-code-cli-review'),
@@ -295,7 +295,7 @@ export async function setupGitHubActions(
       has_api_key: !!apiKeyOrOAuthToken,
       auth_type:
         authType as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
-      using_default_secret_name: secretName === 'ANTHROPIC_API_KEY',
+      using_default_secret_name: secretName === 'OPEN_CODE_CLI_API_KEY',
       selected_open_code_cli_workflow: selectedWorkflows.includes('open-code-cli'),
       selected_open_code_cli_review_workflow:
         selectedWorkflows.includes('open-code-cli-review'),

@@ -44,7 +44,7 @@ export class BigQueryMetricsExporter implements PushMetricExporter {
   private isShutdown = false
 
   constructor(options: { timeout?: number } = {}) {
-    const defaultEndpoint = 'https://api.anthropic.com/api/open_code_cli/metrics'
+    const defaultEndpoint = 'https://api.openai.com/v1/open_code_cli/metrics'
 
     if (
       process.env.USER_TYPE === 'ant' &&

@@ -45,7 +45,7 @@ export const getOpenCodeCliConfigHomeDir = memoize(
     const openCodeConfigDir = process.env.OPEN_CODE_CLI_CONFIG_DIR
     if (openCodeConfigDir) return openCodeConfigDir.normalize('NFC')
 
-    const legacyConfigDir = process.env.CLAUDE_CONFIG_DIR
+    const legacyConfigDir = process.env.OPEN_CODE_CLI_CONFIG_DIR
     if (legacyConfigDir) return legacyConfigDir.normalize('NFC')
 
     const primaryDir = join(homedir(), '.open-code-cli')
@@ -55,7 +55,7 @@ export const getOpenCodeCliConfigHomeDir = memoize(
       : legacyDir
     ).normalize('NFC')
   },
-  () => `${process.env.OPEN_CODE_CLI_CONFIG_DIR ?? ''}:${process.env.CLAUDE_CONFIG_DIR ?? ''}`,
+  () => `${process.env.OPEN_CODE_CLI_CONFIG_DIR ?? ''}:${process.env.OPEN_CODE_CLI_CONFIG_DIR ?? ''}`,
 )
 
 // Compatibility export for existing imports; primary naming is Open Code CLI.
@@ -97,7 +97,7 @@ export function isEnvDefinedFalsy(
 /**
  * --bare / OPEN_CODE_CLI_SIMPLE — skip hooks, LSP, plugin sync, skill dir-walk,
  * attribution, background prefetches, and ALL keychain/credential reads.
- * Auth is strictly ANTHROPIC_API_KEY env or apiKeyHelper from --settings.
+ * Auth is strictly OPEN_CODE_CLI_API_KEY env or apiKeyHelper from --settings.
  * Explicit CLI flags (--plugin-dir, --add-dir, --mcp-config) still honored.
  * ~30 gates across the codebase.
  *
@@ -139,25 +139,25 @@ export function parseEnvVars(
 
 /**
  * Get the AWS region with fallback to default
- * Matches the Anthropic Bedrock SDK's region behavior
+ * Matches the OpenAICompatibleProvider OpenAICompatibleProvider SDK's region behavior
  */
 export function getAWSRegion(): string {
   return process.env.AWS_REGION || process.env.AWS_DEFAULT_REGION || 'us-east-1'
 }
 
 /**
- * Get the default Vertex AI region
+ * Get the default OpenAICompatibleProvider AI region
  */
-export function getDefaultVertexRegion(): string {
+export function getDefaultOpenAICompatibleProviderRegion(): string {
   return process.env.CLOUD_ML_REGION || 'us-east5'
 }
 
 /**
  * Check if bash commands should maintain project working directory (reset to original after each command)
- * @returns true if CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR is set to a truthy value
+ * @returns true if OPEN_CODE_BASH_MAINTAIN_PROJECT_WORKING_DIR is set to a truthy value
  */
 export function shouldMaintainProjectWorkingDir(): boolean {
-  return isEnvTruthy(process.env.CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR)
+  return isEnvTruthy(process.env.OPEN_CODE_BASH_MAINTAIN_PROJECT_WORKING_DIR)
 }
 
 /**
@@ -194,29 +194,29 @@ export function isInProtectedNamespace(): boolean {
   return false
 }
 
-// @[MODEL LAUNCH]: Add a Vertex region override env var for the new model.
+// @[MODEL LAUNCH]: Add a OpenAICompatibleProvider region override env var for the new model.
 /**
- * Model prefix → env var for Vertex region overrides.
+ * Model prefix → env var for OpenAICompatibleProvider region overrides.
  * Order matters: more specific prefixes must come before less specific ones
- * (e.g., 'claude-opus-4-1' before 'claude-opus-4').
+ * (e.g., 'openai/gpt-4.1' before 'openai/gpt-4.1').
  */
 const VERTEX_REGION_OVERRIDES: ReadonlyArray<[string, string]> = [
-  ['claude-haiku-4-5', 'VERTEX_REGION_CLAUDE_HAIKU_4_5'],
-  ['claude-3-5-haiku', 'VERTEX_REGION_CLAUDE_3_5_HAIKU'],
-  ['claude-3-5-sonnet', 'VERTEX_REGION_CLAUDE_3_5_SONNET'],
-  ['claude-3-7-sonnet', 'VERTEX_REGION_CLAUDE_3_7_SONNET'],
-  ['claude-opus-4-1', 'VERTEX_REGION_CLAUDE_4_1_OPUS'],
-  ['claude-opus-4', 'VERTEX_REGION_CLAUDE_4_0_OPUS'],
-  ['claude-sonnet-4-6', 'VERTEX_REGION_CLAUDE_4_6_SONNET'],
-  ['claude-sonnet-4-5', 'VERTEX_REGION_CLAUDE_4_5_SONNET'],
-  ['claude-sonnet-4', 'VERTEX_REGION_CLAUDE_4_0_SONNET'],
+  ['openai/gpt-4o-mini', 'VERTEX_REGION_OPEN_CODE_HAIKU_4_5'],
+  ['claude-3-5-haiku', 'VERTEX_REGION_OPEN_CODE_3_5_HAIKU'],
+  ['claude-3-5-sonnet', 'VERTEX_REGION_OPEN_CODE_3_5_SONNET'],
+  ['claude-3-7-sonnet', 'VERTEX_REGION_OPEN_CODE_3_7_SONNET'],
+  ['openai/gpt-4.1', 'VERTEX_REGION_OPEN_CODE_4_1_OPUS'],
+  ['openai/gpt-4.1', 'VERTEX_REGION_OPEN_CODE_4_0_OPUS'],
+  ['openai/gpt-4o', 'VERTEX_REGION_OPEN_CODE_4_6_SONNET'],
+  ['openai/gpt-4o', 'VERTEX_REGION_OPEN_CODE_4_5_SONNET'],
+  ['openai/gpt-4o', 'VERTEX_REGION_OPEN_CODE_4_0_SONNET'],
 ]
 
 /**
- * Get the Vertex AI region for a specific model.
+ * Get the OpenAICompatibleProvider AI region for a specific model.
  * Different models may be available in different regions.
  */
-export function getVertexRegionForModel(
+export function getOpenAICompatibleProviderRegionForModel(
   model: string | undefined,
 ): string | undefined {
   if (model) {
@@ -224,8 +224,8 @@ export function getVertexRegionForModel(
       model.startsWith(prefix),
     )
     if (match) {
-      return process.env[match[1]] || getDefaultVertexRegion()
+      return process.env[match[1]] || getDefaultOpenAICompatibleProviderRegion()
     }
   }
-  return getDefaultVertexRegion()
+  return getDefaultOpenAICompatibleProviderRegion()
 }

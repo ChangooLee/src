@@ -18,7 +18,7 @@ import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
   logEvent,
 } from '../services/analytics/index.js'
-import { accumulateUsage, updateUsage } from '../services/api/claude.js'
+import { accumulateUsage, updateUsage } from '../services/api/provider.js'
 import { EMPTY_USAGE, type NonNullableUsage } from '../services/api/logging.js'
 import type { ToolUseContext } from '../Tool.js'
 import type { AgentDefinition } from '../tools/AgentTool/loadAgentsDir.js'
@@ -45,7 +45,7 @@ import { createAgentId } from './uuid.js'
 
 /**
  * Parameters that must be identical between the fork and parent API requests
- * to share the parent's prompt cache. The Anthropic API cache key is composed of:
+ * to share the parent's prompt cache. The OpenAICompatibleProvider API cache key is composed of:
  * system prompt, tools, model, messages (prefix), and thinking config.
  *
  * CacheSafeParams carries the first five. Thinking config is derived from the

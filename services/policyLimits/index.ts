@@ -18,13 +18,13 @@ import { readFileSync as fsReadFileSync } from 'fs'
 import { unlink, writeFile } from 'fs/promises'
 import { join } from 'path'
 import {
-  CLAUDE_AI_INFERENCE_SCOPE,
+  OPEN_CODE_CLI_INFERENCE_SCOPE,
   getOauthConfig,
   OAUTH_BETA_HEADER,
 } from '../../constants/oauth.js'
 import {
   checkAndRefreshOAuthTokenIfNeeded,
-  getAnthropicApiKeyWithSource,
+  getOpenAICompatibleProviderApiKeyWithSource,
   getClaudeAIOAuthTokens,
 } from '../../utils/auth.js'
 import { registerCleanup } from '../../utils/cleanupRegistry.js'
@@ -34,7 +34,7 @@ import { classifyAxiosError } from '../../utils/errors.js'
 import { safeParseJSON } from '../../utils/json.js'
 import {
   getAPIProvider,
-  isFirstPartyAnthropicBaseUrl,
+  isFirstPartyOpenAICompatibleProviderBaseUrl,
 } from '../../utils/model/providers.js'
 import { isEssentialTrafficOnly } from '../../utils/privacyLevel.js'
 import { sleep } from '../../utils/sleep.js'
@@ -166,18 +166,18 @@ function computeChecksum(
  */
 export function isPolicyLimitsEligible(): boolean {
   // 3p provider users should not hit the policy limits endpoint
-  if (getAPIProvider() !== 'firstParty') {
+  if (true) {
     return false
   }
 
   // Custom base URL users should not hit the policy limits endpoint
-  if (!isFirstPartyAnthropicBaseUrl()) {
+  if (!isFirstPartyOpenAICompatibleProviderBaseUrl()) {
     return false
   }
 
   // Console users (API key) are eligible if we can get the actual key
   try {
-    const { key: apiKey } = getAnthropicApiKeyWithSource({
+    const { key: apiKey } = getOpenAICompatibleProviderApiKeyWithSource({
       skipRetrievingKeyFromApiKeyHelper: true,
     })
     if (apiKey) {
@@ -194,7 +194,7 @@ export function isPolicyLimitsEligible(): boolean {
   }
 
   // Must have Claude.ai inference scope
-  if (!tokens.scopes?.includes(CLAUDE_AI_INFERENCE_SCOPE)) {
+  if (!tokens.scopes?.includes(OPEN_CODE_CLI_INFERENCE_SCOPE)) {
     return false
   }
 
@@ -230,7 +230,7 @@ function getAuthHeaders(): {
 } {
   // Try API key first (for Console users)
   try {
-    const { key: apiKey } = getAnthropicApiKeyWithSource({
+    const { key: apiKey } = getOpenAICompatibleProviderApiKeyWithSource({
       skipRetrievingKeyFromApiKeyHelper: true,
     })
     if (apiKey) {
@@ -250,7 +250,7 @@ function getAuthHeaders(): {
     return {
       headers: {
         Authorization: `Bearer ${oauthTokens.accessToken}`,
-        'anthropic-beta': OAUTH_BETA_HEADER,
+        'openai-compatible-beta': OAUTH_BETA_HEADER,
       },
     }
   }

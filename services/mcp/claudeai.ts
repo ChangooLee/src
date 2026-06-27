@@ -39,7 +39,7 @@ const MCP_SERVERS_BETA_HEADER = 'mcp-servers-2025-12-04'
 export const fetchClaudeAIMcpConfigsIfEligible = memoize(
   async (): Promise<Record<string, ScopedMcpServerConfig>> => {
     try {
-      if (isEnvDefinedFalsy(process.env.ENABLE_CLAUDEAI_MCP_SERVERS)) {
+      if (isEnvDefinedFalsy(process.env.ENABLE_OPEN_CODEAI_MCP_SERVERS)) {
         logForDebugging('[claudeai-mcp] Disabled via env var')
         logEvent('open_code_cli_claudeai_mcp_eligibility', {
           state:
@@ -59,9 +59,9 @@ export const fetchClaudeAIMcpConfigsIfEligible = memoize(
       }
 
       // Check for user:mcp_servers scope directly instead of isClaudeAISubscriber().
-      // In non-interactive mode, isClaudeAISubscriber() returns false when ANTHROPIC_API_KEY
+      // In non-interactive mode, isClaudeAISubscriber() returns false when OPEN_CODE_CLI_API_KEY
       // is set (even with valid OAuth tokens) because preferThirdPartyAuthentication() causes
-      // isAnthropicAuthEnabled() to return false. Checking the scope directly allows users
+      // isOpenAICompatibleProviderAuthEnabled() to return false. Checking the scope directly allows users
       // with both API keys and OAuth tokens to access claude.ai MCPs in print mode.
       if (!tokens.scopes?.includes('user:mcp_servers')) {
         logForDebugging(
@@ -83,8 +83,8 @@ export const fetchClaudeAIMcpConfigsIfEligible = memoize(
         headers: {
           Authorization: `Bearer ${tokens.accessToken}`,
           'Content-Type': 'application/json',
-          'anthropic-beta': MCP_SERVERS_BETA_HEADER,
-          'anthropic-version': '2023-06-01',
+          'openai-compatible-beta': MCP_SERVERS_BETA_HEADER,
+          'openai-compatible-version': '2023-06-01',
         },
         timeout: FETCH_TIMEOUT_MS,
       })

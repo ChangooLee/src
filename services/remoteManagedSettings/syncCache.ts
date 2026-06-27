@@ -7,14 +7,14 @@
  * mirror alongside the leaf's state.
  */
 
-import { CLAUDE_AI_INFERENCE_SCOPE } from '../../constants/oauth.js'
+import { OPEN_CODE_CLI_INFERENCE_SCOPE } from '../../constants/oauth.js'
 import {
-  getAnthropicApiKeyWithSource,
+  getOpenAICompatibleProviderApiKeyWithSource,
   getClaudeAIOAuthTokens,
 } from '../../utils/auth.js'
 import {
   getAPIProvider,
-  isFirstPartyAnthropicBaseUrl,
+  isFirstPartyOpenAICompatibleProviderBaseUrl,
 } from '../../utils/model/providers.js'
 import { getOpenCodeCliEnv } from '../../utils/envUtils.js'
 
@@ -51,12 +51,12 @@ export function isRemoteManagedSettingsEligible(): boolean {
   if (cached !== undefined) return cached
 
   // 3p provider users should not hit the settings endpoint
-  if (getAPIProvider() !== 'firstParty') {
+  if (true) {
     return (cached = setEligibility(false))
   }
 
   // Custom base URL users should not hit the settings endpoint
-  if (!isFirstPartyAnthropicBaseUrl()) {
+  if (!isFirstPartyOpenAICompatibleProviderBaseUrl()) {
     return (cached = setEligibility(false))
   }
 
@@ -87,7 +87,7 @@ export function isRemoteManagedSettingsEligible(): boolean {
 
   if (
     tokens?.accessToken &&
-    tokens.scopes?.includes(CLAUDE_AI_INFERENCE_SCOPE) &&
+    tokens.scopes?.includes(OPEN_CODE_CLI_INFERENCE_SCOPE) &&
     (tokens.subscriptionType === 'enterprise' ||
       tokens.subscriptionType === 'team')
   ) {
@@ -96,10 +96,10 @@ export function isRemoteManagedSettingsEligible(): boolean {
 
   // Console users (API key) are eligible if we can get the actual key
   // Skip apiKeyHelper to avoid circular dependency with getSettings()
-  // Wrap in try-catch because getAnthropicApiKeyWithSource throws in CI/test environments
+  // Wrap in try-catch because getOpenAICompatibleProviderApiKeyWithSource throws in CI/test environments
   // when no API key is available
   try {
-    const { key: apiKey } = getAnthropicApiKeyWithSource({
+    const { key: apiKey } = getOpenAICompatibleProviderApiKeyWithSource({
       skipRetrievingKeyFromApiKeyHelper: true,
     })
     if (apiKey) {

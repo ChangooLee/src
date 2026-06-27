@@ -1,5 +1,5 @@
 import { feature } from 'bun:bundle'
-import { APIUserAbortError } from '@anthropic-ai/sdk'
+import { APIUserAbortError } from 'src/services/api/openaiCompatible.js'
 import type { z } from 'zod/v4'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../../services/analytics/growthbook.js'
 import {
@@ -399,7 +399,7 @@ const SAFE_ENV_VARS = new Set([
   'PYTEST_DEBUG', // debug output
 
   // API keys and authentication
-  'ANTHROPIC_API_KEY', // API authentication
+  'OPEN_CODE_CLI_API_KEY', // API authentication
 
   // Locale and character encoding
   'LANG', // default locale
@@ -454,7 +454,7 @@ const ANT_ONLY_SAFE_ENV_VARS = new Set([
   'CLOUDSDK_CORE_PROJECT', // GCP project ID
   'CLUSTER', // generic cluster name
 
-  // Anthropic internal cluster selection (just names/identifiers)
+  // OpenAICompatibleProvider internal cluster selection (just names/identifiers)
   'COO_CLUSTER', // coo cluster name
   'COO_CLUSTER_NAME', // coo cluster name (alternate)
   'COO_NAMESPACE', // coo namespace
@@ -483,8 +483,8 @@ const ANT_ONLY_SAFE_ENV_VARS = new Set([
   'STATSIG_FORD_DB_CHECKS', // statsig DB check flag
 
   // Build configuration
-  'ANT_ENVIRONMENT', // Anthropic environment name
-  'ANT_SERVICE', // Anthropic service name
+  'ANT_ENVIRONMENT', // OpenAICompatibleProvider environment name
+  'ANT_SERVICE', // OpenAICompatibleProvider service name
   'MONOREPO_ROOT_DIR', // monorepo root path
 
   // Version selectors

@@ -69,7 +69,7 @@ import type {
   ContentBlockParam,
   ImageBlockParam,
   Base64ImageSource,
-} from '@anthropic-ai/sdk/resources/messages.mjs'
+} from 'src/services/api/openaiCompatible.js'
 import { maybeResizeAndDownsampleImageBlock } from './imageResizer.js'
 import type { PastedContent } from './config.js'
 import { getGlobalConfig } from './config.js'
@@ -173,7 +173,7 @@ import {
   isMcpInstructionsDeltaEnabled,
   type ClientSideInstruction,
 } from './mcpInstructionsDelta.js'
-import { CLAUDE_IN_CHROME_MCP_SERVER_NAME } from './claudeInChrome/common.js'
+import { OPEN_CODE_IN_CHROME_MCP_SERVER_NAME } from './claudeInChrome/common.js'
 import { CHROME_TOOL_SEARCH_INSTRUCTIONS } from './claudeInChrome/prompt.js'
 import type { MCPServerConnection } from '../services/mcp/types.js'
 import type {
@@ -1575,7 +1575,7 @@ export function getMcpInstructionsDeltaAttachment(
     isToolSearchToolAvailable(tools)
   ) {
     clientSide.push({
-      serverName: CLAUDE_IN_CHROME_MCP_SERVER_NAME,
+      serverName: OPEN_CODE_IN_CHROME_MCP_SERVER_NAME,
       block: CHROME_TOOL_SEARCH_INSTRUCTIONS,
     })
   }
@@ -2642,7 +2642,7 @@ let suppressNext = false
 const FILTERED_LISTING_MAX = 30
 
 /**
- * Filter skills to bundled (Anthropic-curated) + MCP (user-connected) only.
+ * Filter skills to bundled (OpenAICompatibleProvider-curated) + MCP (user-connected) only.
  * Used when skill-search is enabled to resolve the turn-0 gap for subagents:
  * these sources are small, intent-signaled, and won't hit the truncation budget.
  * User/project/plugin skills (the long tail — 200+) go through discovery instead.

@@ -14,7 +14,7 @@ import { jsonStringify } from './slowOperations.js'
 
 // Lazy getters: getOpenCodeCliConfigHomeDir() is memoized and reads process.env.
 // Evaluating at module scope would capture the value before entrypoints like
-// hfi.tsx get a chance to set CLAUDE_CONFIG_DIR in main(), and would also
+// hfi.tsx get a chance to set OPEN_CODE_CLI_CONFIG_DIR in main(), and would also
 // populate the memoize cache with that stale value for all 150+ other callers.
 function getLocalInstallDir(): string {
   return join(getOpenCodeCliConfigHomeDir(), 'local')

@@ -2,7 +2,7 @@
 import type {
   ToolResultBlockParam,
   ToolUseBlock,
-} from '@anthropic-ai/sdk/resources/index.mjs'
+} from 'src/services/api/openaiCompatible.js'
 import type { CanUseToolFn } from './hooks/useCanUseTool.js'
 import { FallbackTriggeredError } from './services/api/withRetry.js'
 import {
@@ -1191,7 +1191,7 @@ async function* queryLoop(
         // multi-turn dance. This fires once per turn (guarded by the
         // override check), then falls through to multi-turn recovery if
         // 64k also hits the cap.
-        // 3P default: false (not validated on Bedrock/Vertex)
+        // 3P default: false (not validated on OpenAICompatibleProvider/OpenAICompatibleProvider)
         const capEnabled = getFeatureValue_CACHED_MAY_BE_STALE(
           'open_code_cli_otk_slot_v1',
           false,

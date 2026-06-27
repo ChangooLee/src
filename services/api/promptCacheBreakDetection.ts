@@ -1,5 +1,5 @@
-import type { BetaToolUnion } from '@anthropic-ai/sdk/resources/beta/messages/messages.mjs'
-import type { TextBlockParam } from '@anthropic-ai/sdk/resources/index.mjs'
+import type { BetaToolUnion } from 'src/services/api/openaiCompatible.js'
+import type { TextBlockParam } from 'src/services/api/openaiCompatible.js'
 import { createPatch } from 'diff'
 import { mkdir, writeFile } from 'fs/promises'
 import { join } from 'path'
@@ -54,10 +54,10 @@ type PreviousState = {
    *  (sticky-on latched in claude.ts). Tracked to verify the fix. */
   cachedMCEnabled: boolean
   /** Resolved effort (env → options → model default). Goes into output_config
-   *  or anthropic_internal.effort_override. */
+   *  or openai-compatible_internal.effort_override. */
   effortValue: string
   /** Hash of getExtraBodyParams() — catches OPEN_CODE_CLI_EXTRA_BODY and
-   *  anthropic_internal changes. */
+   *  openai-compatible_internal changes. */
   extraBodyHash: number
   callCount: number
   pendingChanges: PendingChanges | null
@@ -119,7 +119,7 @@ const TRACKED_SOURCE_PREFIXES = [
 // and aren't worth alerting on.
 const MIN_CACHE_MISS_TOKENS = 2_000
 
-// Anthropic's server-side prompt cache TTL thresholds to test.
+// OpenAICompatibleProvider's server-side prompt cache TTL thresholds to test.
 // Cache breaks after these durations are likely due to TTL expiration
 // rather than client-side changes.
 const CACHE_TTL_5MIN_MS = 5 * 60 * 1000

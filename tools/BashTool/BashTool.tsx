@@ -1,5 +1,5 @@
 import { feature } from 'bun:bundle';
-import type { ToolResultBlockParam } from '@anthropic-ai/sdk/resources/index.mjs';
+import type { ToolResultBlockParam } from 'src/services/api/openaiCompatible.js';
 import { copyFile, stat as fsStat, truncate as fsTruncate, link } from 'fs/promises';
 import * as React from 'react';
 import type { CanUseToolFn } from 'src/hooks/useCanUseTool.js';
@@ -771,7 +771,7 @@ export const BashTool = buildTool({
     }
     let strippedStdout = stripEmptyLines(stdout);
 
-    // Open Code CLI hints protocol: CLIs/SDKs gated on CLAUDECODE=1 emit a
+    // Open Code CLI hints protocol: CLIs/SDKs gated on OPEN_CODE_CLI=1 emit a
     // `<open-code-cli-hint />` tag to stderr (merged into stdout here). Scan,
     // record for useOpenCodeCliHintRecommendation to surface, then strip
     // so the model never sees the tag — a zero-token side channel.

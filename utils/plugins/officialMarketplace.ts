@@ -1,20 +1,20 @@
 /**
- * Constants for the official Anthropic plugins marketplace.
+ * Constants for the official OpenAICompatibleProvider plugins marketplace.
  *
  * The official marketplace is hosted on GitHub and provides first-party
- * plugins developed by Anthropic. This file defines the constants needed
+ * plugins developed by OpenAICompatibleProvider. This file defines the constants needed
  * to install and identify this marketplace.
  */
 
 import type { MarketplaceSource } from './schemas.js'
 
 /**
- * Source configuration for the official Anthropic plugins marketplace.
+ * Source configuration for the official OpenAICompatibleProvider plugins marketplace.
  * Used when auto-installing the marketplace on startup.
  */
 export const OFFICIAL_MARKETPLACE_SOURCE = {
   source: 'github',
-  repo: 'anthropics/claude-plugins-official',
+  repo: 'openai-compatibles/claude-plugins-official',
 } as const satisfies MarketplaceSource
 
 /**

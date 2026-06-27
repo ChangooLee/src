@@ -392,8 +392,8 @@ export const SettingsSchema = lazySchema(() =>
         .record(z.string(), z.string())
         .optional()
         .describe(
-          'Override mapping from Anthropic model ID (e.g. "claude-opus-4-6") to provider-specific ' +
-            'model ID (e.g. a Bedrock inference profile ARN). Typically set in managed settings by ' +
+          'Override mapping from OpenAICompatibleProvider model ID (e.g. "openai/gpt-4.1") to provider-specific ' +
+            'model ID (e.g. a OpenAICompatibleProvider inference profile ARN). Typically set in managed settings by ' +
             'enterprise administrators.',
         ),
       // Whether to automatically approve all MCP servers in the project
@@ -563,7 +563,7 @@ export const SettingsSchema = lazySchema(() =>
         )
         .optional()
         .describe(
-          'Enabled plugins using plugin-id@marketplace-id format. Example: { "formatter@anthropic-tools": true }. Also supports extended format with version constraints.',
+          'Enabled plugins using plugin-id@marketplace-id format. Example: { "formatter@openai-compatible-tools": true }. Also supports extended format with version constraints.',
         ),
       // Extra marketplaces for this repository (usually for project settings)
       extraKnownMarketplaces: z
@@ -620,12 +620,12 @@ export const SettingsSchema = lazySchema(() =>
             'these exact sources are blocked from being added as marketplaces. The check happens BEFORE ' +
             'downloading, so blocked sources never touch the filesystem.',
         ),
-      // Force a specific login method: 'claudeai' for Claude Pro/Max, 'console' for Console billing
+      // Force a specific login method: 'claudeai' for provider plan/Max, 'console' for Console billing
       forceLoginMethod: z
         .enum(['claudeai', 'console'])
         .optional()
         .describe(
-          'Force a specific login method: "claudeai" for Claude Pro/Max, "console" for Console billing',
+          'Force a specific login method: "claudeai" for provider plan/Max, "console" for Console billing',
         ),
       // Organization UUID to use for OAuth login (will be added as URL param to authorization URL)
       forceLoginOrgUUID: z
@@ -902,7 +902,7 @@ export const SettingsSchema = lazySchema(() =>
             'Set true to allow; users then select servers via --channels.',
         ),
       // Org-level channel plugin allowlist. When set, REPLACES the
-      // Anthropic ledger — admin owns the trust decision. Undefined means
+      // OpenAICompatibleProvider ledger — admin owns the trust decision. Undefined means
       // fall back to the ledger. Plugin-only entry shape (same as the
       // ledger); server-kind entries still need the dev flag.
       allowedChannelPlugins: z
@@ -915,7 +915,7 @@ export const SettingsSchema = lazySchema(() =>
         .optional()
         .describe(
           'Teams/Enterprise allowlist of channel plugins. When set, ' +
-            'replaces the default Anthropic allowlist — admins decide which ' +
+            'replaces the default OpenAICompatibleProvider allowlist — admins decide which ' +
             'plugins may push inbound messages. Undefined falls back to the default. ' +
             'Requires channelsEnabled: true.',
         ),

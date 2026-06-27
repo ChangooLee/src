@@ -27,7 +27,7 @@ function getOpenCodeGuideBasePrompt(): string {
     ? `${FILE_READ_TOOL_NAME}, \`find\`, and \`grep\``
     : `${FILE_READ_TOOL_NAME}, ${GLOB_TOOL_NAME}, and ${GREP_TOOL_NAME}`
 
-  return `You are the Open Code CLI guide agent. Your primary responsibility is helping users understand and use Open Code CLI, the Claude Agent SDK, and the Claude API (formerly the Anthropic API) effectively.
+  return `You are the Open Code CLI guide agent. Your primary responsibility is helping users understand and use Open Code CLI, the Claude Agent SDK, and the OpenAI-compatible API (formerly the OpenAICompatibleProvider API) effectively.
 
 **Your expertise spans three domains:**
 
@@ -35,7 +35,7 @@ function getOpenCodeGuideBasePrompt(): string {
 
 2. **Claude Agent SDK**: A framework for building custom AI agents based on Open Code CLI technology. Available for Node.js/TypeScript and Python.
 
-3. **Claude API**: The Claude API (formerly known as the Anthropic API) for direct model interaction, tool use, and integrations.
+3. **OpenAI-compatible API**: The OpenAI-compatible API (formerly known as the OpenAICompatibleProvider API) for direct model interaction, tool use, and integrations.
 
 **Documentation sources:**
 
@@ -57,15 +57,15 @@ function getOpenCodeGuideBasePrompt(): string {
   - MCP integration in agents
   - Hosting and deployment
   - Cost tracking and context management
-  Note: Agent SDK docs are part of the Claude API documentation at the same URL.
+  Note: Agent SDK docs are part of the OpenAI-compatible API documentation at the same URL.
 
-- **Claude API docs** (${CDP_DOCS_MAP_URL}): Fetch this for questions about the Claude API (formerly the Anthropic API), including:
+- **OpenAI-compatible API docs** (${CDP_DOCS_MAP_URL}): Fetch this for questions about the OpenAI-compatible API (formerly the OpenAICompatibleProvider API), including:
   - Messages API and streaming
-  - Tool use (function calling) and Anthropic-defined tools (computer use, code execution, web search, text editor, bash, programmatic tool calling, tool search tool, context editing, Files API, structured outputs)
+  - Tool use (function calling) and OpenAICompatibleProvider-defined tools (computer use, code execution, web search, text editor, bash, programmatic tool calling, tool search tool, context editing, Files API, structured outputs)
   - Vision, PDF support, and citations
   - Extended thinking and structured outputs
   - MCP connector for remote MCP servers
-  - Cloud provider integrations (Bedrock, Vertex AI, Foundry)
+  - Cloud provider integrations (OpenAICompatibleProvider, OpenAICompatibleProvider AI, OpenAICompatibleProvider)
 
 **Approach:**
 1. Determine which domain the user's question falls into
@@ -87,7 +87,7 @@ Complete the user's request by providing accurate, documentation-based guidance.
 }
 
 function getFeedbackGuideline(): string {
-  // For 3P services (Bedrock/Vertex/Foundry), /feedback command is disabled
+  // For 3P services (OpenAICompatibleProvider/OpenAICompatibleProvider/OpenAICompatibleProvider), /feedback command is disabled
   // Direct users to the appropriate feedback channel instead
   if (isUsing3PServices()) {
     return `- When you cannot find an answer or the feature doesn't exist, direct the user to ${MACRO.ISSUES_EXPLAINER}`
@@ -97,7 +97,7 @@ function getFeedbackGuideline(): string {
 
 export const OPEN_CODE_GUIDE_AGENT: BuiltInAgentDefinition = {
   agentType: OPEN_CODE_GUIDE_AGENT_TYPE,
-  whenToUse: `Use this agent when the user asks questions ("Can Claude...", "Does Claude...", "How do I...") about: (1) Open Code CLI (the CLI tool) - features, hooks, slash commands, MCP servers, settings, IDE integrations, keyboard shortcuts; (2) Claude Agent SDK - building custom agents; (3) Claude API (formerly Anthropic API) - API usage, tool use, Anthropic SDK usage. **IMPORTANT:** Before spawning a new agent, check if there is already a running or recently completed open-code-cli-guide agent that you can continue via ${SEND_MESSAGE_TOOL_NAME}.`,
+  whenToUse: `Use this agent when the user asks questions ("Can Claude...", "Does Claude...", "How do I...") about: (1) Open Code CLI (the CLI tool) - features, hooks, slash commands, MCP servers, settings, IDE integrations, keyboard shortcuts; (2) Claude Agent SDK - building custom agents; (3) OpenAI-compatible API (formerly OpenAICompatibleProvider API) - API usage, tool use, OpenAICompatibleProvider SDK usage. **IMPORTANT:** Before spawning a new agent, check if there is already a running or recently completed open-code-cli-guide agent that you can continue via ${SEND_MESSAGE_TOOL_NAME}.`,
   // Ant-native builds: Glob/Grep tools are removed; use Bash (with embedded
   // bfs/ugrep via find/grep aliases) for local file search instead.
   tools: hasEmbeddedSearchTools()

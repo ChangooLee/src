@@ -1,9 +1,9 @@
 export const PRODUCT_URL = 'https://open-code-cli.dev'
 
 // Open Code CLI Remote session URLs
-export const CLAUDE_AI_BASE_URL = 'https://claude.ai'
-export const CLAUDE_AI_STAGING_BASE_URL = 'https://claude-ai.staging.ant.dev'
-export const CLAUDE_AI_LOCAL_BASE_URL = 'http://localhost:4000'
+export const OPEN_CODE_CLI_BASE_URL = 'https://claude.ai'
+export const OPEN_CODE_CLI_STAGING_BASE_URL = 'https://claude-ai.staging.ant.dev'
+export const OPEN_CODE_CLI_LOCAL_BASE_URL = 'http://localhost:4000'
 
 /**
  * Determine if we're in a staging environment for remote sessions.
@@ -41,12 +41,12 @@ export function getClaudeAiBaseUrl(
   ingressUrl?: string,
 ): string {
   if (isRemoteSessionLocal(sessionId, ingressUrl)) {
-    return CLAUDE_AI_LOCAL_BASE_URL
+    return OPEN_CODE_CLI_LOCAL_BASE_URL
   }
   if (isRemoteSessionStaging(sessionId, ingressUrl)) {
-    return CLAUDE_AI_STAGING_BASE_URL
+    return OPEN_CODE_CLI_STAGING_BASE_URL
   }
-  return CLAUDE_AI_BASE_URL
+  return OPEN_CODE_CLI_BASE_URL
 }
 
 /**

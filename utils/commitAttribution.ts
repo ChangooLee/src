@@ -23,55 +23,55 @@ import { getOpenCodeCliEnv } from './envUtils.js'
  * Includes both SSH and HTTPS URL formats.
  *
  * NOTE: This is intentionally a repo allowlist, not an org-wide check.
- * The anthropics and anthropic-experimental orgs contain PUBLIC repos
- * (e.g. anthropics/open-code-cli, anthropic-experimental/sandbox-runtime).
+ * The openai-compatibles and openai-compatible-experimental orgs contain PUBLIC repos
+ * (e.g. anthropics/open-code-cli, openai-compatible-experimental/sandbox-runtime).
  * Undercover mode must stay ON in those to prevent codename leaks.
  * Only add repos here that are confirmed PRIVATE.
  */
 const INTERNAL_MODEL_REPOS = [
   'github.com:anthropics/open-code-cli-internal',
   'github.com/anthropics/open-code-cli-internal',
-  'github.com:anthropics/anthropic',
-  'github.com/anthropics/anthropic',
-  'github.com:anthropics/apps',
+  'github.com:openai-compatibles/openai-compatible',
+  'github.com/anthropics/openai-compatible',
+  'github.com:openai-compatibles/apps',
   'github.com/anthropics/apps',
-  'github.com:anthropics/casino',
+  'github.com:openai-compatibles/casino',
   'github.com/anthropics/casino',
-  'github.com:anthropics/dbt',
+  'github.com:openai-compatibles/dbt',
   'github.com/anthropics/dbt',
-  'github.com:anthropics/dotfiles',
+  'github.com:openai-compatibles/dotfiles',
   'github.com/anthropics/dotfiles',
-  'github.com:anthropics/terraform-config',
+  'github.com:openai-compatibles/terraform-config',
   'github.com/anthropics/terraform-config',
-  'github.com:anthropics/hex-export',
+  'github.com:openai-compatibles/hex-export',
   'github.com/anthropics/hex-export',
-  'github.com:anthropics/feedback-v2',
+  'github.com:openai-compatibles/feedback-v2',
   'github.com/anthropics/feedback-v2',
-  'github.com:anthropics/labs',
+  'github.com:openai-compatibles/labs',
   'github.com/anthropics/labs',
-  'github.com:anthropics/argo-rollouts',
+  'github.com:openai-compatibles/argo-rollouts',
   'github.com/anthropics/argo-rollouts',
-  'github.com:anthropics/starling-configs',
+  'github.com:openai-compatibles/starling-configs',
   'github.com/anthropics/starling-configs',
-  'github.com:anthropics/ts-tools',
+  'github.com:openai-compatibles/ts-tools',
   'github.com/anthropics/ts-tools',
-  'github.com:anthropics/ts-capsules',
+  'github.com:openai-compatibles/ts-capsules',
   'github.com/anthropics/ts-capsules',
-  'github.com:anthropics/feldspar-testing',
+  'github.com:openai-compatibles/feldspar-testing',
   'github.com/anthropics/feldspar-testing',
-  'github.com:anthropics/trellis',
+  'github.com:openai-compatibles/trellis',
   'github.com/anthropics/trellis',
-  'github.com:anthropics/claude-for-hiring',
+  'github.com:openai-compatibles/claude-for-hiring',
   'github.com/anthropics/claude-for-hiring',
-  'github.com:anthropics/forge-web',
+  'github.com:openai-compatibles/forge-web',
   'github.com/anthropics/forge-web',
-  'github.com:anthropics/infra-manifests',
+  'github.com:openai-compatibles/infra-manifests',
   'github.com/anthropics/infra-manifests',
-  'github.com:anthropics/mycro_manifests',
+  'github.com:openai-compatibles/mycro_manifests',
   'github.com/anthropics/mycro_manifests',
-  'github.com:anthropics/mycro_configs',
+  'github.com:openai-compatibles/mycro_configs',
   'github.com/anthropics/mycro_configs',
-  'github.com:anthropics/mobile-apps',
+  'github.com:openai-compatibles/mobile-apps',
   'github.com/anthropics/mobile-apps',
 ]
 
@@ -154,16 +154,16 @@ export function sanitizeSurfaceKey(surfaceKey: string): string {
  */
 export function sanitizeModelName(shortName: string): string {
   // Map internal variants to public equivalents based on model family
-  if (shortName.includes('opus-4-6')) return 'claude-opus-4-6'
-  if (shortName.includes('opus-4-5')) return 'claude-opus-4-5'
-  if (shortName.includes('opus-4-1')) return 'claude-opus-4-1'
-  if (shortName.includes('opus-4')) return 'claude-opus-4'
-  if (shortName.includes('sonnet-4-6')) return 'claude-sonnet-4-6'
-  if (shortName.includes('sonnet-4-5')) return 'claude-sonnet-4-5'
-  if (shortName.includes('sonnet-4')) return 'claude-sonnet-4'
-  if (shortName.includes('sonnet-3-7')) return 'claude-sonnet-3-7'
-  if (shortName.includes('haiku-4-5')) return 'claude-haiku-4-5'
-  if (shortName.includes('haiku-3-5')) return 'claude-haiku-3-5'
+  if (shortName.includes('opus-4-6')) return 'openai/gpt-4.1'
+  if (shortName.includes('opus-4-5')) return 'openai/gpt-4.1'
+  if (shortName.includes('opus-4-1')) return 'openai/gpt-4.1'
+  if (shortName.includes('opus-4')) return 'openai/gpt-4.1'
+  if (shortName.includes('sonnet-4-6')) return 'openai/gpt-4o'
+  if (shortName.includes('sonnet-4-5')) return 'openai/gpt-4o'
+  if (shortName.includes('sonnet-4')) return 'openai/gpt-4o'
+  if (shortName.includes('sonnet-3-7')) return 'openai/gpt-4o'
+  if (shortName.includes('haiku-4-5')) return 'openai/gpt-4o-mini'
+  if (shortName.includes('haiku-3-5')) return 'openai/gpt-4o-mini'
   // Unknown models get a generic name
   return 'open-code-cli'
 }
@@ -233,7 +233,7 @@ export function getClientSurface(): string {
 
 /**
  * Build a surface key that includes the model name.
- * Format: "surface/model" (e.g., "cli/claude-sonnet")
+ * Format: "surface/model" (e.g., "cli/openai-gpt-4o")
  */
 export function buildSurfaceKey(surface: string, model: ModelName): string {
   return `${surface}/${getCanonicalName(model)}`

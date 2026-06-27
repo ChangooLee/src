@@ -6,7 +6,7 @@ import { Box, Text } from '../../ink.js';
 import { useAppState } from '../../state/AppState.js';
 import { isClaudeAISubscriber } from '../../utils/auth.js';
 import { openBrowser } from '../../utils/browser.js';
-import { CLAUDE_IN_CHROME_MCP_SERVER_NAME, openInChrome } from '../../utils/claudeInChrome/common.js';
+import { OPEN_CODE_IN_CHROME_MCP_SERVER_NAME, openInChrome } from '../../utils/claudeInChrome/common.js';
 import { isChromeExtensionInstalled } from '../../utils/claudeInChrome/setup.js';
 import { getGlobalConfig, saveGlobalConfig } from '../../utils/config.js';
 import { env } from '../../utils/env.js';
@@ -270,7 +270,7 @@ function _temp3(k_1) {
   return k_1 + 1;
 }
 function _temp2(c) {
-  return c.name === CLAUDE_IN_CHROME_MCP_SERVER_NAME;
+  return c.name === OPEN_CODE_IN_CHROME_MCP_SERVER_NAME;
 }
 function _temp(s) {
   return s.mcp.clients;

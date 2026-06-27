@@ -173,7 +173,7 @@ Set \`header: "Action"\` and offer the four actions (create/list/update/run) as 
 
   return `# Schedule Remote Agents
 
-You are helping the user schedule, update, list, or run **remote** Open Code CLI agents. These are NOT local cron jobs — each trigger spawns a fully isolated remote session (CCR) in Anthropic's cloud infrastructure on a cron schedule. The agent runs in a sandboxed environment with its own git checkout, tools, and optional MCP connections.
+You are helping the user schedule, update, list, or run **remote** Open Code CLI agents. These are NOT local cron jobs — each trigger spawns a fully isolated remote session (CCR) in OpenAICompatibleProvider's cloud infrastructure on a cron schedule. The agent runs in a sandboxed environment with its own git checkout, tools, and optional MCP connections.
 
 ## First Step
 
@@ -203,7 +203,7 @@ You CANNOT delete triggers. If the user asks to delete, direct them to: https://
     "ccr": {
       "environment_id": "ENVIRONMENT_ID",
       "session_context": {
-        "model": "claude-sonnet-4-6",
+        "model": "openai/gpt-4o",
         "sources": [
           {"git_repository": {"url": "${gitRepoUrl || 'https://github.com/ORG/REPO'}"}}
         ],
@@ -286,7 +286,7 @@ Minimum interval is 1 hour. \`*/30 * * * *\` will be rejected.
    - Clear about which files/areas to focus on
    - Explicit about what actions to take (open PRs, commit, just analyze, etc.)
 3. **Set the schedule** — Ask when and how often. The user's timezone is ${userTimezone}. When they say a time (e.g., "every morning at 9am"), assume they mean their local time and convert to UTC for the cron expression. Always confirm the conversion: "9am ${userTimezone} = Xam UTC."
-4. **Choose the model** — Default to \`claude-sonnet-4-6\`. Tell the user which model you're defaulting to and ask if they want a different one.
+4. **Choose the model** — Default to \`openai/gpt-4o\`. Tell the user which model you're defaulting to and ask if they want a different one.
 5. **Validate connections** — Infer what services the agent will need from the user's description. For example, if they say "check Datadog and Slack me errors," the agent needs both Datadog and Slack MCP connectors. Cross-reference with the connectors list above. If any are missing, warn the user and link them to https://claude.ai/settings/connectors to connect first.${gitRepoUrl ? ` The default git repo is already set to \`${gitRepoUrl}\`. Ask the user if this is the right repo or if they need a different one.` : ' Ask which git repos the remote agent needs cloned into its environment.'}
 6. **Review and confirm** — Show the full configuration before creating. Let them adjust.
 7. **Create it** \u2014 Call \`${REMOTE_TRIGGER_TOOL_NAME}\` with \`action: "create"\` and show the result. The response includes the trigger ID. Always output a link at the end: \`https://open-code-cli.dev/code/scheduled/{TRIGGER_ID}\`
@@ -311,7 +311,7 @@ Minimum interval is 1 hour. \`*/30 * * * *\` will be rejected.
 
 ## Important Notes
 
-- These are REMOTE agents — they run in Anthropic's cloud, not on the user's machine. They cannot access local files, local services, or local environment variables.
+- These are REMOTE agents — they run in OpenAICompatibleProvider's cloud, not on the user's machine. They cannot access local files, local services, or local environment variables.
 - Always convert cron to human-readable when displaying
 - Default to \`enabled: true\` unless user says otherwise
 - Accept GitHub URLs in any format (https://github.com/org/repo, org/repo, etc.) and normalize to the full HTTPS URL (without .git suffix)

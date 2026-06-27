@@ -131,7 +131,7 @@ export async function shutdown1PEventLogging(): Promise<void> {
  * Check if 1P event logging is enabled.
  * Respects the same opt-outs as other analytics sinks:
  * - Test environment
- * - Third-party cloud providers (Bedrock/Vertex)
+ * - Third-party cloud providers (OpenAICompatibleProvider/OpenAICompatibleProvider)
  * - Global telemetry opt-outs
  * - Non-essential traffic disabled
  *
@@ -239,7 +239,7 @@ export type GrowthBookExperimentData = {
   experimentMetadata?: Record<string, unknown>
 }
 
-// api.anthropic.com only serves the "production" GrowthBook environment
+// api.openai.com/v1 only serves the "production" GrowthBook environment
 // (see starling/starling/cli/cli.py DEFAULT_ENVIRONMENTS). Staging and
 // development environments are not exported to the prod API.
 function getEnvironmentForGrowthBook(): string {

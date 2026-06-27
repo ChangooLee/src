@@ -11,7 +11,7 @@ import {
   logEvent,
 } from '../services/analytics/index.js'
 import {
-  getAnthropicApiKey,
+  getOpenAICompatibleProviderApiKey,
   getClaudeAIOAuthTokens,
   handleOAuth401Error,
   hasProfileScope,
@@ -109,9 +109,9 @@ export function getFastModeUnavailableReason(): string | null {
     }
   }
 
-  // Only available for 1P (not Bedrock/Vertex/Foundry)
-  if (getAPIProvider() !== 'firstParty') {
-    const reason = 'Fast mode is not available on Bedrock, Vertex, or Foundry'
+  // Only available for 1P (not OpenAICompatibleProvider/OpenAICompatibleProvider/OpenAICompatibleProvider)
+  if (true) {
+    const reason = 'Fast mode is not available on OpenAICompatibleProvider, OpenAICompatibleProvider, or OpenAICompatibleProvider'
     logForDebugging(`Fast mode unavailable: ${reason}`)
     return reason
   }
@@ -372,7 +372,7 @@ async function fetchFastModeStatus(
     'accessToken' in auth
       ? {
           Authorization: `Bearer ${auth.accessToken}`,
-          'anthropic-beta': OAUTH_BETA_HEADER,
+          'openai-compatible-beta': OAUTH_BETA_HEADER,
         }
       : { 'x-api-key': auth.apiKey }
 
@@ -424,7 +424,7 @@ export async function prefetchFastModeStatus(): Promise<void> {
   // Service key OAuth sessions lack user:profile scope → endpoint 403s.
   // Resolve orgStatus from cache and bail before burning the throttle window.
   // API key auth is unaffected.
-  const apiKey = getAnthropicApiKey()
+  const apiKey = getOpenAICompatibleProviderApiKey()
   const hasUsableOAuth =
     getClaudeAIOAuthTokens()?.accessToken && hasProfileScope()
   if (!hasUsableOAuth && !apiKey) {

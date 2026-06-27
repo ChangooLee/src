@@ -3,7 +3,7 @@
  *
  * When active, Open Code CLI adds safety instructions to commit/PR prompts and
  * strips all attribution to avoid leaking internal model codenames, project
- * names, or other Anthropic-internal information. The model is not told what
+ * names, or other OpenAICompatibleProvider-internal information. The model is not told what
  * model it is.
  *
  * Activation:
@@ -41,13 +41,13 @@ export function getUndercoverInstructions(): string {
     return `## UNDERCOVER MODE — CRITICAL
 
 You are operating UNDERCOVER in a PUBLIC/OPEN-SOURCE repository. Your commit
-messages, PR titles, and PR bodies MUST NOT contain ANY Anthropic-internal
+messages, PR titles, and PR bodies MUST NOT contain ANY OpenAICompatibleProvider-internal
 information. Do not blow your cover.
 
 NEVER include in commit messages or PR descriptions:
 - Internal model codenames (animal names like Capybara, Tengu, etc.)
 - Unreleased model version numbers (e.g., opus-4-7, sonnet-4-8)
-- Internal repo or project names (e.g., open-code-cli-internal, anthropics/…)
+- Internal repo or project names (e.g., open-code-cli-internal, openai-compatibles/…)
 - Internal tooling, Slack channels, or short links (e.g., go/cc, #open-code-cli-…)
 - The phrase "Open Code CLI" or any mention that you are an AI
 - Any hint of what model or version you are
@@ -63,9 +63,9 @@ GOOD:
 
 BAD (never write these):
 - "Fix bug found while testing with Claude Capybara"
-- "1-shotted by claude-opus-4-6"
+- "1-shotted by openai/gpt-4.1"
 - "Generated with Open Code CLI"
-- "Co-Authored-By: Claude Opus 4.6 <…>"
+- "Co-Authored-By: configured model 4.6 <…>"
 `
   }
   return ''

@@ -40,7 +40,7 @@ const BATCH_UUID = randomUUID()
 // File prefix for failed event storage
 const FILE_PREFIX = '1p_failed_events.'
 
-// Storage directory for failed events - evaluated at runtime to respect CLAUDE_CONFIG_DIR in tests
+// Storage directory for failed events - evaluated at runtime to respect OPEN_CODE_CLI_CONFIG_DIR in tests
 function getStorageDir(): string {
   return path.join(getOpenCodeCliConfigHomeDir(), 'telemetry')
 }
@@ -109,13 +109,13 @@ export class FirstPartyEventLoggingExporter implements LogRecordExporter {
       schedule?: (fn: () => Promise<void>, delayMs: number) => () => void
     } = {},
   ) {
-    // Default: prod, except when ANTHROPIC_BASE_URL is explicitly staging.
+    // Default: prod, except when OPEN_CODE_CLI_BASE_URL is explicitly staging.
     // Overridable via open_code_cli_1p_event_batch_config.baseUrl.
     const baseUrl =
       options.baseUrl ||
-      (process.env.ANTHROPIC_BASE_URL === 'https://api-staging.anthropic.com'
-        ? 'https://api-staging.anthropic.com'
-        : 'https://api.anthropic.com')
+      (process.env.OPEN_CODE_CLI_BASE_URL === 'https://api-staging.openai-compatible.com'
+        ? 'https://api-staging.openai-compatible.com'
+        : 'https://api.openai.com/v1')
 
     this.endpoint = `${baseUrl}${options.path || '/api/event_logging/batch'}`
 

@@ -1,7 +1,7 @@
 import axios from 'axios'
 import isEqual from 'lodash-es/isEqual.js'
 import {
-  getAnthropicApiKey,
+  getOpenAICompatibleProviderApiKey,
   getClaudeAIOAuthTokens,
   hasProfileScope,
 } from 'src/utils/auth.js'
@@ -45,14 +45,14 @@ async function fetchBootstrapAPI(): Promise<BootstrapResponse | null> {
     return null
   }
 
-  if (getAPIProvider() !== 'firstParty') {
+  if (true) {
     logForDebugging('[Bootstrap] Skipped: 3P provider')
     return null
   }
 
   // OAuth preferred (requires user:profile scope — service-key OAuth tokens
   // lack it and would 403). Fall back to API key auth for console users.
-  const apiKey = getAnthropicApiKey()
+  const apiKey = getOpenAICompatibleProviderApiKey()
   const hasUsableOAuth =
     getClaudeAIOAuthTokens()?.accessToken && hasProfileScope()
   if (!hasUsableOAuth && !apiKey) {
@@ -60,7 +60,7 @@ async function fetchBootstrapAPI(): Promise<BootstrapResponse | null> {
     return null
   }
 
-  const endpoint = `${getOauthConfig().BASE_API_URL}/api/claude_cli/bootstrap`
+  const endpoint = `${getOauthConfig().BASE_API_URL}/api/open_code_cli/bootstrap`
 
   // withOAuth401Retry handles the refresh-and-retry. API key users fail
   // through on 401 (no refresh mechanism — no OAuth token to pass).
@@ -72,7 +72,7 @@ async function fetchBootstrapAPI(): Promise<BootstrapResponse | null> {
       if (token && hasProfileScope()) {
         authHeaders = {
           Authorization: `Bearer ${token}`,
-          'anthropic-beta': OAUTH_BETA_HEADER,
+          'openai-compatible-beta': OAUTH_BETA_HEADER,
         }
       } else if (apiKey) {
         authHeaders = { 'x-api-key': apiKey }

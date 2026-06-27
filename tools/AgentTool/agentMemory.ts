@@ -166,7 +166,7 @@ export function loadAgentMemoryPrompt(
   void ensureMemoryDirExists(memoryDir)
 
   const coworkExtraGuidelines =
-    process.env.CLAUDE_COWORK_MEMORY_EXTRA_GUIDELINES
+    process.env.OPEN_CODE_COWORK_MEMORY_EXTRA_GUIDELINES
   return buildMemoryPrompt({
     displayName: 'Persistent Agent Memory',
     memoryDir,

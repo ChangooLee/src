@@ -9,7 +9,7 @@ import { getWorkload } from '../utils/workloadContext.js'
 
 const DEFAULT_PREFIX = `You are an interactive code agent.`
 const AGENT_SDK_OPEN_CODE_CLI_PRESET_PREFIX = `You are an interactive code agent running within the Claude Agent SDK.`
-const AGENT_SDK_PREFIX = `You are a Claude agent, built on Anthropic's Claude Agent SDK.`
+const AGENT_SDK_PREFIX = `You are a Claude agent, built on OpenAICompatibleProvider's Claude Agent SDK.`
 
 const CLI_SYSPROMPT_PREFIX_VALUES = [
   DEFAULT_PREFIX,
@@ -32,7 +32,7 @@ export function getCLISyspromptPrefix(options?: {
   hasAppendSystemPrompt: boolean
 }): CLISyspromptPrefix {
   const apiProvider = getAPIProvider()
-  if (apiProvider === 'vertex') {
+  if (apiProvider === 'openaiCompatible') {
     return DEFAULT_PREFIX
   }
 
@@ -65,7 +65,7 @@ function isAttributionHeaderEnabled(): boolean {
  * Before the request is sent, Bun's native HTTP stack finds this placeholder
  * in the request body and overwrites the zeros with a computed hash. The
  * server verifies this token to confirm the request came from a real Claude
- * Code client. See bun-anthropic/src/http/Attestation.zig for implementation.
+ * Code client. See bun-openai-compatible/src/http/Attestation.zig for implementation.
  *
  * We use a placeholder (instead of injecting from Zig) because same-length
  * replacement avoids Content-Length changes and buffer reallocation.
@@ -88,7 +88,7 @@ export function getAttributionHeader(fingerprint: string): string {
   // fields so old API deploys silently ignore this.
   const workload = getWorkload()
   const workloadPair = workload ? ` cc_workload=${workload};` : ''
-  const header = `x-anthropic-billing-header: cc_version=${version}; cc_entrypoint=${entrypoint};${cch}${workloadPair}`
+  const header = `x-openai-compatible-billing-header: cc_version=${version}; cc_entrypoint=${entrypoint};${cch}${workloadPair}`
 
   logForDebugging(`attribution header ${header}`)
   return header

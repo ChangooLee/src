@@ -70,15 +70,15 @@ export function getAttributionTexts(): AttributionTexts {
 
   // @[MODEL LAUNCH]: Update the hardcoded fallback model name below (guards against codename leaks).
   // For internal repos, use the real model name. For external repos,
-  // fall back to "Claude Opus 4.6" for unrecognized models to avoid leaking codenames.
+  // fall back to "configured model 4.6" for unrecognized models to avoid leaking codenames.
   const model = getMainLoopModel()
   const isKnownPublicModel = getPublicModelDisplayName(model) !== null
   const modelName =
     isInternalModelRepoCached() || isKnownPublicModel
       ? getPublicModelName(model)
-      : 'Claude Opus 4.6'
+      : 'configured model 4.6'
   const defaultAttribution = `🤖 Generated with [Open Code CLI](${PRODUCT_URL})`
-  const defaultCommit = `Co-Authored-By: ${modelName} <noreply@anthropic.com>`
+  const defaultCommit = `Co-Authored-By: ${modelName} <noreply@openai-compatible.com>`
 
   const settings = getInitialSettings()
 
@@ -285,12 +285,12 @@ async function getTranscriptStats(): Promise<{
 /**
  * Get enhanced PR attribution text with Claude contribution stats.
  *
- * Format: "🤖 Generated with Open Code CLI (93% 3-shotted by claude-opus-4-5)"
+ * Format: "🤖 Generated with Open Code CLI (93% 3-shotted by openai/gpt-4.1)"
  *
  * Rules:
  * - Shows Claude contribution percentage from commit attribution
  * - Shows N-shotted where N is the prompt count (1-shotted, 2-shotted, etc.)
- * - Shows short model name (e.g., claude-opus-4-5)
+ * - Shows short model name (e.g., openai/gpt-4.1)
  * - Returns default attribution if stats can't be computed
  *
  * @param getAppState Function to get the current AppState (from command context)
@@ -367,7 +367,7 @@ export async function getEnhancedPRAttribution(
     return defaultAttribution
   }
 
-  // Build the enhanced attribution: "🤖 Generated with Open Code CLI (93% 3-shotted by claude-opus-4-5, 2 memories recalled)"
+  // Build the enhanced attribution: "🤖 Generated with Open Code CLI (93% 3-shotted by openai/gpt-4.1, 2 memories recalled)"
   const memSuffix =
     memoryAccessCount > 0
       ? `, ${memoryAccessCount} ${memoryAccessCount === 1 ? 'memory' : 'memories'} recalled`

@@ -73,7 +73,7 @@ export function PackageManagerAutoUpdater(t0) {
   if (!updateAvailable) {
     return null;
   }
-  const updateCommand = packageManager === "homebrew" ? "brew upgrade open-code-cli" : packageManager === "winget" ? "winget upgrade Anthropic.ClaudeCode" : packageManager === "apk" ? "apk upgrade open-code-cli" : "your package manager update command";
+  const updateCommand = packageManager === "homebrew" ? "brew upgrade open-code-cli" : packageManager === "winget" ? "winget upgrade OpenAICompatibleProvider.ClaudeCode" : packageManager === "apk" ? "apk upgrade open-code-cli" : "your package manager update command";
   let t4;
   if ($[3] !== verbose) {
     t4 = verbose && <Text dimColor={true} wrap="truncate">currentVersion: {MACRO.VERSION}</Text>;

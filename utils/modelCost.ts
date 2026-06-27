@@ -1,29 +1,15 @@
-import type { BetaUsage as Usage } from '@anthropic-ai/sdk/resources/beta/messages/messages.mjs'
+import type { BetaUsage as Usage } from 'src/services/api/openaiCompatible.js'
 import type { AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS } from 'src/services/analytics/index.js'
 import { logEvent } from 'src/services/analytics/index.js'
 import { setHasUnknownModelCost } from '../bootstrap/state.js'
 import { isFastModeEnabled } from './fastMode.js'
 import {
-  CLAUDE_3_5_HAIKU_CONFIG,
-  CLAUDE_3_5_V2_SONNET_CONFIG,
-  CLAUDE_3_7_SONNET_CONFIG,
-  CLAUDE_HAIKU_4_5_CONFIG,
-  CLAUDE_OPUS_4_1_CONFIG,
-  CLAUDE_OPUS_4_5_CONFIG,
-  CLAUDE_OPUS_4_6_CONFIG,
-  CLAUDE_OPUS_4_CONFIG,
-  CLAUDE_SONNET_4_5_CONFIG,
-  CLAUDE_SONNET_4_6_CONFIG,
-  CLAUDE_SONNET_4_CONFIG,
-} from './model/configs.js'
-import {
-  firstPartyNameToCanonical,
-  getCanonicalName,
+    getCanonicalName,
   getDefaultMainLoopModelSetting,
   type ModelShortName,
 } from './model/model.js'
 
-// @see https://platform.open-code-cli.com/docs/en/about-claude/pricing
+// Generic OpenAI-compatible pricing estimates; override when provider-specific pricing is needed.
 export type ModelCosts = {
   inputTokens: number
   outputTokens: number
@@ -32,7 +18,7 @@ export type ModelCosts = {
   webSearchRequests: number
 }
 
-// Standard pricing tier for Sonnet models: $3 input / $15 output per Mtok
+// Generic balanced pricing tier: $3 input / $15 output per Mtok
 export const COST_TIER_3_15 = {
   inputTokens: 3,
   outputTokens: 15,
@@ -41,7 +27,7 @@ export const COST_TIER_3_15 = {
   webSearchRequests: 0.01,
 } as const satisfies ModelCosts
 
-// Pricing tier for Opus 4/4.1: $15 input / $75 output per Mtok
+// Generic high-capability pricing tier: $15 input / $75 output per Mtok
 export const COST_TIER_15_75 = {
   inputTokens: 15,
   outputTokens: 75,
@@ -50,7 +36,7 @@ export const COST_TIER_15_75 = {
   webSearchRequests: 0.01,
 } as const satisfies ModelCosts
 
-// Pricing tier for Opus 4.5: $5 input / $25 output per Mtok
+// Generic default pricing tier: $5 input / $25 output per Mtok
 export const COST_TIER_5_25 = {
   inputTokens: 5,
   outputTokens: 25,
@@ -59,7 +45,7 @@ export const COST_TIER_5_25 = {
   webSearchRequests: 0.01,
 } as const satisfies ModelCosts
 
-// Fast mode pricing for Opus 4.6: $30 input / $150 output per Mtok
+// Fast mode pricing for best model: $30 input / $150 output per Mtok
 export const COST_TIER_30_150 = {
   inputTokens: 30,
   outputTokens: 150,
@@ -68,7 +54,7 @@ export const COST_TIER_30_150 = {
   webSearchRequests: 0.01,
 } as const satisfies ModelCosts
 
-// Pricing for Haiku 3.5: $0.80 input / $4 output per Mtok
+// Generic small-model pricing tier: $0.80 input / $4 output per Mtok
 export const COST_HAIKU_35 = {
   inputTokens: 0.8,
   outputTokens: 4,
@@ -77,7 +63,7 @@ export const COST_HAIKU_35 = {
   webSearchRequests: 0.01,
 } as const satisfies ModelCosts
 
-// Pricing for Haiku 4.5: $1 input / $5 output per Mtok
+// Generic small fast-model pricing tier: $1 input / $5 output per Mtok
 export const COST_HAIKU_45 = {
   inputTokens: 1,
   outputTokens: 5,
@@ -89,9 +75,9 @@ export const COST_HAIKU_45 = {
 const DEFAULT_UNKNOWN_MODEL_COST = COST_TIER_5_25
 
 /**
- * Get the cost tier for Opus 4.6 based on fast mode.
+ * Get the cost tier for best model based on fast mode.
  */
-export function getOpus46CostTier(fastMode: boolean): ModelCosts {
+export function getBestModelCostTier(fastMode: boolean): ModelCosts {
   if (isFastModeEnabled() && fastMode) {
     return COST_TIER_30_150
   }
@@ -99,30 +85,13 @@ export function getOpus46CostTier(fastMode: boolean): ModelCosts {
 }
 
 // @[MODEL LAUNCH]: Add a pricing entry for the new model below.
-// Costs from https://platform.open-code-cli.com/docs/en/about-claude/pricing
+// Costs from https://platform.open-code-cli.com/docs/en/openai-compatible-pricing
 // Web search cost: $10 per 1000 requests = $0.01 per request
 export const MODEL_COSTS: Record<ModelShortName, ModelCosts> = {
-  [firstPartyNameToCanonical(CLAUDE_3_5_HAIKU_CONFIG.firstParty)]:
-    COST_HAIKU_35,
-  [firstPartyNameToCanonical(CLAUDE_HAIKU_4_5_CONFIG.firstParty)]:
-    COST_HAIKU_45,
-  [firstPartyNameToCanonical(CLAUDE_3_5_V2_SONNET_CONFIG.firstParty)]:
-    COST_TIER_3_15,
-  [firstPartyNameToCanonical(CLAUDE_3_7_SONNET_CONFIG.firstParty)]:
-    COST_TIER_3_15,
-  [firstPartyNameToCanonical(CLAUDE_SONNET_4_CONFIG.firstParty)]:
-    COST_TIER_3_15,
-  [firstPartyNameToCanonical(CLAUDE_SONNET_4_5_CONFIG.firstParty)]:
-    COST_TIER_3_15,
-  [firstPartyNameToCanonical(CLAUDE_SONNET_4_6_CONFIG.firstParty)]:
-    COST_TIER_3_15,
-  [firstPartyNameToCanonical(CLAUDE_OPUS_4_CONFIG.firstParty)]: COST_TIER_15_75,
-  [firstPartyNameToCanonical(CLAUDE_OPUS_4_1_CONFIG.firstParty)]:
-    COST_TIER_15_75,
-  [firstPartyNameToCanonical(CLAUDE_OPUS_4_5_CONFIG.firstParty)]:
-    COST_TIER_5_25,
-  [firstPartyNameToCanonical(CLAUDE_OPUS_4_6_CONFIG.firstParty)]:
-    COST_TIER_5_25,
+  'openai/gpt-4o-mini': COST_HAIKU_45,
+  'openai/gpt-4o': COST_TIER_3_15,
+  'openai/gpt-4.1-mini': COST_TIER_3_15,
+  'openai/gpt-4.1': COST_TIER_5_25,
 }
 
 /**
@@ -143,14 +112,6 @@ function tokensToUSDCost(modelCosts: ModelCosts, usage: Usage): number {
 
 export function getModelCosts(model: string, usage: Usage): ModelCosts {
   const shortName = getCanonicalName(model)
-
-  // Check if this is an Opus 4.6 model with fast mode active.
-  if (
-    shortName === firstPartyNameToCanonical(CLAUDE_OPUS_4_6_CONFIG.firstParty)
-  ) {
-    const isFastMode = usage.speed === 'fast'
-    return getOpus46CostTier(isFastMode)
-  }
 
   const costs = MODEL_COSTS[shortName]
   if (!costs) {

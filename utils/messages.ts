@@ -1,5 +1,5 @@
 import { feature } from 'bun:bundle'
-import type { BetaUsage as Usage } from '@anthropic-ai/sdk/resources/beta/messages/messages.mjs'
+import type { BetaUsage as Usage } from 'src/services/api/openaiCompatible.js'
 import type {
   ContentBlock,
   ContentBlockParam,
@@ -11,7 +11,7 @@ import type {
   ToolResultBlockParam,
   ToolUseBlock,
   ToolUseBlockParam,
-} from '@anthropic-ai/sdk/resources/index.mjs'
+} from 'src/services/api/openaiCompatible.js'
 import { randomUUID, type UUID } from 'crypto'
 import isObject from 'lodash-es/isObject.js'
 import last from 'lodash-es/last.js'
@@ -91,14 +91,14 @@ type HookAttachmentWithName = Exclude<
   HookPermissionDecisionAttachment
 >
 
-import type { APIError } from '@anthropic-ai/sdk'
+import type { APIError } from 'src/services/api/openaiCompatible.js'
 import type {
   BetaContentBlock,
   BetaMessage,
   BetaRedactedThinkingBlock,
   BetaThinkingBlock,
   BetaToolUseBlock,
-} from '@anthropic-ai/sdk/resources/beta/messages/messages.mjs'
+} from 'src/services/api/openaiCompatible.js'
 import type {
   HookEvent,
   SDKAssistantMessageError,
@@ -424,7 +424,7 @@ export function createAssistantMessage({
             {
               type: 'text' as const,
               text: content === '' ? NO_CONTENT_MESSAGE : content,
-            } as BetaContentBlock, // NOTE: citations field is not supported in Bedrock API
+            } as BetaContentBlock, // NOTE: citations field is not supported in OpenAICompatibleProvider API
           ]
         : content,
     usage,
@@ -448,7 +448,7 @@ export function createAssistantAPIErrorMessage({
       {
         type: 'text' as const,
         text: content === '' ? NO_CONTENT_MESSAGE : content,
-      } as BetaContentBlock, // NOTE: citations field is not supported in Bedrock API
+      } as BetaContentBlock, // NOTE: citations field is not supported in OpenAICompatibleProvider API
     ],
     isApiErrorMessage: true,
     apiError,
@@ -2092,7 +2092,7 @@ export function normalizeMessagesForAPI(
           return
         }
         case 'user': {
-          // Merge consecutive user messages because Bedrock doesn't support
+          // Merge consecutive user messages because OpenAICompatibleProvider doesn't support
           // multiple user messages in a row; 1P API does and merges them
           // into a single user turn
 
@@ -2601,8 +2601,8 @@ export function mergeUserContentBlocks(
   a: ContentBlockParam[],
   b: ContentBlockParam[],
 ): ContentBlockParam[] {
-  // See https://anthropic.slack.com/archives/C06FE2FP0Q2/p1747586370117479 and
-  // https://anthropic.slack.com/archives/C0AHK9P0129/p1773159663856279:
+  // See https://openai-compatible.slack.com/archives/C06FE2FP0Q2/p1747586370117479 and
+  // https://openai-compatible.slack.com/archives/C0AHK9P0129/p1773159663856279:
   // any sibling after tool_result renders as </function_results>\n\nHuman:<...>
   // on the wire. Repeated mid-conversation, this teaches capy to emit Human: at
   // a bare tail → 3-token empty end_turn. A/B (sai-20260310-161901) validated:

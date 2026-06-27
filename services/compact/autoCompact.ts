@@ -13,7 +13,7 @@ import type { CacheSafeParams } from '../../utils/forkedAgent.js'
 import { logError } from '../../utils/log.js'
 import { tokenCountWithEstimation } from '../../utils/tokens.js'
 import { getFeatureValue_CACHED_MAY_BE_STALE } from '../analytics/growthbook.js'
-import { getMaxOutputTokensForModel } from '../api/claude.js'
+import { getMaxOutputTokensForModel } from '../api/provider.js'
 import { notifyCompaction } from '../api/promptCacheBreakDetection.js'
 import { setLastSummarizedMessageId } from '../SessionMemory/sessionMemoryUtils.js'
 import {
@@ -76,7 +76,7 @@ export function getAutoCompactThreshold(model: string): number {
     effectiveContextWindow - AUTOCOMPACT_BUFFER_TOKENS
 
   // Override for easier testing of autocompact
-  const envPercent = process.env.CLAUDE_AUTOCOMPACT_PCT_OVERRIDE
+  const envPercent = process.env.OPEN_CODE_AUTOCOMPACT_PCT_OVERRIDE
   if (envPercent) {
     const parsed = parseFloat(envPercent)
     if (!isNaN(parsed) && parsed > 0 && parsed <= 100) {
@@ -209,7 +209,7 @@ export async function shouldAutoCompact(
   // sessionMemory + manual /compact working.
   //
   // Consult isContextCollapseEnabled (not the raw gate) so the
-  // CLAUDE_CONTEXT_COLLAPSE env override is honored here too. require()
+  // OPEN_CODE_CONTEXT_COLLAPSE env override is honored here too. require()
   // inside the block breaks the init-time cycle (this file exports
   // getEffectiveContextWindowSize which collapse's index imports).
   if (feature('CONTEXT_COLLAPSE')) {

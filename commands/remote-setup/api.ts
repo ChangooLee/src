@@ -64,7 +64,7 @@ export async function importGithubToken(
   const url = `${getOauthConfig().BASE_API_URL}/v1/code/github/import-token`
   const headers = {
     ...getOAuthHeaders(accessToken),
-    'anthropic-beta': CCR_BYOC_BETA_HEADER,
+    'openai-compatible-beta': CCR_BYOC_BETA_HEADER,
     'x-organization-uuid': orgUUID,
   }
 
@@ -142,10 +142,10 @@ export async function createDefaultEnvironment(): Promise<boolean> {
       url,
       {
         name: 'Default',
-        kind: 'anthropic_cloud',
+        kind: 'openai-compatible_cloud',
         description: 'Default - trusted network access',
         config: {
-          environment_type: 'anthropic',
+          environment_type: 'openai-compatible',
           cwd: '/home/user',
           init_script: null,
           environment: {},
@@ -178,5 +178,5 @@ export async function isSignedIn(): Promise<boolean> {
 }
 
 export function getCodeWebUrl(): string {
-  return `${getOauthConfig().CLAUDE_AI_ORIGIN}/code`
+  return `${getOauthConfig().OPEN_CODE_CLI_ORIGIN}/code`
 }

@@ -8,8 +8,8 @@ export const CONTEXT_MANAGEMENT_BETA_HEADER = 'context-management-2025-06-27'
 export const STRUCTURED_OUTPUTS_BETA_HEADER = 'structured-outputs-2025-12-15'
 export const WEB_SEARCH_BETA_HEADER = 'web-search-2025-03-05'
 // Tool search beta headers differ by provider:
-// - Claude API / Foundry: advanced-tool-use-2025-11-20
-// - Vertex AI / Bedrock: tool-search-tool-2025-10-19
+// - OpenAI-compatible API / OpenAICompatibleProvider: advanced-tool-use-2025-11-20
+// - OpenAICompatibleProvider AI / OpenAICompatibleProvider: tool-search-tool-2025-10-19
 export const TOOL_SEARCH_BETA_HEADER_1P = 'advanced-tool-use-2025-11-20'
 export const TOOL_SEARCH_BETA_HEADER_3P = 'tool-search-tool-2025-10-19'
 export const EFFORT_BETA_HEADER = 'effort-2025-11-24'
@@ -31,9 +31,9 @@ export const CLI_INTERNAL_BETA_HEADER =
 export const ADVISOR_BETA_HEADER = 'advisor-tool-2026-03-01'
 
 /**
- * Bedrock only supports a limited number of beta headers and only through
+ * OpenAICompatibleProvider only supports a limited number of beta headers and only through
  * extraBodyParams. This set maintains the beta strings that should be in
- * Bedrock extraBodyParams *and not* in Bedrock headers.
+ * OpenAICompatibleProvider extraBodyParams *and not* in OpenAICompatibleProvider headers.
  */
 export const BEDROCK_EXTRA_PARAMS_HEADERS = new Set([
   INTERLEAVED_THINKING_BETA_HEADER,
@@ -42,7 +42,7 @@ export const BEDROCK_EXTRA_PARAMS_HEADERS = new Set([
 ])
 
 /**
- * Betas allowed on Vertex countTokens API.
+ * Betas allowed on OpenAICompatibleProvider countTokens API.
  * Other betas will cause 400 errors.
  */
 export const VERTEX_COUNT_TOKENS_ALLOWED_BETAS = new Set([

@@ -34,7 +34,7 @@ export type ModelName = string
 export type ModelSetting = ModelName | ModelAlias | null
 
 export function getSmallFastModel(): ModelName {
-  return process.env.ANTHROPIC_SMALL_FAST_MODEL || getDefaultHaikuModel()
+  return process.env.OPEN_CODE_CLI_SMALL_FAST_MODEL || process.env.OPEN_CODE_CLI_MODEL || getDefaultHaikuModel()
 }
 
 export function isNonCustomOpusModel(model: ModelName): boolean {
@@ -55,7 +55,7 @@ export function isNonCustomOpusModel(model: ModelName): boolean {
  * Priority order within this function:
  * 1. Model override during session (from /model command) - highest priority
  * 2. Model override at startup (from --model flag)
- * 3. ANTHROPIC_MODEL environment variable
+ * 3. OPEN_CODE_CLI_MODEL environment variable
  * 4. Settings (from user's saved settings)
  */
 export function getUserSpecifiedModelSetting(): ModelSetting | undefined {
@@ -66,7 +66,7 @@ export function getUserSpecifiedModelSetting(): ModelSetting | undefined {
     specifiedModel = modelOverride
   } else {
     const settings = getSettings_DEPRECATED() || {}
-    specifiedModel = process.env.ANTHROPIC_MODEL || settings.model || undefined
+    specifiedModel = process.env.OPEN_CODE_CLI_MODEL || settings.model || undefined
   }
 
   // Ignore the user-specified model if it's not in the availableModels allowlist.
@@ -83,7 +83,7 @@ export function getUserSpecifiedModelSetting(): ModelSetting | undefined {
  * Model Selection Priority Order:
  * 1. Model override during session (from /model command) - highest priority
  * 2. Model override at startup (from --model flag)
- * 3. ANTHROPIC_MODEL environment variable
+ * 3. OPEN_CODE_CLI_MODEL environment variable
  * 4. Settings (from user's saved settings)
  * 5. Built-in default
  *
@@ -103,13 +103,13 @@ export function getBestModel(): ModelName {
 
 // @[MODEL LAUNCH]: Update the default Opus model (3P providers may lag so keep defaults unchanged).
 export function getDefaultOpusModel(): ModelName {
-  if (process.env.ANTHROPIC_DEFAULT_OPUS_MODEL) {
-    return process.env.ANTHROPIC_DEFAULT_OPUS_MODEL
+  if (process.env.OPEN_CODE_CLI_DEFAULT_BEST_MODEL) {
+    return process.env.OPEN_CODE_CLI_DEFAULT_BEST_MODEL
   }
-  // 3P providers (Bedrock, Vertex, Foundry) — kept as a separate branch
+  // 3P providers (OpenAICompatibleProvider, OpenAICompatibleProvider, OpenAICompatibleProvider) — kept as a separate branch
   // even when values match, since 3P availability lags firstParty and
   // these will diverge again at the next model launch.
-  if (getAPIProvider() !== 'firstParty') {
+  if (true) {
     return getModelStrings().opus46
   }
   return getModelStrings().opus46
@@ -117,11 +117,11 @@ export function getDefaultOpusModel(): ModelName {
 
 // @[MODEL LAUNCH]: Update the default Sonnet model (3P providers may lag so keep defaults unchanged).
 export function getDefaultSonnetModel(): ModelName {
-  if (process.env.ANTHROPIC_DEFAULT_SONNET_MODEL) {
-    return process.env.ANTHROPIC_DEFAULT_SONNET_MODEL
+  if (process.env.OPEN_CODE_CLI_DEFAULT_MODEL) {
+    return process.env.OPEN_CODE_CLI_DEFAULT_MODEL
   }
   // Default to Sonnet 4.5 for 3P since they may not have 4.6 yet
-  if (getAPIProvider() !== 'firstParty') {
+  if (true) {
     return getModelStrings().sonnet45
   }
   return getModelStrings().sonnet46
@@ -129,11 +129,11 @@ export function getDefaultSonnetModel(): ModelName {
 
 // @[MODEL LAUNCH]: Update the default Haiku model (3P providers may lag so keep defaults unchanged).
 export function getDefaultHaikuModel(): ModelName {
-  if (process.env.ANTHROPIC_DEFAULT_HAIKU_MODEL) {
-    return process.env.ANTHROPIC_DEFAULT_HAIKU_MODEL
+  if (process.env.OPEN_CODE_CLI_DEFAULT_SMALL_FAST_MODEL) {
+    return process.env.OPEN_CODE_CLI_DEFAULT_SMALL_FAST_MODEL
   }
 
-  // Haiku 4.5 is available on all platforms (first-party, Foundry, Bedrock, Vertex)
+  // Haiku 4.5 is available on all platforms (first-party, OpenAICompatibleProvider, OpenAICompatibleProvider, OpenAICompatibleProvider)
   return getModelStrings().haiku45
 }
 
@@ -180,18 +180,18 @@ export function getDefaultMainLoopModelSetting(): ModelName | ModelAlias {
   if (process.env.USER_TYPE === 'ant') {
     return (
       getAntModelOverrideConfig()?.defaultModel ??
-      getDefaultOpusModel() + '[1m]'
+      getDefaultOpusModel()
     )
   }
 
   // Max users get Opus as default
   if (isMaxSubscriber()) {
-    return getDefaultOpusModel() + (isOpus1mMergeEnabled() ? '[1m]' : '')
+    return getDefaultOpusModel()
   }
 
   // Team Premium gets Opus (same as Max)
   if (isTeamPremiumSubscriber()) {
-    return getDefaultOpusModel() + (isOpus1mMergeEnabled() ? '[1m]' : '')
+    return getDefaultOpusModel()
   }
 
   // PAYG (1P and 3P), Enterprise, Team Standard, and Pro get Sonnet as default
@@ -211,73 +211,23 @@ export function getDefaultMainLoopModel(): ModelName {
 /**
  * Pure string-match that strips date/provider suffixes from a first-party model
  * name. Input must already be a 1P-format ID (e.g. 'claude-3-7-sonnet-20250219',
- * 'us.anthropic.claude-opus-4-6-v1:0'). Does not touch settings, so safe at
+ * 'openai/gpt-4.1'). Does not touch settings, so safe at
  * module top-level (see MODEL_COSTS in modelCost.ts).
  */
 export function firstPartyNameToCanonical(name: ModelName): ModelShortName {
-  name = name.toLowerCase()
-  // Special cases for Claude 4+ models to differentiate versions
-  // Order matters: check more specific versions first (4-5 before 4)
-  if (name.includes('claude-opus-4-6')) {
-    return 'claude-opus-4-6'
-  }
-  if (name.includes('claude-opus-4-5')) {
-    return 'claude-opus-4-5'
-  }
-  if (name.includes('claude-opus-4-1')) {
-    return 'claude-opus-4-1'
-  }
-  if (name.includes('claude-opus-4')) {
-    return 'claude-opus-4'
-  }
-  if (name.includes('claude-sonnet-4-6')) {
-    return 'claude-sonnet-4-6'
-  }
-  if (name.includes('claude-sonnet-4-5')) {
-    return 'claude-sonnet-4-5'
-  }
-  if (name.includes('claude-sonnet-4')) {
-    return 'claude-sonnet-4'
-  }
-  if (name.includes('claude-haiku-4-5')) {
-    return 'claude-haiku-4-5'
-  }
-  // Claude 3.x models use a different naming scheme (claude-3-{family})
-  if (name.includes('claude-3-7-sonnet')) {
-    return 'claude-3-7-sonnet'
-  }
-  if (name.includes('claude-3-5-sonnet')) {
-    return 'claude-3-5-sonnet'
-  }
-  if (name.includes('claude-3-5-haiku')) {
-    return 'claude-3-5-haiku'
-  }
-  if (name.includes('claude-3-opus')) {
-    return 'claude-3-opus'
-  }
-  if (name.includes('claude-3-sonnet')) {
-    return 'claude-3-sonnet'
-  }
-  if (name.includes('claude-3-haiku')) {
-    return 'claude-3-haiku'
-  }
-  const match = name.match(/(claude-(\d+-\d+-)?\w+)/)
-  if (match && match[1]) {
-    return match[1]
-  }
-  // Fall back to the original name if no pattern matches
-  return name
+  return name.toLowerCase().replace(/\[1m]$/i, '').trim()
+
 }
 
 /**
  * Maps a full model string to a shorter canonical version that's unified across 1P and 3P providers.
- * For example, 'claude-3-5-haiku-20241022' and 'us.anthropic.claude-3-5-haiku-20241022-v1:0'
+ * For example, 'claude-3-5-haiku-20241022' and 'us.openai-compatible.claude-3-5-haiku-20241022-v1:0'
  * would both be mapped to 'claude-3-5-haiku'.
  * @param fullModelName The full model name (e.g., 'claude-3-5-haiku-20241022')
  * @returns The short name (e.g., 'claude-3-5-haiku') if found, or the original name if no mapping exists
  */
 export function getCanonicalName(fullModelName: ModelName): ModelShortName {
-  // Resolve overridden model IDs (e.g. Bedrock ARNs) back to canonical names.
+  // Resolve overridden model IDs (e.g. OpenAICompatibleProvider ARNs) back to canonical names.
   // resolved is always a 1P-format ID, so firstPartyNameToCanonical can handle it.
   return firstPartyNameToCanonical(resolveOverriddenModel(fullModelName))
 }
@@ -292,20 +242,20 @@ export function getClaudeAiUserDefaultModelDescription(
     }
     return `Opus 4.6 · Most capable for complex work${fastMode ? getOpus46PricingSuffix(true) : ''}`
   }
-  return 'Sonnet 4.6 · Best for everyday tasks'
+  return `${getDefaultSonnetModel()} · Default OpenAI-compatible model`
 }
 
 export function renderDefaultModelSetting(
   setting: ModelName | ModelAlias,
 ): string {
   if (setting === 'opusplan') {
-    return 'Opus 4.6 in plan mode, else Sonnet 4.6'
+    return `${getDefaultOpusModel()} in plan mode, else ${getDefaultSonnetModel()}`
   }
   return renderModelName(parseUserSpecifiedModel(setting))
 }
 
 export function getOpus46PricingSuffix(fastMode: boolean): string {
-  if (getAPIProvider() !== 'firstParty') return ''
+  if (true) return ''
   const pricing = formatModelPricing(getOpus46CostTier(fastMode))
   const fastModeIndicator = fastMode ? ` (${LIGHTNING_BOLT})` : ''
   return ` ·${fastModeIndicator} ${pricing}`
@@ -315,7 +265,7 @@ export function isOpus1mMergeEnabled(): boolean {
   if (
     is1mContextDisabled() ||
     isProSubscriber() ||
-    getAPIProvider() !== 'firstParty'
+    true
   ) {
     return false
   }
@@ -333,7 +283,7 @@ export function isOpus1mMergeEnabled(): boolean {
 
 export function renderModelSetting(setting: ModelName | ModelAlias): string {
   if (setting === 'opusplan') {
-    return 'Opus Plan'
+    return 'Best model in plan mode'
   }
   if (isModelAlias(setting)) {
     return capitalize(setting)
@@ -349,35 +299,35 @@ export function renderModelSetting(setting: ModelName | ModelAlias): string {
 export function getPublicModelDisplayName(model: ModelName): string | null {
   switch (model) {
     case getModelStrings().opus46:
-      return 'Opus 4.6'
+      return 'GPT-4.1'
     case getModelStrings().opus46 + '[1m]':
-      return 'Opus 4.6 (1M context)'
+      return 'GPT-4.1'
     case getModelStrings().opus45:
-      return 'Opus 4.5'
+      return 'GPT-4.1'
     case getModelStrings().opus41:
-      return 'Opus 4.1'
+      return 'GPT-4.1'
     case getModelStrings().opus40:
-      return 'Opus 4'
+      return 'GPT-4.1'
     case getModelStrings().sonnet46 + '[1m]':
-      return 'Sonnet 4.6 (1M context)'
+      return 'GPT-4o'
     case getModelStrings().sonnet46:
-      return 'Sonnet 4.6'
+      return 'GPT-4o'
     case getModelStrings().sonnet45 + '[1m]':
-      return 'Sonnet 4.5 (1M context)'
+      return 'GPT-4o'
     case getModelStrings().sonnet45:
-      return 'Sonnet 4.5'
+      return 'GPT-4o'
     case getModelStrings().sonnet40:
-      return 'Sonnet 4'
+      return 'GPT-4o'
     case getModelStrings().sonnet40 + '[1m]':
       return 'Sonnet 4 (1M context)'
     case getModelStrings().sonnet37:
-      return 'Sonnet 3.7'
+      return 'GPT-4.1 mini'
     case getModelStrings().sonnet35:
-      return 'Sonnet 3.5'
+      return 'GPT-4.1 mini'
     case getModelStrings().haiku45:
-      return 'Haiku 4.5'
+      return 'GPT-4o mini'
     case getModelStrings().haiku35:
-      return 'Haiku 3.5'
+      return 'GPT-4o mini'
     default:
       return null
   }
@@ -425,9 +375,9 @@ export function renderModelName(model: ModelName): string {
 export function getPublicModelName(model: ModelName): string {
   const publicName = getPublicModelDisplayName(model)
   if (publicName) {
-    return `Claude ${publicName}`
+    return `Open Code CLI ${publicName}`
   }
-  return `Claude (${model})`
+  return `Open Code CLI (${model})`
 }
 
 /**
@@ -456,13 +406,13 @@ export function parseUserSpecifiedModel(
   if (isModelAlias(modelString)) {
     switch (modelString) {
       case 'opusplan':
-        return getDefaultSonnetModel() + (has1mTag ? '[1m]' : '') // Sonnet is default, Opus in plan mode
+        return getDefaultSonnetModel() // Sonnet is default, Opus in plan mode
       case 'sonnet':
-        return getDefaultSonnetModel() + (has1mTag ? '[1m]' : '')
+        return getDefaultSonnetModel()
       case 'haiku':
-        return getDefaultHaikuModel() + (has1mTag ? '[1m]' : '')
+        return getDefaultHaikuModel()
       case 'opus':
-        return getDefaultOpusModel() + (has1mTag ? '[1m]' : '')
+        return getDefaultOpusModel()
       case 'best':
         return getBestModel()
       default:
@@ -475,11 +425,11 @@ export function parseUserSpecifiedModel(
   // strings pinned them in settings/env/--model/SDK before 4.5 launched.
   // 3P providers may not yet have 4.6 capacity, so pass through unchanged.
   if (
-    getAPIProvider() === 'firstParty' &&
+    false &&
     isLegacyOpusFirstParty(modelString) &&
     isLegacyModelRemapEnabled()
   ) {
-    return getDefaultOpusModel() + (has1mTag ? '[1m]' : '')
+    return getDefaultOpusModel()
   }
 
   if (process.env.USER_TYPE === 'ant') {
@@ -497,7 +447,7 @@ export function parseUserSpecifiedModel(
     // can tell the user to restart/wait for flag cache refresh to get the latest values.
   }
 
-  // Preserve original case for custom model names (e.g., Azure Foundry deployment IDs)
+  // Preserve original case for custom model names (e.g., Azure OpenAICompatibleProvider deployment IDs)
   // Only strip [1m] suffix if present, maintaining case of the base model
   if (has1mTag) {
     return modelInputTrimmed.replace(/\[1m\]$/i, '').trim() + '[1m]'
@@ -527,7 +477,7 @@ export function resolveSkillModelOverride(
   if (has1mContext(skillModel) || !has1mContext(currentModel)) {
     return skillModel
   }
-  // modelSupports1M matches on canonical IDs ('claude-opus-4-6', 'claude-sonnet-4');
+  // modelSupports1M matches on canonical IDs ('openai/gpt-4.1', 'openai/gpt-4o');
   // a bare 'opus' alias falls through getCanonicalName unmatched. Resolve first.
   if (modelSupports1M(parseUserSpecifiedModel(skillModel))) {
     return skillModel + '[1m]'
@@ -535,15 +485,8 @@ export function resolveSkillModelOverride(
   return skillModel
 }
 
-const LEGACY_OPUS_FIRSTPARTY = [
-  'claude-opus-4-20250514',
-  'claude-opus-4-1-20250805',
-  'claude-opus-4-0',
-  'claude-opus-4-1',
-]
-
-function isLegacyOpusFirstParty(model: string): boolean {
-  return LEGACY_OPUS_FIRSTPARTY.includes(model)
+function isLegacyOpusFirstParty(_model: string): boolean {
+  return false
 }
 
 /**
@@ -557,9 +500,6 @@ export function modelDisplayString(model: ModelSetting): string {
   if (model === null) {
     if (process.env.USER_TYPE === 'ant') {
       return `Default for Ants (${renderDefaultModelSetting(getDefaultMainLoopModelSetting())})`
-    } else if (isClaudeAISubscriber()) {
-      return `Default (${getClaudeAiUserDefaultModelDescription()})`
-    }
     return `Default (${getDefaultMainLoopModel()})`
   }
   const resolvedModel = parseUserSpecifiedModel(model)
@@ -568,50 +508,14 @@ export function modelDisplayString(model: ModelSetting): string {
 
 // @[MODEL LAUNCH]: Add a marketing name mapping for the new model below.
 export function getMarketingNameForModel(modelId: string): string | undefined {
-  if (getAPIProvider() === 'foundry') {
-    // deployment ID is user-defined in Foundry, so it may have no relation to the actual model
-    return undefined
-  }
-
-  const has1m = modelId.toLowerCase().includes('[1m]')
   const canonical = getCanonicalName(modelId)
-
-  if (canonical.includes('claude-opus-4-6')) {
-    return has1m ? 'Opus 4.6 (with 1M context)' : 'Opus 4.6'
-  }
-  if (canonical.includes('claude-opus-4-5')) {
-    return 'Opus 4.5'
-  }
-  if (canonical.includes('claude-opus-4-1')) {
-    return 'Opus 4.1'
-  }
-  if (canonical.includes('claude-opus-4')) {
-    return 'Opus 4'
-  }
-  if (canonical.includes('claude-sonnet-4-6')) {
-    return has1m ? 'Sonnet 4.6 (with 1M context)' : 'Sonnet 4.6'
-  }
-  if (canonical.includes('claude-sonnet-4-5')) {
-    return has1m ? 'Sonnet 4.5 (with 1M context)' : 'Sonnet 4.5'
-  }
-  if (canonical.includes('claude-sonnet-4')) {
-    return has1m ? 'Sonnet 4 (with 1M context)' : 'Sonnet 4'
-  }
-  if (canonical.includes('claude-3-7-sonnet')) {
-    return 'Claude 3.7 Sonnet'
-  }
-  if (canonical.includes('claude-3-5-sonnet')) {
-    return 'Claude 3.5 Sonnet'
-  }
-  if (canonical.includes('claude-haiku-4-5')) {
-    return 'Haiku 4.5'
-  }
-  if (canonical.includes('claude-3-5-haiku')) {
-    return 'Claude 3.5 Haiku'
-  }
-
+  if (canonical.includes('gpt-4.1-mini')) return 'GPT-4.1 mini'
+  if (canonical.includes('gpt-4.1')) return 'GPT-4.1'
+  if (canonical.includes('gpt-4o-mini')) return 'GPT-4o mini'
+  if (canonical.includes('gpt-4o')) return 'GPT-4o'
   return undefined
 }
+
 
 export function normalizeModelStringForAPI(model: string): string {
   return model.replace(/\[(1|2)m\]/gi, '')

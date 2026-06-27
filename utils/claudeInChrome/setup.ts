@@ -22,7 +22,7 @@ import { execFileNoThrowWithCwd } from '../execFileNoThrow.js'
 import { getPlatform } from '../platform.js'
 import { jsonStringify } from '../slowOperations.js'
 import {
-  CLAUDE_IN_CHROME_MCP_SERVER_NAME,
+  OPEN_CODE_IN_CHROME_MCP_SERVER_NAME,
   getAllBrowserDataPaths,
   getAllNativeMessagingHostsDirs,
   getAllWindowsRegistryKeys,
@@ -33,7 +33,7 @@ import { isChromeExtensionInstalledPortable } from './setupPortable.js'
 
 const CHROME_EXTENSION_RECONNECT_URL = 'https://clau.de/chrome/reconnect'
 
-const NATIVE_HOST_IDENTIFIER = 'com.anthropic.open_code_cli_browser_extension'
+const NATIVE_HOST_IDENTIFIER = 'com.openai-compatible.open_code_cli_browser_extension'
 const NATIVE_HOST_MANIFEST_NAME = `${NATIVE_HOST_IDENTIFIER}.json`
 
 export function shouldEnableClaudeInChrome(chromeFlag?: boolean): boolean {
@@ -100,7 +100,7 @@ export function setupClaudeInChrome(): {
 
   const env: Record<string, string> = {}
   if (getSessionBypassPermissionsMode()) {
-    env.CLAUDE_CHROME_PERMISSION_MODE = 'skip_all_permission_checks'
+    env.OPEN_CODE_CHROME_PERMISSION_MODE = 'skip_all_permission_checks'
   }
   const hasEnv = Object.keys(env).length > 0
 
@@ -123,7 +123,7 @@ export function setupClaudeInChrome(): {
 
     return {
       mcpConfig: {
-        [CLAUDE_IN_CHROME_MCP_SERVER_NAME]: {
+        [OPEN_CODE_IN_CHROME_MCP_SERVER_NAME]: {
           type: 'stdio' as const,
           command: process.execPath,
           args: ['--claude-in-chrome-mcp'],
@@ -153,7 +153,7 @@ export function setupClaudeInChrome(): {
       )
 
     const mcpConfig = {
-      [CLAUDE_IN_CHROME_MCP_SERVER_NAME]: {
+      [OPEN_CODE_IN_CHROME_MCP_SERVER_NAME]: {
         type: 'stdio' as const,
         command: process.execPath,
         args: [`${cliPath}`, '--claude-in-chrome-mcp'],

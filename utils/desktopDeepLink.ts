@@ -105,7 +105,7 @@ async function getDesktopVersion(): Promise<string | null> {
     if (!localAppData) {
       return null
     }
-    const installDir = join(localAppData, 'AnthropicClaude')
+    const installDir = join(localAppData, 'OpenAICompatibleProviderClaude')
     try {
       const entries = await readdir(installDir)
       const versions = entries

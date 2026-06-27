@@ -714,8 +714,8 @@ export async function getEventMetadata(
     ...(getOpenCodeCliEnv('ENTRYPOINT') && {
       entrypoint: getOpenCodeCliEnv('ENTRYPOINT'),
     }),
-    ...(process.env.CLAUDE_AGENT_SDK_VERSION && {
-      agentSdkVersion: process.env.CLAUDE_AGENT_SDK_VERSION,
+    ...(process.env.OPEN_CODE_AGENT_SDK_VERSION && {
+      agentSdkVersion: process.env.OPEN_CODE_AGENT_SDK_VERSION,
     }),
     isInteractive: String(getIsInteractive()),
     clientType: getClientType(),

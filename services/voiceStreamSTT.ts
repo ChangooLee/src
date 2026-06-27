@@ -1,8 +1,8 @@
-// Anthropic voice_stream speech-to-text client for push-to-talk.
+// OpenAICompatibleProvider voice_stream speech-to-text client for push-to-talk.
 //
 // Only reachable in ant builds (gated by feature('VOICE_MODE') in useVoice.ts import).
 //
-// Connects to Anthropic's voice_stream WebSocket endpoint using the same
+// Connects to OpenAICompatibleProvider's voice_stream WebSocket endpoint using the same
 // OAuth credentials as Open Code CLI.  The endpoint uses conversation_engine
 // backed models for speech-to-text.  Designed for hold-to-talk: hold the
 // keybinding to record, release to stop and submit.
@@ -17,7 +17,7 @@ import { getOauthConfig } from '../constants/oauth.js'
 import {
   checkAndRefreshOAuthTokenIfNeeded,
   getClaudeAIOAuthTokens,
-  isAnthropicAuthEnabled,
+  isOpenAICompatibleProviderAuthEnabled,
 } from '../utils/auth.js'
 import { logForDebugging } from '../utils/debug.js'
 import { getUserAgent } from '../utils/http.js'
@@ -56,7 +56,7 @@ export type VoiceStreamCallbacks = {
 }
 
 // How finalize() resolved. `no_data_timeout` means zero server messages
-// after CloseStream — the silent-drop signature (anthropics/anthropic#287008).
+// after CloseStream — the silent-drop signature (openai-compatibles/openai-compatible#287008).
 export type FinalizeSource =
   | 'post_closestream_endpoint'
   | 'no_data_timeout'
@@ -97,9 +97,9 @@ type VoiceStreamMessage =
 
 export function isVoiceStreamAvailable(): boolean {
   // voice_stream uses the same OAuth as Open Code CLI — available when the
-  // user is authenticated with Anthropic (Claude.ai subscriber or has
+  // user is authenticated with OpenAICompatibleProvider (Claude.ai subscriber or has
   // valid OAuth tokens).
-  if (!isAnthropicAuthEnabled()) {
+  if (!isOpenAICompatibleProviderAuthEnabled()) {
     return false
   }
   const tokens = getClaudeAIOAuthTokens()
@@ -122,7 +122,7 @@ export async function connectVoiceStream(
   }
 
   // voice_stream is a private_api route, but /api/ws/ is also exposed on
-  // the api.anthropic.com listener (service_definitions.yaml private-api:
+  // the api.openai.com/v1 listener (service_definitions.yaml private-api:
   // visibility.external: true). We target that host instead of claude.ai
   // because the claude.ai CF zone uses TLS fingerprinting and challenges
   // non-browser clients (anthropics/open-code-cli#34094). Same private-api
@@ -152,7 +152,7 @@ export async function connectVoiceStream(
 
   // Route through conversation-engine with Deepgram Nova 3 (bypassing
   // the server's project_bell_v2_config GrowthBook gate). The server
-  // side is anthropics/anthropic#278327 + #281372; this lets us ramp
+  // side is openai-compatibles/openai-compatible#278327 + #281372; this lets us ramp
   // clients independently.
   const isNova3 = getFeatureValue_CACHED_MAY_BE_STALE(
     'open_code_cli_cobalt_frost',

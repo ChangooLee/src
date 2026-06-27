@@ -7,7 +7,7 @@ const sessionTranscriptModule = feature('KAIROS')
   ? (require('../sessionTranscript/sessionTranscript.js') as typeof import('../sessionTranscript/sessionTranscript.js'))
   : null
 
-import { APIUserAbortError } from '@anthropic-ai/sdk'
+import { APIUserAbortError } from 'src/services/api/openaiCompatible.js'
 import { markPostCompaction } from 'src/bootstrap/state.js'
 import { getInvokedSkillsForAgent } from '../../bootstrap/state.js'
 import type { QuerySource } from '../../constants/querySource.js'
@@ -99,7 +99,7 @@ import {
 import {
   getMaxOutputTokensForModel,
   queryModelWithStreaming,
-} from '../api/claude.js'
+} from '../api/provider.js'
 import {
   getPromptTooLongTokenGap,
   PROMPT_TOO_LONG_ERROR_MESSAGE,
@@ -230,7 +230,7 @@ const PTL_RETRY_MARKER = '[earlier conversation truncated for compaction retry]'
 /**
  * Drops the oldest API-round groups from messages until tokenGap is covered.
  * Falls back to dropping 20% of groups when the gap is unparseable (some
- * Vertex/Bedrock error formats). Returns null when nothing can be dropped
+ * OpenAICompatibleProvider/OpenAICompatibleProvider error formats). Returns null when nothing can be dropped
  * without leaving an empty summarize set.
  *
  * This is the last-resort escape hatch for CC-1180 — when the compact request

@@ -85,7 +85,7 @@ export async function submitTranscriptShare(
     }
 
     const response = await axios.post(
-      'https://api.anthropic.com/api/open_code_cli_shared_session_transcripts',
+      'https://api.openai.com/v1/open_code_cli_shared_session_transcripts',
       { content, appearance_id: appearanceId },
       {
         headers,

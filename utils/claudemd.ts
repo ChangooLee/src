@@ -4,7 +4,7 @@
  * 1. Managed memory (eg. /etc/open-code-cli/OPEN_CODE.md) - Global instructions for all users
  * 2. User memory (~/.open-code-cli/OPEN_CODE.md) - Private global instructions for all projects
  * 3. Project memory (OPEN_CODE.md, .open-code-cli/OPEN_CODE.md, and .open-code-cli/rules/*.md in project roots) - Instructions checked into the codebase
- * 4. Local memory (CLAUDE.local.md in project roots) - Private project-specific instructions
+ * 4. Local memory (OPEN_CODE.local.md in project roots) - Private project-specific instructions
  *
  * Files are loaded in reverse order of priority, i.e. the latest files are highest priority
  * with the model paying more attention to them.
@@ -862,7 +862,7 @@ export const getMemoryFiles = memoize(
     // checked-in files like OPEN_CODE.md and .open-code-cli/rules/*.md, so the same
     // content gets loaded twice. Skip Project-type (checked-in) files from
     // directories above the worktree but within the main repo — the worktree
-    // already has its own checkout. CLAUDE.local.md is gitignored so it only
+    // already has its own checkout. OPEN_CODE.local.md is gitignored so it only
     // exists in the main repo and is still loaded.
     // See: https://github.com/anthropics/open-code-cli/issues/29599
     const gitRoot = findGitRoot(originalCwd)
@@ -919,9 +919,9 @@ export const getMemoryFiles = memoize(
         )
       }
 
-      // Try reading CLAUDE.local.md (Local) - only if localSettings is enabled
+      // Try reading OPEN_CODE.local.md (Local) - only if localSettings is enabled
       if (isSettingSourceEnabled('localSettings')) {
-        const localPath = join(dir, 'CLAUDE.local.md')
+        const localPath = join(dir, 'OPEN_CODE.local.md')
         result.push(
           ...(await processMemoryFile(
             localPath,
@@ -934,10 +934,10 @@ export const getMemoryFiles = memoize(
     }
 
     // Process OPEN_CODE.md from additional directories (--add-dir) if env var is enabled
-    // This is controlled by OPEN_CODE_CLI_ADDITIONAL_DIRECTORIES_CLAUDE_MD and defaults to off
+    // This is controlled by OPEN_CODE_CLI_ADDITIONAL_DIRECTORIES_OPEN_CODE_MD and defaults to off
     // Note: we don't check isSettingSourceEnabled('projectSettings') here because --add-dir
     // is an explicit user action and the SDK defaults settingSources to [] when not specified
-    if (isEnvTruthy(process.env.OPEN_CODE_CLI_ADDITIONAL_DIRECTORIES_CLAUDE_MD)) {
+    if (isEnvTruthy(process.env.OPEN_CODE_CLI_ADDITIONAL_DIRECTORIES_OPEN_CODE_MD)) {
       const additionalDirs = getAdditionalDirectoriesForClaudeMd()
       for (const dir of additionalDirs) {
         // Try reading OPEN_CODE.md from the additional directory
@@ -1275,9 +1275,9 @@ export async function getMemoryFilesForNestedDirectory(
     )
   }
 
-  // Process local memory file (CLAUDE.local.md)
+  // Process local memory file (OPEN_CODE.local.md)
   if (isSettingSourceEnabled('localSettings')) {
-    const localPath = join(dir, 'CLAUDE.local.md')
+    const localPath = join(dir, 'OPEN_CODE.local.md')
     result.push(
       ...(await processMemoryFile(localPath, 'Local', processedPaths, false)),
     )
@@ -1430,13 +1430,13 @@ export async function shouldShowClaudeMdExternalIncludesWarning(): Promise<boole
 }
 
 /**
- * Check if a file path is a memory file (OPEN_CODE.md, CLAUDE.local.md, or .open-code-cli/rules/*.md)
+ * Check if a file path is a memory file (OPEN_CODE.md, OPEN_CODE.local.md, or .open-code-cli/rules/*.md)
  */
 export function isMemoryFilePath(filePath: string): boolean {
   const name = basename(filePath)
 
-  // OPEN_CODE.md or CLAUDE.local.md anywhere
-  if (name === 'OPEN_CODE.md' || name === 'CLAUDE.local.md') {
+  // OPEN_CODE.md or OPEN_CODE.local.md anywhere
+  if (name === 'OPEN_CODE.md' || name === 'OPEN_CODE.local.md') {
     return true
   }
 

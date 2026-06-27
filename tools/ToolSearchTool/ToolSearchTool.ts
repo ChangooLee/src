@@ -1,4 +1,4 @@
-import type { ToolResultBlockParam } from '@anthropic-ai/sdk/resources/index.mjs'
+import type { ToolResultBlockParam } from 'src/services/api/openaiCompatible.js'
 import memoize from 'lodash-es/memoize.js'
 import { z } from 'zod/v4'
 import {
@@ -438,7 +438,7 @@ export const ToolSearchTool = buildTool({
   userFacingName: () => '',
   /**
    * Returns a tool_result with tool_reference blocks.
-   * This format works on 1P/Foundry. Bedrock/Vertex may not support
+   * This format works on 1P/OpenAICompatibleProvider. OpenAICompatibleProvider/OpenAICompatibleProvider may not support
    * client-side tool_reference expansion yet.
    */
   mapToolResultToToolResultBlockParam(

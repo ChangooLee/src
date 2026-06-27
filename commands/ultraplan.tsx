@@ -26,7 +26,7 @@ export const CCR_TERMS_URL = 'https://open-code-cli.dev/docs/open-code-cli-on-th
 
 // CCR runs against the first-party API — use the canonical ID, not the
 // provider-specific string getModelStrings() would return (which may be a
-// Bedrock ARN or Vertex ID on the local CLI). Read at call time, not module
+// OpenAICompatibleProvider ARN or OpenAICompatibleProvider ID on the local CLI). Read at call time, not module
 // load: the GrowthBook cache is empty at import and `/config` Gates can flip
 // it between invocations.
 function getUltraplanModel(): string {

@@ -32,7 +32,7 @@ const NEW_INIT_PROMPT = `Set up a minimal OPEN_CODE.md (and optionally skills an
 Use AskUserQuestion to find out what the user wants:
 
 - "Which OPEN_CODE.md files should /init set up?"
-  Options: "Project OPEN_CODE.md" | "Personal CLAUDE.local.md" | "Both project + personal"
+  Options: "Project OPEN_CODE.md" | "Personal OPEN_CODE.local.md" | "Both project + personal"
   Description for project: "Team-shared instructions checked into source control — architecture, coding standards, common workflows."
   Description for personal: "Your private preferences for this project (gitignored, not shared) — your role, sandbox URLs, preferred test data, workflow quirks."
 
@@ -53,7 +53,7 @@ Detect:
 - Non-obvious gotchas, required env vars, or workflow quirks
 - Existing .open-code-cli/skills/ and .open-code-cli/rules/ directories
 - Formatter configuration (prettier, biome, ruff, black, gofmt, rustfmt, or a unified format script like \`npm run format\` / \`make fmt\`)
-- Git worktree usage: run \`git worktree list\` to check if this repo has multiple worktrees (only relevant if the user wants a personal CLAUDE.local.md)
+- Git worktree usage: run \`git worktree list\` to check if this repo has multiple worktrees (only relevant if the user wants a personal OPEN_CODE.local.md)
 
 Note what you could NOT figure out from code alone — these become interview questions.
 
@@ -63,11 +63,11 @@ Use AskUserQuestion to gather what you still need to write good OPEN_CODE.md fil
 
 If the user chose project OPEN_CODE.md or both: ask about codebase practices — non-obvious commands, gotchas, branch/PR conventions, required env setup, testing quirks. Skip things already in README or obvious from manifest files. Do not mark any options as "recommended" — this is about how their team works, not best practices.
 
-If the user chose personal CLAUDE.local.md or both: ask about them, not the codebase. Do not mark any options as "recommended" — this is about their personal preferences, not best practices. Examples of questions:
+If the user chose personal OPEN_CODE.local.md or both: ask about them, not the codebase. Do not mark any options as "recommended" — this is about their personal preferences, not best practices. Examples of questions:
   - What's their role on the team? (e.g., "backend engineer", "data scientist", "new hire onboarding")
   - How familiar are they with this codebase and its languages/frameworks? (so Open Code CLI can calibrate explanation depth)
   - Do they have personal sandbox URLs, test accounts, API key paths, or local setup details Open Code CLI should know?
-  - Only if Phase 2 found multiple git worktrees: ask whether their worktrees are nested inside the main repo (e.g., \`.open-code-cli/worktrees/<name>/\`) or siblings/external (e.g., \`../myrepo-feature/\`). If nested, the upward file walk finds the main repo's CLAUDE.local.md automatically — no special handling needed. If sibling/external, the personal content should live in a home-directory file (e.g., \`~/.open-code-cli/<project-name>-instructions.md\`) and each worktree gets a one-line CLAUDE.local.md stub that imports it: \`@~/.open-code-cli/<project-name>-instructions.md\`. Never put this import in the project OPEN_CODE.md — that would check a personal reference into the team-shared file.
+  - Only if Phase 2 found multiple git worktrees: ask whether their worktrees are nested inside the main repo (e.g., \`.open-code-cli/worktrees/<name>/\`) or siblings/external (e.g., \`../myrepo-feature/\`). If nested, the upward file walk finds the main repo's OPEN_CODE.local.md automatically — no special handling needed. If sibling/external, the personal content should live in a home-directory file (e.g., \`~/.open-code-cli/<project-name>-instructions.md\`) and each worktree gets a one-line OPEN_CODE.local.md stub that imports it: \`@~/.open-code-cli/<project-name>-instructions.md\`. Never put this import in the project OPEN_CODE.md — that would check a personal reference into the team-shared file.
   - Any communication preferences? (e.g., "be terse", "always explain tradeoffs", "don't summarize at the end")
 
 **Synthesize a proposal from Phase 2 findings** — e.g., format-on-edit if a formatter exists, a \`/verify\` skill if tests exist, a OPEN_CODE.md note for anything from the gap-fill answers that's a guideline rather than a workflow. For each, pick the artifact type that fits, **constrained by the Phase 1 skills+hooks choice**:
@@ -134,11 +134,11 @@ For projects with multiple concerns, suggest organizing instructions into \`.ope
 
 For projects with distinct subdirectories (monorepos, multi-module projects, etc.): mention that subdirectory OPEN_CODE.md files can be added for module-specific instructions (they're loaded automatically when Open Code CLI works in those directories). Offer to create them if the user wants.
 
-## Phase 5: Write CLAUDE.local.md (if user chose personal or both)
+## Phase 5: Write OPEN_CODE.local.md (if user chose personal or both)
 
-Write a minimal CLAUDE.local.md at the project root. This file is automatically loaded alongside OPEN_CODE.md. After creating it, add \`CLAUDE.local.md\` to the project's .gitignore so it stays private.
+Write a minimal OPEN_CODE.local.md at the project root. This file is automatically loaded alongside OPEN_CODE.md. After creating it, add \`OPEN_CODE.local.md\` to the project's .gitignore so it stays private.
 
-**Consume \`note\` entries from the Phase 3 preference queue whose target is CLAUDE.local.md** (personal-level notes) — add each as a concise line. If the user chose personal-only in Phase 1, this is the sole consumer of note entries.
+**Consume \`note\` entries from the Phase 3 preference queue whose target is OPEN_CODE.local.md** (personal-level notes) — add each as a concise line. If the user chose personal-only in Phase 1, this is the sole consumer of note entries.
 
 Include:
 - The user's role and familiarity with the codebase (so Open Code CLI can calibrate explanations)
@@ -147,9 +147,9 @@ Include:
 
 Keep it short — only include what would make Open Code CLI's responses noticeably better for this user.
 
-If Phase 2 found multiple git worktrees and the user confirmed they use sibling/external worktrees (not nested inside the main repo): the upward file walk won't find a single CLAUDE.local.md from all worktrees. Write the actual personal content to \`~/.open-code-cli/<project-name>-instructions.md\` and make CLAUDE.local.md a one-line stub that imports it: \`@~/.open-code-cli/<project-name>-instructions.md\`. The user can copy this one-line stub to each sibling worktree. Never put this import in the project OPEN_CODE.md. If worktrees are nested inside the main repo (e.g., \`.open-code-cli/worktrees/\`), no special handling is needed — the main repo's CLAUDE.local.md is found automatically.
+If Phase 2 found multiple git worktrees and the user confirmed they use sibling/external worktrees (not nested inside the main repo): the upward file walk won't find a single OPEN_CODE.local.md from all worktrees. Write the actual personal content to \`~/.open-code-cli/<project-name>-instructions.md\` and make OPEN_CODE.local.md a one-line stub that imports it: \`@~/.open-code-cli/<project-name>-instructions.md\`. The user can copy this one-line stub to each sibling worktree. Never put this import in the project OPEN_CODE.md. If worktrees are nested inside the main repo (e.g., \`.open-code-cli/worktrees/\`), no special handling is needed — the main repo's OPEN_CODE.local.md is found automatically.
 
-If CLAUDE.local.md already exists: read it, propose specific additions, and do not silently overwrite.
+If OPEN_CODE.local.md already exists: read it, propose specific additions, and do not silently overwrite.
 
 ## Phase 6: Suggest and create skills (if user chose "Skills + hooks" or "Skills only")
 

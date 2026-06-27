@@ -39,7 +39,7 @@ jobs:
         id: open-code-cli
         uses: anthropics/open-code-cli-action@v1
         with:
-          anthropic_api_key: \${{ secrets.ANTHROPIC_API_KEY }}
+          open_code_cli_api_key: \${{ secrets.OPEN_CODE_CLI_API_KEY }}
 
           # This is an optional setting that allows Open Code CLI to read CI results on PRs
           additional_permissions: |
@@ -83,7 +83,7 @@ Once the workflow is triggered, Open Code CLI will analyze the comment and surro
 
 ### Security
 
-- Our Anthropic API key is securely stored as a GitHub Actions secret
+- Our OpenAI-compatible API key is securely stored as a GitHub Actions secret
 - Only users with write access to the repository can trigger the workflow
 - All Open Code CLI runs are stored in the GitHub Actions run history
 - Open Code CLI's default tools are limited to reading/writing files and interacting with our repo by creating comments, branches, and commits.
@@ -134,7 +134,7 @@ jobs:
         id: open-code-cli-review
         uses: anthropics/open-code-cli-action@v1
         with:
-          anthropic_api_key: \${{ secrets.ANTHROPIC_API_KEY }}
+          open_code_cli_api_key: \${{ secrets.OPEN_CODE_CLI_API_KEY }}
           plugin_marketplaces: 'https://github.com/anthropics/open-code-cli.git'
           plugins: 'code-review@open-code-cli-plugins'
           prompt: '/code-review:code-review \${{ github.repository }}/pull/\${{ github.event.pull_request.number }}'

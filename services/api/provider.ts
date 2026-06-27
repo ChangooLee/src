@@ -16,14 +16,10 @@ import type {
   BetaToolUnion,
   BetaUsage,
   BetaMessageParam as MessageParam,
-} from '@anthropic-ai/sdk/resources/beta/messages/messages.mjs'
-import type { TextBlockParam } from '@anthropic-ai/sdk/resources/index.mjs'
-import type { Stream } from '@anthropic-ai/sdk/streaming.mjs'
+} from './providerTypes.js'
+import type { TextBlockParam, Stream } from './providerTypes.js'
 import { randomUUID } from 'crypto'
-import {
-  getAPIProvider,
-  isFirstPartyAnthropicBaseUrl,
-} from 'src/utils/model/providers.js'
+import { getAPIProvider } from 'src/utils/model/providers.js'
 import {
   getAttributionHeader,
   getCLISyspromptPrefix,
@@ -56,11 +52,7 @@ import {
   toolToAPISchema,
 } from '../../utils/api.js'
 import { getOauthAccountInfo } from '../../utils/auth.js'
-import {
-  getBedrockExtraBodyParamsBetas,
-  getMergedBetas,
-  getModelBetas,
-} from '../../utils/betas.js'
+import { getMergedBetas, getModelBetas } from '../../utils/betas.js'
 import { getOrCreateUserID } from '../../utils/config.js'
 import {
   CAPPED_DEFAULT_MAX_TOKENS,
@@ -107,12 +99,12 @@ const autoModeStateModule = feature('TRANSCRIPT_CLASSIFIER')
   : null
 
 import { feature } from 'bun:bundle'
-import type { ClientOptions } from '@anthropic-ai/sdk'
 import {
   APIConnectionTimeoutError,
   APIError,
   APIUserAbortError,
-} from '@anthropic-ai/sdk/error'
+  type ClientOptions,
+} from './providerTypes.js'
 import {
   getAfkModeHeaderLatched,
   getCacheEditingHeaderLatched,
@@ -161,7 +153,7 @@ import {
   shouldIncludeFirstPartyOnlyBetas,
   shouldUseGlobalCacheScope,
 } from 'src/utils/betas.js'
-import { CLAUDE_IN_CHROME_MCP_SERVER_NAME } from 'src/utils/claudeInChrome/common.js'
+import { OPEN_CODE_IN_CHROME_MCP_SERVER_NAME } from 'src/utils/claudeInChrome/common.js'
 import { CHROME_TOOL_SEARCH_INSTRUCTIONS } from 'src/utils/claudeInChrome/prompt.js'
 import { getMaxThinkingTokensForModel } from 'src/utils/context.js'
 import { logForDebugging } from 'src/utils/debug.js'
@@ -199,7 +191,6 @@ import { count } from '../../utils/array.js'
 import { insertBlockAfterToolResults } from '../../utils/contentArray.js'
 import { validateBoundedIntEnvVar } from '../../utils/envValidation.js'
 import { safeParseJSON } from '../../utils/json.js'
-import { getInferenceProfileBackingModel } from '../../utils/model/bedrock.js'
 import {
   normalizeModelStringForAPI,
   parseUserSpecifiedModel,
@@ -228,7 +219,7 @@ import {
 import { getInitializationStatus } from '../lsp/manager.js'
 import { isToolFromMcpServer } from '../mcp/utils.js'
 import { withStreamingVCR, withVCR } from '../vcr.js'
-import { CLIENT_REQUEST_ID_HEADER, getAnthropicClient } from './client.js'
+import { CLIENT_REQUEST_ID_HEADER, getProviderClient } from './client.js'
 import {
   API_ERROR_MESSAGE_PREFIX,
   CUSTOM_OFF_SWITCH_MESSAGE,
@@ -264,7 +255,7 @@ type JsonArray = JsonValue[]
 /**
  * Assemble the extra body parameters for the API request, based on the
  * OPEN_CODE_CLI_EXTRA_BODY environment variable if present and on any beta
- * headers (primarily for Bedrock requests).
+ * headers (primarily for OpenAICompatibleProvider requests).
  *
  * @param betaHeaders - An array of beta headers to include in the request.
  * @returns A JSON object representing the extra body parameters.
@@ -304,7 +295,7 @@ export function getExtraBodyParams(betaHeaders?: string[]): JsonObject {
       ? getOpenCodeCliEnv('ENTRYPOINT') === 'cli' &&
         shouldIncludeFirstPartyOnlyBetas() &&
         getFeatureValue_CACHED_MAY_BE_STALE(
-          'open_code_cli_anti_distill_fake_tool_injection',
+          'tengu_anti_distill_fake_tool_injection',
           false,
         )
       : false
@@ -314,16 +305,16 @@ export function getExtraBodyParams(betaHeaders?: string[]): JsonObject {
 
   // Handle beta headers if provided
   if (betaHeaders && betaHeaders.length > 0) {
-    if (result.anthropic_beta && Array.isArray(result.anthropic_beta)) {
+    if (result.providerClient_beta && Array.isArray(result.providerClient_beta)) {
       // Add to existing array, avoiding duplicates
-      const existingHeaders = result.anthropic_beta as string[]
+      const existingHeaders = result.providerClient_beta as string[]
       const newHeaders = betaHeaders.filter(
         header => !existingHeaders.includes(header),
       )
-      result.anthropic_beta = [...existingHeaders, ...newHeaders]
+      result.providerClient_beta = [...existingHeaders, ...newHeaders]
     } else {
       // Create new array with the beta headers
-      result.anthropic_beta = betaHeaders
+      result.providerClient_beta = betaHeaders
     }
   }
 
@@ -391,10 +382,10 @@ export function getCacheControl({
  * TTLs when GrowthBook's disk cache updates mid-request.
  */
 function should1hCacheTTL(querySource?: QuerySource): boolean {
-  // 3P Bedrock users get 1h TTL when opted in via env var — they manage their own billing
+  // 3P OpenAICompatibleProvider users get 1h TTL when opted in via env var — they manage their own billing
   // No GrowthBook gating needed since 3P users don't have GrowthBook configured
   if (
-    getAPIProvider() === 'bedrock' &&
+    false &&
     isEnvTruthy(process.env.ENABLE_PROMPT_CACHING_1H_BEDROCK)
   ) {
     return true
@@ -418,7 +409,7 @@ function should1hCacheTTL(querySource?: QuerySource): boolean {
   if (allowlist === null) {
     const config = getFeatureValue_CACHED_MAY_BE_STALE<{
       allowlist?: string[]
-    }>('open_code_cli_prompt_cache_1h_config', {})
+    }>('tengu_prompt_cache_1h_config', {})
     allowlist = config.allowlist ?? []
     setPromptCache1hAllowlist(allowlist)
   }
@@ -455,10 +446,10 @@ function configureEffortParams(
     outputConfig.effort = effortValue
     betas.push(EFFORT_BETA_HEADER)
   } else if (process.env.USER_TYPE === 'ant') {
-    // Numeric effort override - ant-only (uses anthropic_internal)
+    // Numeric effort override - ant-only (uses providerClient_internal)
     const existingInternal =
-      (extraBodyParams.anthropic_internal as Record<string, unknown>) || {}
-    extraBodyParams.anthropic_internal = {
+      (extraBodyParams.providerClient_internal as Record<string, unknown>) || {}
+    extraBodyParams.providerClient_internal = {
       ...existingInternal,
       effort_override: effortValue,
     }
@@ -503,14 +494,16 @@ export function configureTaskBudgetParams(
 export function getAPIMetadata() {
   // https://docs.google.com/document/d/1dURO9ycXXQCBS0V4Vhl4poDBRgkelFc5t2BNPoEgH5Q/edit?tab=t.0#heading=h.5g7nec5b09w5
   let extra: JsonObject = {}
-  const extraStr = process.env.OPEN_CODE_CLI_EXTRA_METADATA
+  const extraStr =
+    process.env.OPEN_CODE_CLI_EXTRA_METADATA ??
+    process.env.OPEN_CODE_CLI_EXTRA_METADATA
   if (extraStr) {
     const parsed = safeParseJSON(extraStr, false)
     if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
       extra = parsed as JsonObject
     } else {
       logForDebugging(
-        `OPEN_CODE_CLI_EXTRA_METADATA env var must be a JSON object, but was given ${extraStr}`,
+        `OPEN_CODE_CLI_EXTRA_METADATA env var must be a JSON object, but was given ${extraStr} (legacy: OPEN_CODE_CLI_EXTRA_METADATA)`,
         { level: 'error' },
       )
     }
@@ -543,16 +536,16 @@ export async function verifyApiKey(
     return await returnValue(
       withRetry(
         () =>
-          getAnthropicClient({
+          getProviderClient({
             apiKey,
             maxRetries: 3,
             model,
             source: 'verify_api_key',
           }),
-        async anthropic => {
+        async providerClient => {
           const messages: MessageParam[] = [{ role: 'user', content: 'test' }]
           // biome-ignore lint/plugin: API key verification is intentionally a minimal direct call
-          await anthropic.beta.messages.create({
+          await providerClient.beta.messages.create({
             model,
             max_tokens: 1,
             messages,
@@ -835,20 +828,20 @@ export async function* executeNonStreamingRequest(
   captureRequest: (params: BetaMessageStreamParams) => void,
   /**
    * Request ID of the failed streaming attempt this fallback is recovering
-   * from. Emitted in open_code_cli_nonstreaming_fallback_error for funnel correlation.
+   * from. Emitted in tengu_nonstreaming_fallback_error for funnel correlation.
    */
   originatingRequestId?: string | null,
 ): AsyncGenerator<SystemAPIErrorMessage, BetaMessage> {
   const fallbackTimeoutMs = getNonstreamingFallbackTimeoutMs()
   const generator = withRetry(
     () =>
-      getAnthropicClient({
+      getProviderClient({
         maxRetries: 0,
         model: clientOptions.model,
         fetchOverride: clientOptions.fetchOverride,
         source: clientOptions.source,
       }),
-    async (anthropic, attempt, context) => {
+    async (providerClient, attempt, context) => {
       const start = Date.now()
       const retryParams = paramsFromContext(context)
       captureRequest(retryParams)
@@ -861,7 +854,7 @@ export async function* executeNonStreamingRequest(
 
       try {
         // biome-ignore lint/plugin: non-streaming API call
-        return await anthropic.beta.messages.create(
+        return await providerClient.beta.messages.create(
           {
             ...adjustedParams,
             model: normalizeModelStringForAPI(adjustedParams.model),
@@ -879,7 +872,7 @@ export async function* executeNonStreamingRequest(
         // timeouts). Lets us distinguish "fallback hung past container kill"
         // (no event) from "fallback hit the bounded timeout" (this event).
         logForDiagnosticsNoPII('error', 'cli_nonstreaming_fallback_error')
-        logEvent('open_code_cli_nonstreaming_fallback_error', {
+        logEvent('tengu_nonstreaming_fallback_error', {
           model:
             clientOptions.model as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
           error:
@@ -1033,14 +1026,14 @@ async function* queryModel(
     isNonCustomOpusModel(options.model) &&
     (
       await getDynamicConfig_BLOCKS_ON_INIT<{ activated: boolean }>(
-        'open-code-cli-off-switch',
+        'tengu-off-switch',
         {
           activated: false,
         },
       )
     ).activated
   ) {
-    logEvent('open_code_cli_off_switch_query', {})
+    logEvent('tengu_off_switch_query', {})
     yield getAssistantMessageFromError(
       new Error(CUSTOM_OFF_SWITCH_MESSAGE),
       options.model,
@@ -1055,9 +1048,9 @@ async function* queryModel(
   const previousRequestId = getPreviousRequestIdFromMessages(messages)
 
   const resolvedModel =
-    getAPIProvider() === 'bedrock' &&
+    false &&
     options.model.includes('application-inference-profile')
-      ? ((await getInferenceProfileBackingModel(options.model)) ??
+      ? ((await String(options.model)) ??
         options.model)
       : options.model
 
@@ -1172,10 +1165,10 @@ async function* queryModel(
   }
 
   // Add tool search beta header if enabled - required for defer_loading to be accepted
-  // Header differs by provider: 1P/Foundry use advanced-tool-use, Vertex/Bedrock use tool-search-tool
-  // For Bedrock, this header must go in extraBodyParams, not the betas array
+  // Header differs by provider: 1P/OpenAICompatibleProvider use advanced-tool-use, OpenAICompatibleProvider/OpenAICompatibleProvider use tool-search-tool
+  // For OpenAICompatibleProvider, this header must go in extraBodyParams, not the betas array
   const toolSearchHeader = useToolSearch ? getToolSearchBetaHeader() : null
-  if (toolSearchHeader && getAPIProvider() !== 'bedrock') {
+  if (toolSearchHeader && true) {
     if (!betas.includes(toolSearchHeader)) {
       betas.push(toolSearchHeader)
     }
@@ -1258,7 +1251,7 @@ async function* queryModel(
 
   // Normalize messages before building system prompt (needed for fingerprinting)
   // Instrumentation: Track message count before normalization
-  logEvent('open_code_cli_api_before_normalize', {
+  logEvent('tengu_api_before_normalize', {
     preNormalizedMessageCount: messages.length,
   })
 
@@ -1315,7 +1308,7 @@ async function* queryModel(
   )
 
   // Instrumentation: Track message count after normalization
-  logEvent('open_code_cli_api_after_normalize', {
+  logEvent('tengu_api_after_normalize', {
     postNormalizedMessageCount: messagesForAPI.length,
   })
 
@@ -1349,7 +1342,7 @@ async function* queryModel(
   // (attachments.ts) instead of here. This per-request sys-prompt append
   // busts the prompt cache when chrome connects late.
   const hasChromeTools = filteredTools.some(t =>
-    isToolFromMcpServer(t.name, CLAUDE_IN_CHROME_MCP_SERVER_NAME),
+    isToolFromMcpServer(t.name, OPEN_CODE_IN_CHROME_MCP_SERVER_NAME),
   )
   const injectChromeHere =
     useToolSearch && hasChromeTools && !isMcpInstructionsDeltaEnabled()
@@ -1433,7 +1426,7 @@ async function* queryModel(
     if (
       !cacheEditingHeaderLatched &&
       cachedMCEnabled &&
-      getAPIProvider() === 'firstParty' &&
+      false &&
       options.querySource === 'repl_main_thread'
     ) {
       cacheEditingHeaderLatched = true
@@ -1546,15 +1539,8 @@ async function* queryModel(
       betasParams.push(CONTEXT_1M_BETA_HEADER)
     }
 
-    // For Bedrock, include both model-based betas and dynamically-added tool search header
-    const bedrockBetas =
-      getAPIProvider() === 'bedrock'
-        ? [
-            ...getBedrockExtraBodyParamsBetas(retryContext.model),
-            ...(toolSearchHeader ? [toolSearchHeader] : []),
-          ]
-        : []
-    const extraBodyParams = getExtraBodyParams(bedrockBetas)
+    // For OpenAICompatibleProvider, include both model-based betas and dynamically-added tool search header
+    const extraBodyParams = getExtraBodyParams([])
 
     const outputConfig: BetaOutputConfig = {
       ...((extraBodyParams.output_config as BetaOutputConfig) ?? {}),
@@ -1674,11 +1660,11 @@ async function* queryModel(
     // the feature disables but the header doesn't flip.
     const useCachedMC =
       cachedMCEnabled &&
-      getAPIProvider() === 'firstParty' &&
+      false &&
       options.querySource === 'repl_main_thread'
     if (
       cacheEditingHeaderLatched &&
-      getAPIProvider() === 'firstParty' &&
+      false &&
       options.querySource === 'repl_main_thread' &&
       !betasParams.includes(cacheEditingBetaHeader)
     ) {
@@ -1777,13 +1763,13 @@ async function* queryModel(
     queryCheckpoint('query_client_creation_start')
     const generator = withRetry(
       () =>
-        getAnthropicClient({
+        getProviderClient({
           maxRetries: 0, // Disabled auto-retry in favor of manual implementation
           model: options.model,
           fetchOverride: options.fetchOverride,
           source: options.querySource,
         }),
-      async (anthropic, attempt, context) => {
+      async (providerClient, attempt, context) => {
         attemptNumber = attempt
         isFastModeRequest = context.fastMode ?? false
         start = Date.now()
@@ -1807,19 +1793,14 @@ async function* queryModel(
           headlessProfilerCheckpoint('api_request_sent')
         }
 
-        // Generate and track client request ID so timeouts (which return no
-        // server request ID) can still be correlated with server logs.
-        // First-party only — 3P providers don't log it (inc-4029 class).
-        clientRequestId =
-          getAPIProvider() === 'firstParty' && isFirstPartyAnthropicBaseUrl()
-            ? randomUUID()
-            : undefined
+        // Generate and track a client request ID for OpenAI-compatible gateways.
+        clientRequestId = randomUUID()
 
         // Use raw stream instead of BetaMessageStream to avoid O(n²) partial JSON parsing
         // BetaMessageStream calls partialParse() on every input_json_delta, which we don't need
         // since we handle tool input accumulation ourselves
         // biome-ignore lint/plugin: main conversation loop handles attribution separately
-        const result = await anthropic.beta.messages
+        const result = await providerClient.beta.messages
           .create(
             { ...params, stream: true },
             {
@@ -1872,10 +1853,10 @@ async function* queryModel(
     // the session indefinitely since the SDK's request timeout only covers the
     // initial fetch(), not the streaming body.
     const streamWatchdogEnabled = isEnvTruthy(
-      process.env.CLAUDE_ENABLE_STREAM_WATCHDOG,
+      process.env.OPEN_CODE_ENABLE_STREAM_WATCHDOG,
     )
     const STREAM_IDLE_TIMEOUT_MS =
-      parseInt(process.env.CLAUDE_STREAM_IDLE_TIMEOUT_MS || '', 10) || 90_000
+      parseInt(process.env.OPEN_CODE_STREAM_IDLE_TIMEOUT_MS || '', 10) || 90_000
     const STREAM_IDLE_WARNING_MS = STREAM_IDLE_TIMEOUT_MS / 2
     let streamIdleAborted = false
     // performance.now() snapshot when watchdog fires, for measuring abort propagation delay
@@ -1916,7 +1897,7 @@ async function* queryModel(
           { level: 'error' },
         )
         logForDiagnosticsNoPII('error', 'cli_streaming_idle_timeout')
-        logEvent('open_code_cli_streaming_idle_timeout', {
+        logEvent('tengu_streaming_idle_timeout', {
           model:
             options.model as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
           request_id: (streamRequestId ??
@@ -1951,7 +1932,7 @@ async function* queryModel(
               `Streaming stall detected: ${(timeSinceLastEvent / 1000).toFixed(1)}s gap between events (stall #${stallCount})`,
               { level: 'warn' },
             )
-            logEvent('open_code_cli_streaming_stall', {
+            logEvent('tengu_streaming_stall', {
               stall_duration_ms: timeSinceLastEvent,
               stall_count: stallCount,
               total_stall_time_ms: totalStallTime,
@@ -2008,7 +1989,7 @@ async function* queryModel(
                 if ((part.content_block.name as string) === 'advisor') {
                   isAdvisorInProgress = true
                   logForDebugging(`[AdvisorTool] Advisor tool called`)
-                  logEvent('open_code_cli_advisor_tool_call', {
+                  logEvent('tengu_advisor_tool_call', {
                     model:
                       options.model as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
                     advisor_model: (advisorModel ??
@@ -2054,7 +2035,7 @@ async function* queryModel(
             const contentBlock = contentBlocks[part.index]
             const delta = part.delta as typeof part.delta | ConnectorTextDelta
             if (!contentBlock) {
-              logEvent('open_code_cli_streaming_error', {
+              logEvent('tengu_streaming_error', {
                 error_type:
                   'content_block_not_found_delta' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
                 part_type:
@@ -2068,7 +2049,7 @@ async function* queryModel(
               delta.type === 'connector_text_delta'
             ) {
               if (contentBlock.type !== 'connector_text') {
-                logEvent('open_code_cli_streaming_error', {
+                logEvent('tengu_streaming_error', {
                   error_type:
                     'content_block_type_mismatch_connector_text' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
                   expected_type:
@@ -2089,7 +2070,7 @@ async function* queryModel(
                     contentBlock.type !== 'tool_use' &&
                     contentBlock.type !== 'server_tool_use'
                   ) {
-                    logEvent('open_code_cli_streaming_error', {
+                    logEvent('tengu_streaming_error', {
                       error_type:
                         'content_block_type_mismatch_input_json' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
                       expected_type:
@@ -2100,7 +2081,7 @@ async function* queryModel(
                     throw new Error('Content block is not a input_json block')
                   }
                   if (typeof contentBlock.input !== 'string') {
-                    logEvent('open_code_cli_streaming_error', {
+                    logEvent('tengu_streaming_error', {
                       error_type:
                         'content_block_input_not_string' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
                       input_type:
@@ -2112,7 +2093,7 @@ async function* queryModel(
                   break
                 case 'text_delta':
                   if (contentBlock.type !== 'text') {
-                    logEvent('open_code_cli_streaming_error', {
+                    logEvent('tengu_streaming_error', {
                       error_type:
                         'content_block_type_mismatch_text' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
                       expected_type:
@@ -2133,7 +2114,7 @@ async function* queryModel(
                     break
                   }
                   if (contentBlock.type !== 'thinking') {
-                    logEvent('open_code_cli_streaming_error', {
+                    logEvent('tengu_streaming_error', {
                       error_type:
                         'content_block_type_mismatch_thinking_signature' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
                       expected_type:
@@ -2147,7 +2128,7 @@ async function* queryModel(
                   break
                 case 'thinking_delta':
                   if (contentBlock.type !== 'thinking') {
-                    logEvent('open_code_cli_streaming_error', {
+                    logEvent('tengu_streaming_error', {
                       error_type:
                         'content_block_type_mismatch_thinking_delta' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
                       expected_type:
@@ -2171,7 +2152,7 @@ async function* queryModel(
           case 'content_block_stop': {
             const contentBlock = contentBlocks[part.index]
             if (!contentBlock) {
-              logEvent('open_code_cli_streaming_error', {
+              logEvent('tengu_streaming_error', {
                 error_type:
                   'content_block_not_found_stop' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
                 part_type:
@@ -2181,7 +2162,7 @@ async function* queryModel(
               throw new RangeError('Content block not found')
             }
             if (!partialMessage) {
-              logEvent('open_code_cli_streaming_error', {
+              logEvent('tengu_streaming_error', {
                 error_type:
                   'partial_message_not_found' as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
                 part_type:
@@ -2264,11 +2245,11 @@ async function* queryModel(
             }
 
             if (stopReason === 'max_tokens') {
-              logEvent('open_code_cli_max_tokens_reached', {
+              logEvent('tengu_max_tokens_reached', {
                 max_tokens: maxOutputTokens,
               })
               yield createAssistantAPIErrorMessage({
-                content: `${API_ERROR_MESSAGE_PREFIX}: Claude's response exceeded the ${
+                content: `${API_ERROR_MESSAGE_PREFIX}: Open Code CLI's response exceeded the ${
                   maxOutputTokens
                 } output token maximum. To configure this behavior, set the OPEN_CODE_CLI_MAX_OUTPUT_TOKENS environment variable.`,
                 apiError: 'max_output_tokens',
@@ -2277,7 +2258,7 @@ async function* queryModel(
             }
 
             if (stopReason === 'model_context_window_exceeded') {
-              logEvent('open_code_cli_context_window_exceeded', {
+              logEvent('tengu_context_window_exceeded', {
                 max_tokens: maxOutputTokens,
                 output_tokens: usage.output_tokens,
               })
@@ -2319,7 +2300,7 @@ async function* queryModel(
           'info',
           'cli_stream_loop_exited_after_watchdog_clean',
         )
-        logEvent('open_code_cli_stream_loop_exited_after_watchdog', {
+        logEvent('tengu_stream_loop_exited_after_watchdog', {
           request_id: (streamRequestId ??
             'unknown') as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
           exit_delay_ms: exitDelayMs,
@@ -2354,7 +2335,7 @@ async function* queryModel(
             : 'Stream completed with message_start but no content blocks completed - triggering non-streaming fallback',
           { level: 'error' },
         )
-        logEvent('open_code_cli_stream_no_events', {
+        logEvent('tengu_stream_no_events', {
           model:
             options.model as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
           request_id: (streamRequestId ??
@@ -2369,7 +2350,7 @@ async function* queryModel(
           `Streaming completed with ${stallCount} stall(s), total stall time: ${(totalStallTime / 1000).toFixed(1)}s`,
           { level: 'warn' },
         )
-        logEvent('open_code_cli_streaming_stall_summary', {
+        logEvent('tengu_streaming_stall_summary', {
           stall_count: stallCount,
           total_stall_time_ms: totalStallTime,
           model:
@@ -2416,7 +2397,7 @@ async function* queryModel(
           'info',
           'cli_stream_loop_exited_after_watchdog_error',
         )
-        logEvent('open_code_cli_stream_loop_exited_after_watchdog', {
+        logEvent('tengu_stream_loop_exited_after_watchdog', {
           request_id: (streamRequestId ??
             'unknown') as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
           exit_delay_ms: exitDelayMs,
@@ -2441,7 +2422,7 @@ async function* queryModel(
             `Streaming aborted by user: ${errorMessage(streamingError)}`,
           )
           if (isAdvisorInProgress) {
-            logEvent('open_code_cli_advisor_tool_interrupted', {
+            logEvent('tengu_advisor_tool_interrupted', {
               model:
                 options.model as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
               advisor_model: (advisorModel ??
@@ -2469,7 +2450,7 @@ async function* queryModel(
       const disableFallback =
         isEnvTruthy(process.env.OPEN_CODE_CLI_DISABLE_NONSTREAMING_FALLBACK) ||
         getFeatureValue_CACHED_MAY_BE_STALE(
-          'open_code_cli_disable_streaming_to_non_streaming_fallback',
+          'tengu_disable_streaming_to_non_streaming_fallback',
           false,
         )
 
@@ -2478,7 +2459,7 @@ async function* queryModel(
           `Error streaming (non-streaming fallback disabled): ${errorMessage(streamingError)}`,
           { level: 'error' },
         )
-        logEvent('open_code_cli_streaming_fallback_to_non_streaming', {
+        logEvent('tengu_streaming_fallback_to_non_streaming', {
           model:
             options.model as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
           error:
@@ -2510,7 +2491,7 @@ async function* queryModel(
         options.onStreamingFallback()
       }
 
-      logEvent('open_code_cli_streaming_fallback_to_non_streaming', {
+      logEvent('tengu_streaming_fallback_to_non_streaming', {
         model:
           options.model as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
         error:
@@ -2539,7 +2520,7 @@ async function* queryModel(
       // Instrumentation: proves executeNonStreamingRequest was entered (vs. the
       // fallback event firing but the call itself hanging at dispatch).
       logForDiagnosticsNoPII('info', 'cli_nonstreaming_fallback_started')
-      logEvent('open_code_cli_nonstreaming_fallback_started', {
+      logEvent('tengu_nonstreaming_fallback_started', {
         request_id: (streamRequestId ??
           'unknown') as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
         model:
@@ -2630,7 +2611,7 @@ async function* queryModel(
         options.onStreamingFallback()
       }
 
-      logEvent('open_code_cli_streaming_fallback_to_non_streaming', {
+      logEvent('tengu_streaming_fallback_to_non_streaming', {
         model:
           options.model as AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
         error:
@@ -2913,7 +2894,7 @@ export function cleanupStream(
 
 /**
  * Updates usage statistics with new values from streaming API events.
- * Note: Anthropic's streaming API provides cumulative usage totals, not incremental deltas.
+ * Note: OpenAICompatibleProvider's streaming API provides cumulative usage totals, not incremental deltas.
  * Each event contains the complete usage up to that point in the stream.
  *
  * Input-related tokens (input_tokens, cache_creation_input_tokens, cache_read_input_tokens)
@@ -3069,7 +3050,7 @@ export function addCacheBreakpoints(
   pinnedEdits?: CachedMCPinnedEdits[],
   skipCacheWrite = false,
 ): MessageParam[] {
-  logEvent('open_code_cli_api_cache_breakpoints', {
+  logEvent('tengu_api_cache_breakpoints', {
     totalMessageCount: messages.length,
     cachingEnabled: enablePromptCaching,
     skipCacheWrite,
@@ -3348,7 +3329,7 @@ export async function queryWithModel({
 }
 
 // Non-streaming requests have a 10min max per the docs:
-// https://platform.open-code-cli.com/docs/en/api/errors#long-requests
+// https://platform.claude.com/docs/en/api/errors#long-requests
 // The SDK's 21333-token cap is derived from 10min × 128k tokens/hour, but we
 // bypass it by setting a client-level timeout, so we can cap higher.
 export const MAX_NON_STREAMING_TOKENS = 64_000
@@ -3392,8 +3373,8 @@ export function adjustParamsForNonStreaming<
 }
 
 function isMaxTokensCapEnabled(): boolean {
-  // 3P default: false (not validated on Bedrock/Vertex)
-  return getFeatureValue_CACHED_MAY_BE_STALE('open_code_cli_otk_slot_v1', false)
+  // 3P default: false (not validated on OpenAICompatibleProvider/OpenAICompatibleProvider)
+  return getFeatureValue_CACHED_MAY_BE_STALE('tengu_otk_slot_v1', false)
 }
 
 export function getMaxOutputTokensForModel(model: string): number {

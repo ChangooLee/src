@@ -126,7 +126,7 @@ function isAgentMemFile(filePath: string): boolean {
 /**
  * Check if a file is a Claude-managed memory file (NOT user-managed instruction files).
  * Includes: auto-memory (memdir), agent memory, session memory/transcripts.
- * Excludes: OPEN_CODE.md, CLAUDE.local.md, .open-code-cli/rules/*.md (user-managed).
+ * Excludes: OPEN_CODE.md, OPEN_CODE.local.md, .open-code-cli/rules/*.md (user-managed).
  *
  * Use this for collapse/badge logic where user-managed files should show full diffs.
  */
@@ -173,7 +173,7 @@ export function isMemoryDirectory(dirPath: string): boolean {
   ) {
     return true
   }
-  // Check the auto-memory path override (CLAUDE_COWORK_MEMORY_PATH_OVERRIDE)
+  // Check the auto-memory path override (OPEN_CODE_COWORK_MEMORY_PATH_OVERRIDE)
   if (isAutoMemoryEnabled()) {
     const autoMemPath = getAutoMemPath()
     const autoMemDirCmp = toComparable(autoMemPath.replace(/[/\\]+$/, ''))
@@ -271,7 +271,7 @@ export function isShellCommandTargetingMemory(command: string): boolean {
 }
 
 // Check if a glob/pattern targets auto-managed memory files only.
-// Excludes OPEN_CODE.md, CLAUDE.local.md, .open-code-cli/rules/ (user-managed).
+// Excludes OPEN_CODE.md, OPEN_CODE.local.md, .open-code-cli/rules/ (user-managed).
 // Used for collapse badge logic where user-managed files should not be
 // counted as "memory" operations.
 export function isAutoManagedMemoryPattern(pattern: string): boolean {

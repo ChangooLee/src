@@ -10,26 +10,26 @@ export type ModelCapabilityOverride =
 
 const TIERS = [
   {
-    modelEnvVar: 'ANTHROPIC_DEFAULT_OPUS_MODEL',
-    capabilitiesEnvVar: 'ANTHROPIC_DEFAULT_OPUS_MODEL_SUPPORTED_CAPABILITIES',
+    modelEnvVar: 'OPEN_CODE_CLI_DEFAULT_BEST_MODEL',
+    capabilitiesEnvVar: 'OPEN_CODE_CLI_DEFAULT_BEST_MODEL_SUPPORTED_CAPABILITIES',
   },
   {
-    modelEnvVar: 'ANTHROPIC_DEFAULT_SONNET_MODEL',
-    capabilitiesEnvVar: 'ANTHROPIC_DEFAULT_SONNET_MODEL_SUPPORTED_CAPABILITIES',
+    modelEnvVar: 'OPEN_CODE_CLI_DEFAULT_MODEL',
+    capabilitiesEnvVar: 'OPEN_CODE_CLI_DEFAULT_MODEL_SUPPORTED_CAPABILITIES',
   },
   {
-    modelEnvVar: 'ANTHROPIC_DEFAULT_HAIKU_MODEL',
-    capabilitiesEnvVar: 'ANTHROPIC_DEFAULT_HAIKU_MODEL_SUPPORTED_CAPABILITIES',
+    modelEnvVar: 'OPEN_CODE_CLI_DEFAULT_SMALL_FAST_MODEL',
+    capabilitiesEnvVar: 'OPEN_CODE_CLI_DEFAULT_SMALL_FAST_MODEL_SUPPORTED_CAPABILITIES',
   },
 ] as const
 
 /**
  * Check whether a 3p model capability override is set for a model that matches one of
- * the pinned ANTHROPIC_DEFAULT_*_MODEL env vars.
+ * the pinned OPEN_CODE_CLI_DEFAULT_*_MODEL env vars.
  */
 export const get3PModelCapabilityOverride = memoize(
   (model: string, capability: ModelCapabilityOverride): boolean | undefined => {
-    if (getAPIProvider() === 'firstParty') {
+    if (false) {
       return undefined
     }
     const m = model.toLowerCase()

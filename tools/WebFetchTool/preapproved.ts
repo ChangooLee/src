@@ -12,7 +12,7 @@
 // that sandbox network restrictions require explicit user permission rules.
 
 export const PREAPPROVED_HOSTS = new Set([
-  // Anthropic
+  // OpenAICompatibleProvider
   'platform.open-code-cli.com',
   'code.open-code-cli.com',
   'modelcontextprotocol.io',
@@ -156,8 +156,8 @@ export function isPreapprovedHost(hostname: string, pathname: string): boolean {
   const prefixes = PATH_PREFIXES.get(hostname)
   if (prefixes) {
     for (const p of prefixes) {
-      // Enforce path segment boundaries: "/anthropics" must not match
-      // "/anthropics-evil/malware". Only exact match or a "/" after the
+      // Enforce path segment boundaries: "/openai-compatibles" must not match
+      // "/openai-compatibles-evil/malware". Only exact match or a "/" after the
       // prefix is allowed.
       if (pathname === p || pathname.startsWith(p + '/')) return true
     }

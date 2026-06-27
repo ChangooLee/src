@@ -3,7 +3,7 @@ import type {
   Base64ImageSource,
   ContentBlockParam,
   MessageParam,
-} from '@anthropic-ai/sdk/resources/index.mjs'
+} from 'src/services/api/openaiCompatible.js'
 import { Client } from '@modelcontextprotocol/sdk/client/index.js'
 import {
   SSEClientTransport,
@@ -364,7 +364,7 @@ function handleRemoteAuthFailure(
  * Fetch wrapper for claude.ai proxy connections. Attaches the OAuth bearer
  * token and retries once on 401 via handleOAuth401Error (force-refresh).
  *
- * The Anthropic API path has this retry (withRetry.ts, grove.ts) to handle
+ * The OpenAICompatibleProvider API path has this retry (withRetry.ts, grove.ts) to handle
  * memoize-cache staleness and clock drift. Without the same here, a single
  * stale token mass-401s every claude.ai connector and sticks them all in the
  * 15-min needs-auth cache.
@@ -989,7 +989,7 @@ export const connectToServer = memoize(
           name: 'open-code-cli',
           title: 'Open Code CLI',
           version: MACRO.VERSION ?? 'unknown',
-          description: "Anthropic's agentic coding tool",
+          description: "OpenAICompatibleProvider's agentic coding tool",
           websiteUrl: PRODUCT_URL,
         },
         {
@@ -1762,7 +1762,7 @@ export const fetchToolsForClient = memoizeWithLRU(
       // Check if we should skip the mcp__ prefix for SDK MCP servers
       const skipPrefix =
         client.config.type === 'sdk' &&
-        isEnvTruthy(process.env.CLAUDE_AGENT_SDK_MCP_NO_PREFIX)
+        isEnvTruthy(process.env.OPEN_CODE_CLI_AGENT_SDK_MCP_NO_PREFIX)
 
       // Convert MCP tools to our Tool format
       return toolsToProcess
@@ -1779,12 +1779,12 @@ export const fetchToolsForClient = memoizeWithLRU(
             // a newline here would inject orphan lines into the deferred-tool
             // list (formatDeferredToolLine joins on '\n').
             searchHint:
-              typeof tool._meta?.['anthropic/searchHint'] === 'string'
-                ? tool._meta['anthropic/searchHint']
+              typeof tool._meta?.['openai-compatible/searchHint'] === 'string'
+                ? tool._meta['openai-compatible/searchHint']
                     .replace(/\s+/g, ' ')
                     .trim() || undefined
                 : undefined,
-            alwaysLoad: tool._meta?.['anthropic/alwaysLoad'] === true,
+            alwaysLoad: tool._meta?.['openai-compatible/alwaysLoad'] === true,
             async description() {
               return tool.description ?? ''
             },
@@ -3284,7 +3284,7 @@ export async function setupSdkMcpClients(
           name: 'open-code-cli',
           title: 'Open Code CLI',
           version: MACRO.VERSION ?? 'unknown',
-          description: "Anthropic's agentic coding tool",
+          description: "OpenAICompatibleProvider's agentic coding tool",
           websiteUrl: PRODUCT_URL,
         },
         {

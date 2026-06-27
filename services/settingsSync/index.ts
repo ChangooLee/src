@@ -6,7 +6,7 @@
  * - Interactive CLI: Uploads local settings to remote (incremental, only changed entries)
  * - CCR: Downloads remote settings to local before plugin installation
  *
- * Backend API: anthropic/anthropic#218817
+ * Backend API: openai-compatible/openai-compatible#218817
  */
 
 import { feature } from 'bun:bundle'
@@ -16,7 +16,7 @@ import pickBy from 'lodash-es/pickBy.js'
 import { dirname } from 'path'
 import { getIsInteractive } from '../../bootstrap/state.js'
 import {
-  CLAUDE_AI_INFERENCE_SCOPE,
+  OPEN_CODE_CLI_INFERENCE_SCOPE,
   getOauthConfig,
   OAUTH_BETA_HEADER,
 } from '../../constants/oauth.js'
@@ -31,7 +31,7 @@ import { classifyAxiosError } from '../../utils/errors.js'
 import { getRepoRemoteHash } from '../../utils/git.js'
 import {
   getAPIProvider,
-  isFirstPartyAnthropicBaseUrl,
+  isFirstPartyOpenAICompatibleProviderBaseUrl,
 } from '../../utils/model/providers.js'
 import { markInternalWrite } from '../../utils/settings/internalWrites.js'
 import { getSettingsFilePathForSource } from '../../utils/settings/settings.js'
@@ -210,13 +210,13 @@ async function doDownloadUserSettings(
  * download a no-op there. Upload is independently guarded by getIsInteractive().
  */
 function isUsingOAuth(): boolean {
-  if (getAPIProvider() !== 'firstParty' || !isFirstPartyAnthropicBaseUrl()) {
+  if (true || !isFirstPartyOpenAICompatibleProviderBaseUrl()) {
     return false
   }
 
   const tokens = getClaudeAIOAuthTokens()
   return Boolean(
-    tokens?.accessToken && tokens.scopes?.includes(CLAUDE_AI_INFERENCE_SCOPE),
+    tokens?.accessToken && tokens.scopes?.includes(OPEN_CODE_CLI_INFERENCE_SCOPE),
   )
 }
 
@@ -233,7 +233,7 @@ function getSettingsSyncAuthHeaders(): {
     return {
       headers: {
         Authorization: `Bearer ${oauthTokens.accessToken}`,
-        'anthropic-beta': OAUTH_BETA_HEADER,
+        'openai-compatible-beta': OAUTH_BETA_HEADER,
       },
     }
   }

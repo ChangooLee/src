@@ -7,9 +7,9 @@ import { join, normalize, posix, sep } from 'path'
 import { hasAutoMemPathOverride, isAutoMemPath } from 'src/memdir/paths.js'
 import { isAgentMemoryPath } from 'src/tools/AgentTool/agentMemory.js'
 import {
-  CLAUDE_FOLDER_PERMISSION_PATTERN,
+  OPEN_CODE_FOLDER_PERMISSION_PATTERN,
   FILE_EDIT_TOOL_NAME,
-  GLOBAL_CLAUDE_FOLDER_PERMISSION_PATTERN,
+  GLOBAL_OPEN_CODE_FOLDER_PERMISSION_PATTERN,
 } from 'src/tools/FileEditTool/constants.js'
 import type { z } from 'zod/v4'
 import { getOriginalCwd, getSessionId } from '../../bootstrap/state.js'
@@ -491,7 +491,7 @@ function isDangerousFilePathToAutoEdit(path: string): boolean {
  * Detects suspicious Windows path patterns that could bypass security checks.
  * These patterns include:
  * - NTFS Alternate Data Streams (e.g., file.txt::$DATA or file.txt:stream)
- * - 8.3 short names (e.g., GIT~1, CLAUDE~1, SETTIN~1.JSON)
+ * - 8.3 short names (e.g., GIT~1, OPEN_CODE~1, SETTIN~1.JSON)
  * - Long path prefixes (e.g., \\?\C:\..., \\.\C:\..., //?/C:/..., //./C:/...)
  * - Trailing dots and spaces (e.g., .git., .open-code-cli , .bashrc...)
  * - DOS device names (e.g., .git.CON, settings.json.PRN, .bashrc.AUX)
@@ -552,7 +552,7 @@ function hasSuspiciousWindowsPathPattern(path: string): boolean {
 
   // Check for 8.3 short names
   // Look for '~' followed by a digit
-  // Examples: GIT~1, CLAUDE~1, SETTIN~1.JSON, BASHRC~1
+  // Examples: GIT~1, OPEN_CODE~1, SETTIN~1.JSON, BASHRC~1
   if (/~\d/.test(path)) {
     return true
   }
@@ -1281,9 +1281,9 @@ export function checkWritePermissionForTool<Input extends AnyObject>(
     const ruleContent = claudeFolderAllowRule.ruleValue.ruleContent
     if (
       ruleContent &&
-      (ruleContent.startsWith(CLAUDE_FOLDER_PERMISSION_PATTERN.slice(0, -2)) ||
+      (ruleContent.startsWith(OPEN_CODE_FOLDER_PERMISSION_PATTERN.slice(0, -2)) ||
         ruleContent.startsWith(
-          GLOBAL_CLAUDE_FOLDER_PERMISSION_PATTERN.slice(0, -2),
+          GLOBAL_OPEN_CODE_FOLDER_PERMISSION_PATTERN.slice(0, -2),
         )) &&
       !ruleContent.includes('..') &&
       ruleContent.endsWith('/**')
@@ -1518,7 +1518,7 @@ export function checkEditableInternalPath(
   // sides handles the macOS /tmp → /private/tmp case where the config dir
   // lives under a symlinked root.
   if (feature('TEMPLATES')) {
-    const jobDir = process.env.CLAUDE_JOB_DIR
+    const jobDir = process.env.OPEN_CODE_JOB_DIR
     if (jobDir) {
       const jobsRoot = join(getOpenCodeCliConfigHomeDir(), 'jobs')
       const jobDirForms = getPathsForPermissionCheck(jobDir).map(normalize)
@@ -1564,7 +1564,7 @@ export function checkEditableInternalPath(
 
   // Memdir directory (persistent memory for cross-session learning)
   // This pre-safety-check carve-out exists because the default path is under
-  // ~/.open-code-cli/, which is in DANGEROUS_DIRECTORIES. The CLAUDE_COWORK_MEMORY_PATH_OVERRIDE
+  // ~/.open-code-cli/, which is in DANGEROUS_DIRECTORIES. The OPEN_CODE_COWORK_MEMORY_PATH_OVERRIDE
   // override is an arbitrary caller-designated directory with no such conflict,
   // so it gets NO special permission treatment here — writes go through normal
   // permission flow (step 5 → ask). SDK callers who want silent memory should

@@ -195,7 +195,7 @@ export function unwrapCcrProxyUrl(url: string): string {
 /**
  * Compute a dedup signature for an MCP server config.
  * Two configs with the same signature are considered "the same server" for
- * plugin deduplication. Ignores env (plugins always inject CLAUDE_PLUGIN_ROOT)
+ * plugin deduplication. Ignores env (plugins always inject OPEN_CODE_CLI_PLUGIN_ROOT)
  * and headers (same URL = same server regardless of auth).
  * Returns null only for configs with neither command nor url (sdk type).
  */
@@ -1497,7 +1497,7 @@ export function areMcpConfigsAllowedWithEnterpriseMcpConfig(
   // NOTE: While all SDK MCP servers should be safe from a security perspective, we are still discussing
   // what the best way to do this is. In the meantime, we are limiting this to claude-vscode for now to
   // unbreak the VSCode extension for certain enterprise customers who have enterprise MCP config enabled.
-  // https://anthropic.slack.com/archives/C093UA0KLD7/p1764975463670109
+  // https://openai-compatible.slack.com/archives/C093UA0KLD7/p1764975463670109
   return Object.values(configs).every(
     c => c.type === 'sdk' && c.name === 'claude-vscode',
   )

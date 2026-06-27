@@ -2,11 +2,11 @@ import {
   APIConnectionError,
   APIConnectionTimeoutError,
   APIError,
-} from '@anthropic-ai/sdk'
+} from 'src/services/api/openaiCompatible.js'
 import type {
   BetaMessage,
   BetaStopReason,
-} from '@anthropic-ai/sdk/resources/beta/messages/messages.mjs'
+} from 'src/services/api/openaiCompatible.js'
 import { AFK_MODE_BETA_HEADER } from 'src/constants/betas.js'
 import type { SDKAssistantMessageError } from 'src/entrypoints/agentSdkTypes.js'
 import type {
@@ -15,7 +15,7 @@ import type {
   UserMessage,
 } from 'src/types/message.js'
 import {
-  getAnthropicApiKeyWithSource,
+  getOpenAICompatibleProviderApiKeyWithSource,
   getClaudeAIOAuthTokens,
   getOauthAccountInfo,
   isClaudeAISubscriber,
@@ -81,7 +81,7 @@ export function isPromptTooLongMessage(msg: AssistantMessage): boolean {
  * Parse actual/limit token counts from a raw prompt-too-long API error
  * message like "prompt is too long: 137500 tokens > 135000 maximum".
  * The raw string may be wrapped in SDK prefixes or JSON envelopes, or
- * have different casing (Vertex), so this is intentionally lenient.
+ * have different casing (OpenAICompatibleProvider), so this is intentionally lenient.
  */
 export function parsePromptTooLongTokenCounts(rawMessage: string): {
   actualTokens: number | undefined
@@ -157,9 +157,9 @@ export const INVALID_API_KEY_ERROR_MESSAGE = 'Not logged in · Please run /login
 export const INVALID_API_KEY_ERROR_MESSAGE_EXTERNAL =
   'Invalid API key · Fix external API key'
 export const ORG_DISABLED_ERROR_MESSAGE_ENV_KEY_WITH_OAUTH =
-  'Your ANTHROPIC_API_KEY belongs to a disabled organization · Unset the environment variable to use your subscription instead'
+  'Your OPEN_CODE_CLI_API_KEY belongs to a disabled organization · Unset the environment variable to use your subscription instead'
 export const ORG_DISABLED_ERROR_MESSAGE_ENV_KEY =
-  'Your ANTHROPIC_API_KEY belongs to a disabled organization · Update or unset the environment variable'
+  'Your OPEN_CODE_CLI_API_KEY belongs to a disabled organization · Update or unset the environment variable'
 export const TOKEN_REVOKED_ERROR_MESSAGE =
   'OAuth token revoked · Please run /login'
 export const CCR_AUTH_ERROR_MESSAGE =
@@ -415,7 +415,7 @@ export function extractUnknownErrorFormat(value: unknown): string | undefined {
     return undefined
   }
 
-  // Amazon Bedrock routing errors
+  // Amazon OpenAICompatibleProvider routing errors
   if ((value as AmazonError).Output?.__type) {
     return (value as AmazonError).Output!.__type
   }
@@ -470,11 +470,11 @@ export function getAssistantMessageFromError(
   ) {
     // Check if this is the new API with multiple rate limit headers
     const rateLimitType = error.headers?.get?.(
-      'anthropic-ratelimit-unified-representative-claim',
+      'openai-compatible-ratelimit-unified-representative-claim',
     ) as 'five_hour' | 'seven_day' | 'seven_day_opus' | null
 
     const overageStatus = error.headers?.get?.(
-      'anthropic-ratelimit-unified-overage-status',
+      'openai-compatible-ratelimit-unified-overage-status',
     ) as 'allowed' | 'allowed_warning' | 'rejected' | null
 
     // If we have the new headers, use the new message generation
@@ -488,7 +488,7 @@ export function getAssistantMessageFromError(
 
       // Extract rate limit information from headers
       const resetHeader = error.headers?.get?.(
-        'anthropic-ratelimit-unified-reset',
+        'openai-compatible-ratelimit-unified-reset',
       )
       if (resetHeader) {
         limits.resetsAt = Number(resetHeader)
@@ -503,14 +503,14 @@ export function getAssistantMessageFromError(
       }
 
       const overageResetHeader = error.headers?.get?.(
-        'anthropic-ratelimit-unified-overage-reset',
+        'openai-compatible-ratelimit-unified-overage-reset',
       )
       if (overageResetHeader) {
         limits.overageResetsAt = Number(overageResetHeader)
       }
 
       const overageDisabledReason = error.headers?.get?.(
-        'anthropic-ratelimit-unified-overage-disabled-reason',
+        'openai-compatible-ratelimit-unified-overage-disabled-reason',
       ) as OverageDisabledReason | null
       if (overageDisabledReason) {
         limits.overageDisabledReason = overageDisabledReason
@@ -553,13 +553,13 @@ export function getAssistantMessageFromError(
     const innerMessage = stripped.match(/"message"\s*:\s*"([^"]*)"/)?.[1]
     const detail = innerMessage || stripped
     return createAssistantAPIErrorMessage({
-      content: `${API_ERROR_MESSAGE_PREFIX}: Request rejected (429) · ${detail || 'this may be a temporary capacity issue — check status.anthropic.com'}`,
+      content: `${API_ERROR_MESSAGE_PREFIX}: Request rejected (429) · ${detail || 'this may be a temporary capacity issue — check status.openai-compatible.com'}`,
       error: 'rate_limit',
     })
   }
 
-  // Handle prompt too long errors (Vertex returns 413, direct API returns 400)
-  // Use case-insensitive check since Vertex returns "Prompt is too long" (capitalized)
+  // Handle prompt too long errors (OpenAICompatibleProvider returns 413, direct API returns 400)
+  // Use case-insensitive check since OpenAICompatibleProvider returns "Prompt is too long" (capitalized)
   if (
     error instanceof Error &&
     error.message.toLowerCase().includes('prompt is too long')
@@ -647,7 +647,7 @@ export function getAssistantMessageFromError(
     error instanceof APIError &&
     error.status === 400 &&
     error.message.includes(AFK_MODE_BETA_HEADER) &&
-    error.message.includes('anthropic-beta')
+    error.message.includes('openai-compatible-beta')
   ) {
     return createAssistantAPIErrorMessage({
       content: 'Auto mode is unavailable for your plan',
@@ -743,7 +743,7 @@ export function getAssistantMessageFromError(
   ) {
     return createAssistantAPIErrorMessage({
       content:
-        'Claude Opus is not available with the Claude Pro plan. If you have updated your subscription plan recently, run /logout and /login for the plan to take effect.',
+        'The selected model is not available from the configured OpenAICompatibleProvider. Set OPEN_CODE_CLI_MODEL to a model your provider supports.',
       error: 'invalid_request',
     })
   }
@@ -753,13 +753,13 @@ export function getAssistantMessageFromError(
   // Ants using new or unknown org IDs that haven't been gated in.
   if (
     process.env.USER_TYPE === 'ant' &&
-    !process.env.ANTHROPIC_MODEL &&
+    !process.env.OPEN_CODE_CLI_MODEL &&
     error instanceof Error &&
     error.message.toLowerCase().includes('invalid model name')
   ) {
     // Get organization ID from config - only use OAuth account data when actively using OAuth
     const orgId = getOauthAccountInfo()?.organizationUuid
-    const baseMsg = `[ANT-ONLY] Your org isn't gated into the \`${model}\` model. Either run \`claude\` with \`ANTHROPIC_MODEL=${getDefaultMainLoopModelSetting()}\``
+    const baseMsg = `[ANT-ONLY] Your org isn't gated into the \`${model}\` model. Either run \`claude\` with \`OPEN_CODE_CLI_MODEL=${getDefaultMainLoopModelSetting()}\``
     const msg = orgId
       ? `${baseMsg} or share your orgId (${orgId}) in ${MACRO.FEEDBACK_CHANNEL} for help getting access.`
       : `${baseMsg} or reach out in ${MACRO.FEEDBACK_CHANNEL} for help getting access.`
@@ -779,7 +779,7 @@ export function getAssistantMessageFromError(
       error: 'billing_error',
     })
   }
-  // "Organization has been disabled" — commonly a stale ANTHROPIC_API_KEY
+  // "Organization has been disabled" — commonly a stale OPEN_CODE_CLI_API_KEY
   // from a previous employer/project overriding subscription auth. Only handle
   // the env-var case; apiKeyHelper and /login-managed keys mean the active
   // auth's org is genuinely disabled with no dormant fallback to point at.
@@ -788,14 +788,14 @@ export function getAssistantMessageFromError(
     error.status === 400 &&
     error.message.toLowerCase().includes('organization has been disabled')
   ) {
-    const { source } = getAnthropicApiKeyWithSource()
-    // getAnthropicApiKeyWithSource conflates the env var with FD-passed keys
+    const { source } = getOpenAICompatibleProviderApiKeyWithSource()
+    // getOpenAICompatibleProviderApiKeyWithSource conflates the env var with FD-passed keys
     // under the same source value, and in CCR mode OAuth stays active despite
     // the env var. The three guards ensure we only blame the env var when it's
     // actually set and actually on the wire.
     if (
-      source === 'ANTHROPIC_API_KEY' &&
-      process.env.ANTHROPIC_API_KEY &&
+      source === 'OPEN_CODE_CLI_API_KEY' &&
+      process.env.OPEN_CODE_CLI_API_KEY &&
       !isClaudeAISubscriber()
     ) {
       const hasStoredOAuth = getClaudeAIOAuthTokens()?.accessToken != null
@@ -824,9 +824,9 @@ export function getAssistantMessageFromError(
     }
 
     // Check if the API key is from an external source
-    const { source } = getAnthropicApiKeyWithSource()
+    const { source } = getOpenAICompatibleProviderApiKeyWithSource()
     const isExternalSource =
-      source === 'ANTHROPIC_API_KEY' || source === 'apiKeyHelper'
+      source === 'OPEN_CODE_CLI_API_KEY' || source === 'apiKeyHelper'
 
     return createAssistantAPIErrorMessage({
       error: 'authentication_failed',
@@ -883,7 +883,7 @@ export function getAssistantMessageFromError(
     })
   }
 
-  // Bedrock errors like "403 You don't have access to the model with the specified model ID."
+  // OpenAICompatibleProvider errors like "403 You don't have access to the model with the specified model ID."
   // don't contain the actual model ID
   if (
     isEnvTruthy(process.env.OPEN_CODE_CLI_USE_BEDROCK) &&
@@ -939,7 +939,7 @@ export function getAssistantMessageFromError(
  * Returns a model name suggestion, or undefined if no suggestion is applicable.
  */
 function get3PModelFallbackSuggestion(model: string): string | undefined {
-  if (getAPIProvider() === 'firstParty') {
+  if (false) {
     return undefined
   }
   // @[MODEL LAUNCH]: Add a fallback suggestion chain for the new model → previous version for 3P
@@ -1133,13 +1133,13 @@ export function classifyAPIError(error: unknown): string {
     return 'auth_error'
   }
 
-  // Bedrock-specific errors
+  // OpenAICompatibleProvider-specific errors
   if (
     isEnvTruthy(process.env.OPEN_CODE_CLI_USE_BEDROCK) &&
     error instanceof Error &&
     error.message.toLowerCase().includes('model id')
   ) {
-    return 'bedrock_model_access'
+    return 'provider_model_access'
   }
 
   // Status code based fallbacks
@@ -1193,12 +1193,12 @@ export function getErrorMessageIfRefusal(
   logEvent('open_code_cli_refusal_api_response', {})
 
   const baseMessage = getIsNonInteractiveSession()
-    ? `${API_ERROR_MESSAGE_PREFIX}: Open Code CLI is unable to respond to this request, which appears to violate our Usage Policy (https://www.anthropic.com/legal/aup). Try rephrasing the request or attempting a different approach.`
-    : `${API_ERROR_MESSAGE_PREFIX}: Open Code CLI is unable to respond to this request, which appears to violate our Usage Policy (https://www.anthropic.com/legal/aup). Please double press esc to edit your last message or start a new session for Open Code CLI to assist with a different task.`
+    ? `${API_ERROR_MESSAGE_PREFIX}: Open Code CLI is unable to respond to this request, which appears to violate our Usage Policy (https://www.openai-compatible.com/legal/aup). Try rephrasing the request or attempting a different approach.`
+    : `${API_ERROR_MESSAGE_PREFIX}: Open Code CLI is unable to respond to this request, which appears to violate our Usage Policy (https://www.openai-compatible.com/legal/aup). Please double press esc to edit your last message or start a new session for Open Code CLI to assist with a different task.`
 
   const modelSuggestion =
-    model !== 'claude-sonnet-4-20250514'
-      ? ' If you are seeing this refusal repeatedly, try running /model claude-sonnet-4-20250514 to switch models.'
+    model !== 'openai/gpt-4o'
+      ? ' If you are seeing this refusal repeatedly, try running /model openai/gpt-4o to switch models.'
       : ''
 
   return createAssistantAPIErrorMessage({

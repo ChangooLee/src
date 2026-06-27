@@ -22,7 +22,7 @@ export const getGlobalClaudeFile = memoize((): string => {
   }
 
   const filename = `.open-code-cli${fileSuffixForOauthConfig()}.json`
-  return join(process.env.CLAUDE_CONFIG_DIR || homedir(), filename)
+  return join(process.env.OPEN_CODE_CLI_CONFIG_DIR || homedir(), filename)
 })
 
 const hasInternetAccess = memoize(async (): Promise<boolean> => {

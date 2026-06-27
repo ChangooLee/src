@@ -538,7 +538,7 @@ export async function initBridgeCore(
   // Adapter over either HybridTransport (v1: WS reads + POST writes to
   // Session-Ingress) or SSETransport+CCRClient (v2: SSE reads + POST
   // writes to CCR /worker/*). The v1/v2 choice is made in onWorkReceived:
-  // server-driven via secret.use_code_sessions, with CLAUDE_BRIDGE_USE_CCR_V2
+  // server-driven via secret.use_code_sessions, with OPEN_CODE_BRIDGE_USE_CCR_V2
   // as an ant-dev override.
   let transport: ReplBridgeTransport | null = null
   // Bumped on every onWorkReceived. Captured in createV2ReplTransport's .then()
@@ -1137,7 +1137,7 @@ export async function initBridgeCore(
       // inheritance hazard in spawn mode where the parent's orchestrator
       // var would leak into a v1 child.
       const useCcrV2 =
-        serverUseCcrV2 || isEnvTruthy(process.env.CLAUDE_BRIDGE_USE_CCR_V2)
+        serverUseCcrV2 || isEnvTruthy(process.env.OPEN_CODE_BRIDGE_USE_CCR_V2)
 
       // Auth is the one place v1 and v2 diverge hard:
       //
@@ -1464,12 +1464,12 @@ export async function initBridgeCore(
               new URL(wsUrl),
               {
                 Authorization: `Bearer ${oauthToken}`,
-                'anthropic-version': '2023-06-01',
+                'openai-compatible-version': '2023-06-01',
               },
               workSessionId,
               () => ({
                 Authorization: `Bearer ${getOAuthToken() ?? oauthToken}`,
-                'anthropic-version': '2023-06-01',
+                'openai-compatible-version': '2023-06-01',
               }),
               // Cap retries so a persistently-failing session-ingress can't
               // pin the uploader drain loop for the lifetime of the bridge.
@@ -2195,7 +2195,7 @@ async function startWorkPollLoop({
       // BridgeFatalError by handleErrorStatus() — never an axios-shaped
       // error. The poll endpoint's only path param is the env ID; 404
       // unambiguously means env-gone (no-work is a 200 with null body).
-      // The server sends error.type='not_found_error' (standard Anthropic
+      // The server sends error.type='not_found_error' (standard OpenAICompatibleProvider
       // API shape), not a bridge-specific string — but status===404 is
       // the real signal and survives body-shape changes.
       if (

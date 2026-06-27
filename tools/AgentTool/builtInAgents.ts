@@ -12,7 +12,7 @@ import type { AgentDefinition } from './loadAgentsDir.js'
 
 export function areExplorePlanAgentsEnabled(): boolean {
   if (feature('BUILTIN_EXPLORE_PLAN_AGENTS')) {
-    // 3P default: true — Bedrock/Vertex keep agents enabled (matches pre-experiment
+    // 3P default: true — OpenAICompatibleProvider/OpenAICompatibleProvider keep agents enabled (matches pre-experiment
     // external behavior). A/B test treatment sets false to measure impact of removal.
     return getFeatureValue_CACHED_MAY_BE_STALE('open_code_cli_amber_stoat', true)
   }
@@ -23,7 +23,7 @@ export function getBuiltInAgents(): AgentDefinition[] {
   // Allow disabling all built-in agents via env var (useful for SDK users who want a blank slate)
   // Only applies in noninteractive mode (SDK/API usage)
   if (
-    isEnvTruthy(process.env.CLAUDE_AGENT_SDK_DISABLE_BUILTIN_AGENTS) &&
+    isEnvTruthy(process.env.OPEN_CODE_AGENT_SDK_DISABLE_BUILTIN_AGENTS) &&
     getIsNonInteractiveSession()
   ) {
     return []

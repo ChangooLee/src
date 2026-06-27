@@ -4,7 +4,7 @@ import { execa } from 'execa'
 import { mkdir, stat } from 'fs/promises'
 import memoize from 'lodash-es/memoize.js'
 import { join } from 'path'
-import { CLAUDE_AI_PROFILE_SCOPE } from 'src/constants/oauth.js'
+import { OPEN_CODE_CLI_PROFILE_SCOPE } from 'src/constants/oauth.js'
 import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
   logEvent,
@@ -84,7 +84,7 @@ const DEFAULT_API_KEY_HELPER_TTL = 5 * 60 * 1000
 /**
  * CCR and Claude Desktop spawn the CLI with OAuth and should never fall back
  * to the user's ~/.open-code-cli/settings.json API-key config (apiKeyHelper,
- * env.ANTHROPIC_API_KEY, env.ANTHROPIC_AUTH_TOKEN). Those settings exist for
+ * env.OPEN_CODE_CLI_API_KEY, env.OPEN_CODE_CLI_AUTH_TOKEN). Those settings exist for
  * the user's terminal CLI, not managed sessions. Without this guard, a user
  * who runs `claude` in their terminal with an API key sees every CCD session
  * also use that key — and fail if it's stale/wrong-org.
@@ -98,18 +98,18 @@ function isManagedOAuthContext(): boolean {
 
 /** Whether we are supporting direct 1P auth. */
 // this code is closely related to getAuthTokenSource
-export function isAnthropicAuthEnabled(): boolean {
+export function isOpenAICompatibleProviderAuthEnabled(): boolean {
   // --bare: API-key-only, never OAuth.
   if (isBareMode()) return false
 
-  // `open-code-cli ssh` remote: ANTHROPIC_UNIX_SOCKET tunnels API calls through a
+  // `open-code-cli ssh` remote: OPEN_CODE_CLI_UNIX_SOCKET tunnels API calls through a
   // local auth-injecting proxy. The launcher sets OPEN_CODE_CLI_OAUTH_TOKEN as a
   // placeholder iff the local side is a subscriber (so the remote includes the
   // oauth-2025 beta header to match what the proxy will inject). The remote's
-  // ~/.open-code-cli settings (apiKeyHelper, settings.env.ANTHROPIC_API_KEY) MUST NOT
+  // ~/.open-code-cli settings (apiKeyHelper, settings.env.OPEN_CODE_CLI_API_KEY) MUST NOT
   // flip this — they'd cause a header mismatch with the proxy and a bogus
   // "invalid x-api-key" from the API. See src/ssh/sshAuthProxy.ts.
-  if (process.env.ANTHROPIC_UNIX_SOCKET) {
+  if (process.env.OPEN_CODE_CLI_UNIX_SOCKET) {
     return !!process.env.OPEN_CODE_CLI_OAUTH_TOKEN
   }
 
@@ -123,23 +123,23 @@ export function isAnthropicAuthEnabled(): boolean {
   const settings = getSettings_DEPRECATED() || {}
   const apiKeyHelper = settings.apiKeyHelper
   const hasExternalAuthToken =
-    process.env.ANTHROPIC_AUTH_TOKEN ||
+    process.env.OPEN_CODE_CLI_AUTH_TOKEN ||
     apiKeyHelper ||
     process.env.OPEN_CODE_CLI_API_KEY_FILE_DESCRIPTOR
 
   // Check if API key is from an external source (not managed by /login)
-  const { source: apiKeySource } = getAnthropicApiKeyWithSource({
+  const { source: apiKeySource } = getOpenAICompatibleProviderApiKeyWithSource({
     skipRetrievingKeyFromApiKeyHelper: true,
   })
   const hasExternalApiKey =
-    apiKeySource === 'ANTHROPIC_API_KEY' || apiKeySource === 'apiKeyHelper'
+    apiKeySource === 'OPEN_CODE_CLI_API_KEY' || apiKeySource === 'apiKeyHelper'
 
-  // Disable Anthropic auth if:
-  // 1. Using 3rd party services (Bedrock/Vertex/Foundry)
+  // Disable OpenAI-compatible auth if:
+  // 1. Using 3rd party services (OpenAICompatibleProviders)
   // 2. User has an external API key (regardless of proxy configuration)
   // 3. User has an external auth token (regardless of proxy configuration)
   // this may cause issues if users have complex proxy / gateway "client-side creds" auth scenarios,
-  // e.g. if they want to set X-Api-Key to a gateway key but use Anthropic OAuth for the Authorization
+  // e.g. if they want to set X-Api-Key to a gateway key but use OpenAICompatibleProvider OAuth for the Authorization
   // if we get reports of that, we should probably add an env var to force OAuth enablement
   const shouldDisableAuth =
     is3P ||
@@ -150,7 +150,7 @@ export function isAnthropicAuthEnabled(): boolean {
 }
 
 /** Where the auth token is being sourced from, if any. */
-// this code is closely related to isAnthropicAuthEnabled
+// this code is closely related to isOpenAICompatibleProviderAuthEnabled
 export function getAuthTokenSource() {
   // --bare: API-key-only. apiKeyHelper (from --settings) is the only
   // bearer-token-shaped source allowed. OAuth env vars, FD tokens, and
@@ -162,8 +162,8 @@ export function getAuthTokenSource() {
     return { source: 'none' as const, hasToken: false }
   }
 
-  if (process.env.ANTHROPIC_AUTH_TOKEN && !isManagedOAuthContext()) {
-    return { source: 'ANTHROPIC_AUTH_TOKEN' as const, hasToken: true }
+  if (process.env.OPEN_CODE_CLI_AUTH_TOKEN && !isManagedOAuthContext()) {
+    return { source: 'OPEN_CODE_CLI_AUTH_TOKEN' as const, hasToken: true }
   }
 
   if (process.env.OPEN_CODE_CLI_OAUTH_TOKEN) {
@@ -207,35 +207,35 @@ export function getAuthTokenSource() {
 }
 
 export type ApiKeySource =
-  | 'ANTHROPIC_API_KEY'
+  | 'OPEN_CODE_CLI_API_KEY'
   | 'apiKeyHelper'
   | '/login managed key'
   | 'none'
 
-export function getAnthropicApiKey(): null | string {
-  const { key } = getAnthropicApiKeyWithSource()
+export function getOpenAICompatibleProviderApiKey(): null | string {
+  const { key } = getOpenAICompatibleProviderApiKeyWithSource()
   return key
 }
 
-export function hasAnthropicApiKeyAuth(): boolean {
-  const { key, source } = getAnthropicApiKeyWithSource({
+export function hasOpenAICompatibleProviderApiKeyAuth(): boolean {
+  const { key, source } = getOpenAICompatibleProviderApiKeyWithSource({
     skipRetrievingKeyFromApiKeyHelper: true,
   })
   return key !== null && source !== 'none'
 }
 
-export function getAnthropicApiKeyWithSource(
+export function getOpenAICompatibleProviderApiKeyWithSource(
   opts: { skipRetrievingKeyFromApiKeyHelper?: boolean } = {},
 ): {
   key: null | string
   source: ApiKeySource
 } {
-  // --bare: hermetic auth. Only ANTHROPIC_API_KEY env or apiKeyHelper from
+  // --bare: hermetic auth. Only OPEN_CODE_CLI_API_KEY env or apiKeyHelper from
   // the --settings flag. Never touches keychain, config file, or approval
-  // lists. 3P (Bedrock/Vertex/Foundry) uses provider creds, not this path.
+  // lists. 3P (OpenAICompatibleProviders) uses provider creds, not this path.
   if (isBareMode()) {
-    if (process.env.ANTHROPIC_API_KEY) {
-      return { key: process.env.ANTHROPIC_API_KEY, source: 'ANTHROPIC_API_KEY' }
+    if (process.env.OPEN_CODE_CLI_API_KEY) {
+      return { key: process.env.OPEN_CODE_CLI_API_KEY, source: 'OPEN_CODE_CLI_API_KEY' }
     }
     if (getConfiguredApiKeyHelper()) {
       return {
@@ -248,18 +248,18 @@ export function getAnthropicApiKeyWithSource(
     return { key: null, source: 'none' }
   }
 
-  // On homespace, don't use ANTHROPIC_API_KEY (use Console key instead)
-  // https://anthropic.slack.com/archives/C08428WSLKV/p1747331773214779
+  // On homespace, don't use OPEN_CODE_CLI_API_KEY (use Console key instead)
+  // https://openai-compatible.slack.com/archives/C08428WSLKV/p1747331773214779
   const apiKeyEnv = isRunningOnHomespace()
     ? undefined
-    : process.env.ANTHROPIC_API_KEY
+    : process.env.OPEN_CODE_CLI_API_KEY
 
   // Always check for direct environment variable when the user ran open-code-cli --print.
   // This is useful for CI, etc.
   if (preferThirdPartyAuthentication() && apiKeyEnv) {
     return {
       key: apiKeyEnv,
-      source: 'ANTHROPIC_API_KEY',
+      source: 'OPEN_CODE_CLI_API_KEY',
     }
   }
 
@@ -269,7 +269,7 @@ export function getAnthropicApiKeyWithSource(
     if (apiKeyFromFd) {
       return {
         key: apiKeyFromFd,
-        source: 'ANTHROPIC_API_KEY',
+        source: 'OPEN_CODE_CLI_API_KEY',
       }
     }
 
@@ -279,14 +279,14 @@ export function getAnthropicApiKeyWithSource(
       !process.env.OPEN_CODE_CLI_OAUTH_TOKEN_FILE_DESCRIPTOR
     ) {
       throw new Error(
-        'ANTHROPIC_API_KEY or OPEN_CODE_CLI_OAUTH_TOKEN env var is required',
+        'OPEN_CODE_CLI_API_KEY or OPEN_CODE_CLI_OAUTH_TOKEN env var is required',
       )
     }
 
     if (apiKeyEnv) {
       return {
         key: apiKeyEnv,
-        source: 'ANTHROPIC_API_KEY',
+        source: 'OPEN_CODE_CLI_API_KEY',
       }
     }
 
@@ -296,7 +296,7 @@ export function getAnthropicApiKeyWithSource(
       source: 'none',
     }
   }
-  // Check for ANTHROPIC_API_KEY before checking the apiKeyHelper or /login-managed key
+  // Check for OPEN_CODE_CLI_API_KEY before checking the apiKeyHelper or /login-managed key
   if (
     apiKeyEnv &&
     getGlobalConfig().customApiKeyResponses?.approved?.includes(
@@ -305,7 +305,7 @@ export function getAnthropicApiKeyWithSource(
   ) {
     return {
       key: apiKeyEnv,
-      source: 'ANTHROPIC_API_KEY',
+      source: 'OPEN_CODE_CLI_API_KEY',
     }
   }
 
@@ -314,7 +314,7 @@ export function getAnthropicApiKeyWithSource(
   if (apiKeyFromFd) {
     return {
       key: apiKeyFromFd,
-      source: 'ANTHROPIC_API_KEY',
+      source: 'OPEN_CODE_CLI_API_KEY',
     }
   }
 
@@ -843,7 +843,7 @@ const GCP_CREDENTIALS_CHECK_TIMEOUT_MS = 5_000
 
 /**
  * Check if GCP credentials are currently valid by attempting to get an access token.
- * This uses the same authentication chain that the Vertex SDK uses.
+ * This uses the same authentication chain that the OpenAICompatibleProvider SDK uses.
  */
 export async function checkGcpCredentialsValid(): Promise<boolean> {
   try {
@@ -1048,7 +1048,7 @@ export function prefetchAwsCredentialsAndBedRockInfoIfSafe(): void {
   getModelStrings()
 }
 
-/** @private Use {@link getAnthropicApiKey} or {@link getAnthropicApiKeyWithSource} */
+/** @private Use {@link getOpenAICompatibleProviderApiKey} or {@link getOpenAICompatibleProviderApiKeyWithSource} */
 export const getApiKeyFromConfigOrMacOSKeychain = memoize(
   (): { key: string; source: ApiKeySource } | null => {
     if (isBareMode()) return null
@@ -1531,7 +1531,7 @@ async function checkAndRefreshOAuthTokenIfNeededImpl(
     logEvent('open_code_cli_oauth_token_refresh_starting', {})
     const refreshedTokens = await refreshOAuthToken(lockedTokens.refreshToken, {
       // For Claude.ai subscribers, omit scopes so the default
-      // CLAUDE_AI_OAUTH_SCOPES applies — this allows scope expansion
+      // OPEN_CODE_CLI_OAUTH_SCOPES applies — this allows scope expansion
       // (e.g. adding user:file_upload) on refresh without re-login.
       scopes: shouldUseClaudeAIAuth(lockedTokens.scopes)
         ? undefined
@@ -1563,7 +1563,7 @@ async function checkAndRefreshOAuthTokenIfNeededImpl(
 }
 
 export function isClaudeAISubscriber(): boolean {
-  if (!isAnthropicAuthEnabled()) {
+  if (!isOpenAICompatibleProviderAuthEnabled()) {
     return false
   }
 
@@ -1580,18 +1580,18 @@ export function isClaudeAISubscriber(): boolean {
  */
 export function hasProfileScope(): boolean {
   return (
-    getClaudeAIOAuthTokens()?.scopes?.includes(CLAUDE_AI_PROFILE_SCOPE) ?? false
+    getClaudeAIOAuthTokens()?.scopes?.includes(OPEN_CODE_CLI_PROFILE_SCOPE) ?? false
   )
 }
 
 export function is1PApiCustomer(): boolean {
   // 1P API customers are users who are NOT:
   // 1. Claude.ai subscribers (Max, Pro, Enterprise, Team)
-  // 2. Vertex AI users
-  // 3. AWS Bedrock users
-  // 4. Foundry users
+  // 2. OpenAICompatibleProvider AI users
+  // 3. AWS OpenAICompatibleProvider users
+  // 4. OpenAICompatibleProvider users
 
-  // Exclude Vertex, Bedrock, and Foundry customers
+  // Exclude OpenAICompatibleProvider, OpenAICompatibleProvider, and OpenAICompatibleProvider customers
   if (
     isEnvTruthy(process.env.OPEN_CODE_CLI_USE_BEDROCK) ||
     isEnvTruthy(process.env.OPEN_CODE_CLI_USE_VERTEX) ||
@@ -1610,11 +1610,11 @@ export function is1PApiCustomer(): boolean {
 }
 
 /**
- * Gets OAuth account information when Anthropic auth is enabled.
+ * Gets OAuth account information when OpenAI-compatible auth is enabled.
  * Returns undefined when using external API keys or third-party services.
  */
 export function getOauthAccountInfo(): AccountInfo | undefined {
-  return isAnthropicAuthEnabled() ? getGlobalConfig().oauthAccount : undefined
+  return isOpenAICompatibleProviderAuthEnabled() ? getGlobalConfig().oauthAccount : undefined
 }
 
 /**
@@ -1666,7 +1666,7 @@ export function getSubscriptionType(): SubscriptionType | null {
     return getMockSubscriptionType()
   }
 
-  if (!isAnthropicAuthEnabled()) {
+  if (!isOpenAICompatibleProviderAuthEnabled()) {
     return null
   }
   const oauthTokens = getClaudeAIOAuthTokens()
@@ -1701,7 +1701,7 @@ export function isProSubscriber(): boolean {
 }
 
 export function getRateLimitTier(): string | null {
-  if (!isAnthropicAuthEnabled()) {
+  if (!isOpenAICompatibleProviderAuthEnabled()) {
     return null
   }
   const oauthTokens = getClaudeAIOAuthTokens()
@@ -1719,17 +1719,17 @@ export function getSubscriptionName(): string {
     case 'enterprise':
       return 'Claude Enterprise'
     case 'team':
-      return 'Claude Team'
+      return 'provider plan'
     case 'max':
-      return 'Claude Max'
+      return 'provider plan'
     case 'pro':
-      return 'Claude Pro'
+      return 'provider plan'
     default:
-      return 'Claude API'
+      return 'OpenAI-compatible API'
   }
 }
 
-/** Check if using third-party services (Bedrock or Vertex or Foundry) */
+/** Check if using third-party services (OpenAICompatibleProvider or OpenAICompatibleProvider or OpenAICompatibleProvider) */
 export function isUsing3PServices(): boolean {
   return !!(
     isEnvTruthy(process.env.OPEN_CODE_CLI_USE_BEDROCK) ||
@@ -1863,7 +1863,7 @@ export type UserAccountInfo = {
 
 export function getAccountInformation() {
   const apiProvider = getAPIProvider()
-  // Only provide account info for first-party Anthropic API
+  // Only provide account info for first-party OpenAICompatibleProvider API
   if (apiProvider !== 'firstParty') {
     return undefined
   }
@@ -1879,7 +1879,7 @@ export function getAccountInformation() {
   } else {
     accountInfo.tokenSource = authTokenSource
   }
-  const { key: apiKey, source: apiKeySource } = getAnthropicApiKeyWithSource()
+  const { key: apiKey, source: apiKeySource } = getOpenAICompatibleProviderApiKeyWithSource()
   if (apiKey) {
     accountInfo.apiKeySource = apiKeySource
   }
@@ -1925,11 +1925,11 @@ export async function validateForceLoginOrg(): Promise<OrgValidationResult> {
   // `open-code-cli ssh` remote: real auth lives on the local machine and is injected
   // by the proxy. The placeholder token can't be validated against the profile
   // endpoint. The local side already ran this check before establishing the session.
-  if (process.env.ANTHROPIC_UNIX_SOCKET) {
+  if (process.env.OPEN_CODE_CLI_UNIX_SOCKET) {
     return { valid: true }
   }
 
-  if (!isAnthropicAuthEnabled()) {
+  if (!isOpenAICompatibleProviderAuthEnabled()) {
     return { valid: true }
   }
 

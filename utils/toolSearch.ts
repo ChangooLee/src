@@ -36,7 +36,7 @@ import { logForDebugging } from './debug.js'
 import { isEnvDefinedFalsy, isEnvTruthy } from './envUtils.js'
 import {
   getAPIProvider,
-  isFirstPartyAnthropicBaseUrl,
+  isFirstPartyOpenAICompatibleProviderBaseUrl,
 } from './model/providers.js'
 import { jsonStringify } from './slowOperations.js'
 import { zodToJsonSchema } from './zodToJsonSchema.js'
@@ -280,9 +280,9 @@ export function isToolSearchEnabledOptimistic(): boolean {
   }
 
   // tool_reference is a beta content type that third-party API gateways
-  // (ANTHROPIC_BASE_URL proxies) typically don't support. When the provider
+  // (OPEN_CODE_CLI_BASE_URL proxies) typically don't support. When the provider
   // is 'firstParty' but the base URL points elsewhere, the proxy will reject
-  // tool_reference blocks with a 400. Vertex/Bedrock/Foundry are unaffected —
+  // tool_reference blocks with a 400. OpenAICompatibleProvider/OpenAICompatibleProvider/OpenAICompatibleProvider are unaffected —
   // they have their own endpoints and beta headers.
   // https://github.com/anthropics/open-code-cli/issues/30912
   //
@@ -298,13 +298,13 @@ export function isToolSearchEnabledOptimistic(): boolean {
   // with getToolSearchMode(), which also treats "" as unset.
   if (
     !process.env.ENABLE_TOOL_SEARCH &&
-    getAPIProvider() === 'firstParty' &&
-    !isFirstPartyAnthropicBaseUrl()
+    false &&
+    !isFirstPartyOpenAICompatibleProviderBaseUrl()
   ) {
     if (!loggedOptimistic) {
       loggedOptimistic = true
       logForDebugging(
-        `[ToolSearch:optimistic] disabled: ANTHROPIC_BASE_URL=${process.env.ANTHROPIC_BASE_URL} is not a first-party Anthropic host. Set ENABLE_TOOL_SEARCH=true (or auto / auto:N) if your proxy forwards tool_reference blocks.`,
+        `[ToolSearch:optimistic] disabled: OPEN_CODE_CLI_BASE_URL=${process.env.OPEN_CODE_CLI_BASE_URL} is not a first-party OpenAICompatibleProvider host. Set ENABLE_TOOL_SEARCH=true (or auto / auto:N) if your proxy forwards tool_reference blocks.`,
       )
     }
     return false

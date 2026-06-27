@@ -1,10 +1,10 @@
 import { feature } from 'bun:bundle'
-import type Anthropic from '@anthropic-ai/sdk'
+import type OpenAICompatibleProvider from 'src/services/api/openaiCompatible.js'
 import {
   APIConnectionError,
   APIError,
   APIUserAbortError,
-} from '@anthropic-ai/sdk'
+} from 'src/services/api/openaiCompatible.js'
 import type { QuerySource } from 'src/constants/querySource.js'
 import type { SystemAPIErrorMessage } from 'src/types/message.js'
 import { isAwsCredentialsProviderError } from 'src/utils/aws.js'
@@ -169,9 +169,9 @@ export class FallbackTriggeredError extends Error {
 }
 
 export async function* withRetry<T>(
-  getClient: () => Promise<Anthropic>,
+  getClient: () => Promise<OpenAICompatibleProvider>,
   operation: (
-    client: Anthropic,
+    client: OpenAICompatibleProvider,
     attempt: number,
     context: RetryContext,
   ) => Promise<T>,
@@ -183,7 +183,7 @@ export async function* withRetry<T>(
     thinkingConfig: options.thinkingConfig,
     ...(isFastModeEnabled() && { fastMode: options.fastMode }),
   }
-  let client: Anthropic | null = null
+  let client: OpenAICompatibleProvider | null = null
   let consecutive529Errors = options.initialConsecutive529Errors ?? 0
   let lastError: unknown
   let persistentAttempt = 0
@@ -213,8 +213,8 @@ export async function* withRetry<T>(
       // Get a fresh client instance on first attempt or after authentication errors
       // - 401 for first-party API authentication failures
       // - 403 "OAuth token has been revoked" (another process refreshed the token)
-      // - Bedrock-specific auth errors (403 or CredentialsProviderError)
-      // - Vertex-specific auth errors (credential refresh failures, 401)
+      // - OpenAICompatibleProvider-specific auth errors (403 or CredentialsProviderError)
+      // - OpenAICompatibleProvider-specific auth errors (credential refresh failures, 401)
       // - ECONNRESET/EPIPE: stale keep-alive socket; disable pooling and reconnect
       const isStaleConnection = isStaleConnectionError(lastError)
       if (
@@ -234,8 +234,8 @@ export async function* withRetry<T>(
         client === null ||
         (lastError instanceof APIError && lastError.status === 401) ||
         isOAuthTokenRevokedError(lastError) ||
-        isBedrockAuthError(lastError) ||
-        isVertexAuthError(lastError) ||
+        isOpenAICompatibleProviderAuthError(lastError) ||
+        isOpenAICompatibleProviderAuthError(lastError) ||
         isStaleConnection
       ) {
         // On 401 "token expired" or 403 "token revoked", force a token refresh
@@ -274,7 +274,7 @@ export async function* withRetry<T>(
         // If the 429 is specifically because extra usage (overage) is not
         // available, permanently disable fast mode with a specific message.
         const overageReason = error.headers?.get(
-          'anthropic-ratelimit-unified-overage-disabled-reason',
+          'openai-compatible-ratelimit-unified-overage-disabled-reason',
         )
         if (overageReason !== null && overageReason !== undefined) {
           handleFastModeOverageRejection(overageReason)
@@ -629,7 +629,7 @@ function isOAuthTokenRevokedError(error: unknown): boolean {
   )
 }
 
-function isBedrockAuthError(error: unknown): boolean {
+function isOpenAICompatibleProviderAuthError(error: unknown): boolean {
   if (isEnvTruthy(process.env.OPEN_CODE_CLI_USE_BEDROCK)) {
     // AWS libs reject without an API call if .aws holds a past Expiration value
     // otherwise, API calls that receive expired tokens give generic 403
@@ -649,7 +649,7 @@ function isBedrockAuthError(error: unknown): boolean {
  * @returns true if action was taken.
  */
 function handleAwsCredentialError(error: unknown): boolean {
-  if (isBedrockAuthError(error)) {
+  if (isOpenAICompatibleProviderAuthError(error)) {
     clearAwsCredentialsCache()
     return true
   }
@@ -668,13 +668,13 @@ function isGoogleAuthLibraryCredentialError(error: unknown): boolean {
   )
 }
 
-function isVertexAuthError(error: unknown): boolean {
+function isOpenAICompatibleProviderAuthError(error: unknown): boolean {
   if (isEnvTruthy(process.env.OPEN_CODE_CLI_USE_VERTEX)) {
     // SDK-level: google-auth-library fails in prepareOptions() before the HTTP call
     if (isGoogleAuthLibraryCredentialError(error)) {
       return true
     }
-    // Server-side: Vertex returns 401 for expired/invalid tokens
+    // Server-side: OpenAICompatibleProvider returns 401 for expired/invalid tokens
     if (error instanceof APIError && error.status === 401) {
       return true
     }
@@ -687,7 +687,7 @@ function isVertexAuthError(error: unknown): boolean {
  * @returns true if action was taken.
  */
 function handleGcpCredentialError(error: unknown): boolean {
-  if (isVertexAuthError(error)) {
+  if (isOpenAICompatibleProviderAuthError(error)) {
     clearGcpCredentialsCache()
     return true
   }
@@ -813,7 +813,7 @@ function getRetryAfterMs(error: APIError): number | null {
 }
 
 function getRateLimitResetDelayMs(error: APIError): number | null {
-  const resetHeader = error.headers?.get?.('anthropic-ratelimit-unified-reset')
+  const resetHeader = error.headers?.get?.('openai-compatible-ratelimit-unified-reset')
   if (!resetHeader) return null
   const resetUnixSec = Number(resetHeader)
   if (!Number.isFinite(resetUnixSec)) return null

@@ -1,4 +1,4 @@
-import type { ContentBlockParam } from '@anthropic-ai/sdk/resources/index.mjs'
+import type { ContentBlockParam } from 'src/services/api/openaiCompatible.js'
 import type { UUID } from 'crypto'
 import type { CanUseToolFn } from '../hooks/useCanUseTool.js'
 import type { CompactionResult } from '../services/compact/compact.js'
@@ -37,7 +37,7 @@ export type PromptCommand = {
   disableNonInteractive?: boolean
   // Hooks to register when this skill is invoked
   hooks?: HooksSettings
-  // Base directory for skill resources (used to set CLAUDE_PLUGIN_ROOT environment variable for skill hooks)
+  // Base directory for skill resources (used to set OPEN_CODE_CLI_PLUGIN_ROOT environment variable for skill hooks)
   skillRoot?: string
   // Execution context: 'inline' (default) or 'fork' (run as sub-agent)
   // 'inline' = skill content expands into the current conversation
@@ -163,13 +163,13 @@ type LocalJSXCommand = {
  * of the listed auth types. See meetsAvailabilityRequirement() in commands.ts.
  *
  * Example: `availability: ['claude-ai', 'console']` shows the command to
- * claude.ai subscribers and direct Console API key users (api.anthropic.com),
- * but hides it from Bedrock/Vertex/Foundry users and custom base URL users.
+ * claude.ai subscribers and direct Console API key users (api.openai.com/v1),
+ * but hides it from OpenAICompatibleProvider/OpenAICompatibleProvider/OpenAICompatibleProvider users and custom base URL users.
  */
 export type CommandAvailability =
   // claude.ai OAuth subscriber (Pro/Max/Team/Enterprise via claude.ai)
   | 'claude-ai'
-  // Console API key user (direct api.anthropic.com, not via claude.ai OAuth)
+  // Console API key user (direct api.openai.com/v1, not via claude.ai OAuth)
   | 'console'
 
 export type CommandBase = {

@@ -28,7 +28,7 @@ function getTokenFromFileDescriptor(): string | null {
     // No FD env var — either we're not in CCR, or we're a subprocess whose
     // parent stripped the (useless) FD env var. Try the well-known file.
     const path =
-      process.env.CLAUDE_SESSION_INGRESS_TOKEN_FILE ??
+      process.env.OPEN_CODE_SESSION_INGRESS_TOKEN_FILE ??
       CCR_SESSION_INGRESS_TOKEN_PATH
     const fromFile = readTokenFromWellKnownFile(path, 'session ingress token')
     setSessionIngressToken(fromFile)
@@ -78,7 +78,7 @@ function getTokenFromFileDescriptor(): string | null {
     // FD env var was set but read failed — typically a subprocess that
     // inherited the env var but not the FD (ENXIO). Try the well-known file.
     const path =
-      process.env.CLAUDE_SESSION_INGRESS_TOKEN_FILE ??
+      process.env.OPEN_CODE_SESSION_INGRESS_TOKEN_FILE ??
       CCR_SESSION_INGRESS_TOKEN_PATH
     const fromFile = readTokenFromWellKnownFile(path, 'session ingress token')
     setSessionIngressToken(fromFile)
@@ -95,7 +95,7 @@ function getTokenFromFileDescriptor(): string | null {
  *     update_environment_variables stdin message from the parent bridge process.
  *  2. File descriptor (legacy path) — OPEN_CODE_CLI_WEBSOCKET_AUTH_FILE_DESCRIPTOR,
  *     read once and cached.
- *  3. Well-known file — CLAUDE_SESSION_INGRESS_TOKEN_FILE env var path, or
+ *  3. Well-known file — OPEN_CODE_SESSION_INGRESS_TOKEN_FILE env var path, or
  *     /home/claude/.open-code-cli/remote/.session_ingress_token. Covers subprocesses
  *     that can't inherit the FD.
  */

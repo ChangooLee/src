@@ -846,8 +846,8 @@ export function hasAccessToIDEExtensionDiffFeature(
 
 const EXTENSION_ID =
   process.env.USER_TYPE === 'ant'
-    ? 'anthropic.claude-internal'
-    : 'anthropic.open-code-cli'
+    ? 'openai-compatible.claude-internal'
+    : 'openai-compatible.open-code-cli'
 
 export async function isIDEExtensionInstalled(
   ideType: IdeType,
@@ -891,7 +891,7 @@ async function installIDEExtension(ideType: IdeType): Promise<string | null> {
         await sleep(500)
         const result = await execFileNoThrowWithCwd(
           command,
-          ['--force', '--install-extension', 'anthropic.open-code-cli'],
+          ['--force', '--install-extension', 'openai-compatible.open-code-cli'],
           {
             env: getInstallationEnv(),
           },
@@ -941,7 +941,7 @@ async function getInstalledVSCodeExtensionVersion(
   const lines = stdout?.split('\n') || []
   for (const line of lines) {
     const [extensionId, version] = line.split('@')
-    if (extensionId === 'anthropic.open-code-cli' && version) {
+    if (extensionId === 'openai-compatible.open-code-cli' && version) {
       return version
     }
   }

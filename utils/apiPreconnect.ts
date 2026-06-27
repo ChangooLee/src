@@ -1,5 +1,5 @@
 /**
- * Preconnect to the Anthropic API to overlap TCP+TLS handshake with startup.
+ * Preconnect to the OpenAICompatibleProvider API to overlap TCP+TLS handshake with startup.
  *
  * The TCP+TLS handshake is ~100-200ms that normally blocks inside the first
  * API call. Kicking a fire-and-forget fetch during init lets the handshake
@@ -13,14 +13,14 @@
  * Called from init.ts AFTER applyExtraCACertsFromConfig() + configureGlobalAgents()
  * so settings.json env vars are applied and the TLS cert store is finalized.
  * The early cli.tsx call site was removed — it ran before settings.json loaded,
- * so ANTHROPIC_BASE_URL/proxy/mTLS in settings would be invisible and preconnect
+ * so OPEN_CODE_CLI_BASE_URL/proxy/mTLS in settings would be invisible and preconnect
  * would warm the wrong pool (or worse, lock BoringSSL's cert store before
  * NODE_EXTRA_CA_CERTS was applied).
  *
  * Skipped when:
  * - proxy/mTLS/unix socket configured (preconnect would use wrong transport —
  *   the SDK passes a custom dispatcher/agent that doesn't share the global pool)
- * - Bedrock/Vertex/Foundry (different endpoints, different auth)
+ * - OpenAICompatibleProvider/OpenAICompatibleProvider/OpenAICompatibleProvider (different endpoints, different auth)
  */
 
 import { getOauthConfig } from '../constants/oauth.js'
@@ -28,7 +28,7 @@ import { isEnvTruthy } from './envUtils.js'
 
 let fired = false
 
-export function preconnectAnthropicApi(): void {
+export function preconnectOpenAICompatibleProviderApi(): void {
   if (fired) return
   fired = true
 
@@ -46,7 +46,7 @@ export function preconnectAnthropicApi(): void {
     process.env.https_proxy ||
     process.env.HTTP_PROXY ||
     process.env.http_proxy ||
-    process.env.ANTHROPIC_UNIX_SOCKET ||
+    process.env.OPEN_CODE_CLI_UNIX_SOCKET ||
     process.env.OPEN_CODE_CLI_CLIENT_CERT ||
     process.env.OPEN_CODE_CLI_CLIENT_KEY
   ) {
@@ -54,10 +54,10 @@ export function preconnectAnthropicApi(): void {
   }
 
   // Use configured base URL (staging, local, or custom gateway). Covers
-  // ANTHROPIC_BASE_URL env + USE_STAGING_OAUTH + USE_LOCAL_OAUTH in one lookup.
+  // OPEN_CODE_CLI_BASE_URL env + USE_STAGING_OAUTH + USE_LOCAL_OAUTH in one lookup.
   // NODE_EXTRA_CA_CERTS no longer a skip — init.ts applied it before this fires.
   const baseUrl =
-    process.env.ANTHROPIC_BASE_URL || getOauthConfig().BASE_API_URL
+    process.env.OPEN_CODE_CLI_BASE_URL || getOauthConfig().BASE_API_URL
 
   // Fire and forget. HEAD means no response body — the connection is eligible
   // for keep-alive pool reuse immediately after headers arrive. 10s timeout

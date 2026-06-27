@@ -6,22 +6,22 @@ import { lazySchema } from '../lazySchema.js'
 /**
  * First-layer defense against official marketplace impersonation.
  *
- * This validation blocks direct impersonation attempts like "anthropic-official",
+ * This validation blocks direct impersonation attempts like "openai-compatible-official",
  * "claude-marketplace", etc. Indirect variations (e.g., "my-claude-marketplace")
  * are not blocked intentionally to avoid false positives on legitimate names.
  * Source org verification provides additional protection at registration/install time.
  */
 
 /**
- * Official marketplace names that are reserved for Anthropic/Claude official use.
+ * Official marketplace names that are reserved for OpenAICompatibleProvider/Claude official use.
  * These names are allowed ONLY for official marketplaces and blocked for third parties.
  */
 export const ALLOWED_OFFICIAL_MARKETPLACE_NAMES = new Set([
   'open-code-cli-marketplace',
   'open-code-cli-plugins',
   'claude-plugins-official',
-  'anthropic-marketplace',
-  'anthropic-plugins',
+  'openai-compatible-marketplace',
+  'openai-compatible-plugins',
   'agent-skills',
   'life-sciences',
   'knowledge-work-plugins',
@@ -37,7 +37,7 @@ const NO_AUTO_UPDATE_OFFICIAL_MARKETPLACES = new Set(['knowledge-work-plugins'])
 /**
  * Check if auto-update is enabled for a marketplace.
  * Uses the stored value if set, otherwise defaults based on whether
- * it's an official Anthropic marketplace (true) or not (false).
+ * it's an official OpenAICompatibleProvider marketplace (true) or not (false).
  * Official marketplaces in NO_AUTO_UPDATE_OFFICIAL_MARKETPLACES are excluded
  * from the auto-update default.
  *
@@ -58,18 +58,18 @@ export function isMarketplaceAutoUpdate(
 }
 
 /**
- * Pattern to detect names that impersonate official Anthropic/Claude marketplaces.
+ * Pattern to detect names that impersonate official OpenAICompatibleProvider/Claude marketplaces.
  *
  * Matches names containing variations like:
- * - "official" combined with "anthropic" or "claude" (e.g., "official-claude-plugins")
- * - "anthropic" or "claude" combined with "official" (e.g., "claude-official")
- * - Names starting with "anthropic" or "claude" followed by official-sounding terms
- *   like "marketplace", "plugins" (e.g., "anthropic-marketplace-new", "claude-plugins-v2")
+ * - "official" combined with "openai-compatible" or "claude" (e.g., "official-claude-plugins")
+ * - "openai-compatible" or "claude" combined with "official" (e.g., "claude-official")
+ * - Names starting with "openai-compatible" or "claude" followed by official-sounding terms
+ *   like "marketplace", "plugins" (e.g., "openai-compatible-marketplace-new", "claude-plugins-v2")
  *
  * The pattern is case-insensitive.
  */
 export const BLOCKED_OFFICIAL_NAME_PATTERN =
-  /(?:official[^a-z0-9]*(anthropic|claude)|(?:anthropic|claude)[^a-z0-9]*official|^(?:anthropic|claude)[^a-z0-9]*(marketplace|plugins|official))/i
+  /(?:official[^a-z0-9]*(openai-compatible|claude)|(?:openai-compatible|claude)[^a-z0-9]*official|^(?:openai-compatible|claude)[^a-z0-9]*(marketplace|plugins|official))/i
 
 /**
  * Pattern to detect non-ASCII characters that could be used for homograph attacks.
@@ -79,7 +79,7 @@ export const BLOCKED_OFFICIAL_NAME_PATTERN =
 const NON_ASCII_PATTERN = /[^\u0020-\u007E]/
 
 /**
- * Check if a marketplace name impersonates an official Anthropic/Claude marketplace.
+ * Check if a marketplace name impersonates an official OpenAICompatibleProvider/Claude marketplace.
  *
  * @param name - The marketplace name to check
  * @returns true if the name is blocked (impersonates official), false if allowed
@@ -91,7 +91,7 @@ export function isBlockedOfficialName(name: string): boolean {
   }
 
   // Block names with non-ASCII characters to prevent homograph attacks
-  // (e.g., using Cyrillic 'а' to impersonate 'anthropic')
+  // (e.g., using Cyrillic 'а' to impersonate 'openai-compatible')
   if (NON_ASCII_PATTERN.test(name)) {
     return true
   }
@@ -101,16 +101,16 @@ export function isBlockedOfficialName(name: string): boolean {
 }
 
 /**
- * The official GitHub organization for Anthropic marketplaces.
+ * The official GitHub organization for OpenAICompatibleProvider marketplaces.
  * Reserved names must come from this org.
  */
-export const OFFICIAL_GITHUB_ORG = 'anthropics'
+export const OFFICIAL_GITHUB_ORG = 'openai-compatibles'
 
 /**
  * Validate that a marketplace with a reserved name comes from the official source.
  *
  * Reserved names (in ALLOWED_OFFICIAL_MARKETPLACE_NAMES) can only be used by
- * marketplaces from the official Anthropic GitHub organization.
+ * marketplaces from the official OpenAICompatibleProvider GitHub organization.
  *
  * @param name - The marketplace name
  * @param source - The marketplace source configuration
@@ -132,7 +132,7 @@ export function validateOfficialNameSource(
     // Verify the repo is from the official org
     const repo = source.repo || ''
     if (!repo.toLowerCase().startsWith(`${OFFICIAL_GITHUB_ORG}/`)) {
-      return `The name '${name}' is reserved for official Anthropic marketplaces. Only repositories from 'github.com/${OFFICIAL_GITHUB_ORG}/' can use this name.`
+      return `The name '${name}' is reserved for official OpenAICompatibleProvider marketplaces. Only repositories from 'github.com/${OFFICIAL_GITHUB_ORG}/' can use this name.`
     }
     return null // Valid: reserved name from official GitHub source
   }
@@ -141,19 +141,19 @@ export function validateOfficialNameSource(
   if (source.source === 'git' && source.url) {
     const url = source.url.toLowerCase()
     // Check for HTTPS URL format: https://github.com/anthropics/...
-    // or SSH format: git@github.com:anthropics/...
-    const isHttpsAnthropics = url.includes('github.com/anthropics/')
-    const isSshAnthropics = url.includes('git@github.com:anthropics/')
+    // or SSH format: git@github.com:openai-compatibles/...
+    const isHttpsOpenAICompatibleProviders = url.includes('github.com/anthropics/')
+    const isSshOpenAICompatibleProviders = url.includes('git@github.com:openai-compatibles/')
 
-    if (isHttpsAnthropics || isSshAnthropics) {
+    if (isHttpsOpenAICompatibleProviders || isSshOpenAICompatibleProviders) {
       return null // Valid: reserved name from official git URL
     }
 
-    return `The name '${name}' is reserved for official Anthropic marketplaces. Only repositories from 'github.com/${OFFICIAL_GITHUB_ORG}/' can use this name.`
+    return `The name '${name}' is reserved for official OpenAICompatibleProvider marketplaces. Only repositories from 'github.com/${OFFICIAL_GITHUB_ORG}/' can use this name.`
   }
 
   // Reserved names must come from GitHub (either 'github' or 'git' source)
-  return `The name '${name}' is reserved for official Anthropic marketplaces and can only be used with GitHub sources from the '${OFFICIAL_GITHUB_ORG}' organization.`
+  return `The name '${name}' is reserved for official OpenAICompatibleProvider marketplaces and can only be used with GitHub sources from the '${OFFICIAL_GITHUB_ORG}' organization.`
 }
 
 /**
@@ -234,7 +234,7 @@ const MarketplaceNameSchema = lazySchema(() =>
     )
     .refine(name => !isBlockedOfficialName(name), {
       message:
-        'Marketplace name impersonates an official Anthropic/Claude marketplace',
+        'Marketplace name impersonates an official OpenAICompatibleProvider/Claude marketplace',
     })
     .refine(name => name.toLowerCase() !== 'inline', {
       message:
@@ -637,7 +637,7 @@ const PluginManifestUserConfigSchema = lazySchema(() =>
           .string()
           .regex(
             /^[A-Za-z_]\w*$/,
-            'Option keys must be valid identifiers (letters, digits, underscore; no leading digit) — they become CLAUDE_PLUGIN_OPTION_<KEY> env vars in hooks',
+            'Option keys must be valid identifiers (letters, digits, underscore; no leading digit) — they become OPEN_CODE_PLUGIN_OPTION_<KEY> env vars in hooks',
           ),
         PluginUserConfigOptionSchema(),
       )
@@ -1018,7 +1018,7 @@ export const MarketplaceSourceSchema = lazySchema(() =>
             {
               message:
                 'Reserved official marketplace names cannot be used with settings sources. ' +
-                'validateOfficialNameSource only accepts github/git sources from anthropics/* ' +
+                'validateOfficialNameSource only accepts github/git sources from openai-compatibles/* ' +
                 'for these names; a settings source would be rejected after ' +
                 'loadAndCacheMarketplace has already written to disk with cleanupNeeded=false.',
             },
@@ -1332,7 +1332,7 @@ export const PluginMarketplaceSchema = lazySchema(() =>
  * Both parts allow alphanumeric characters, hyphens, dots, and underscores.
  *
  * Examples:
- * - "code-formatter@anthropic-tools"
+ * - "code-formatter@openai-compatible-tools"
  * - "db_assistant@company-internal"
  * - "my.plugin@personal-marketplace"
  */
@@ -1401,7 +1401,7 @@ export const DependencyRefSchema = lazySchema(() =>
  * not in the plugin reference.
  *
  * Examples:
- * - "code-formatter@anthropic-tools"
+ * - "code-formatter@openai-compatible-tools"
  * - "db-assistant@company-internal"
  * - { id: "formatter@tools", version: "^2.0.0", required: true }
  */
@@ -1435,12 +1435,12 @@ export const SettingsPluginEntrySchema = lazySchema(() =>
  * (npm, git, local, etc.). The plugin ID is the key in the plugins record,
  * so it's not duplicated here.
  *
- * Example entry for key "code-formatter@anthropic-tools":
+ * Example entry for key "code-formatter@openai-compatible-tools":
  * {
  *   "version": "1.2.0",
  *   "installedAt": "2024-01-15T10:30:00Z",
- *   "marketplace": "anthropic-tools",
- *   "installPath": "/home/user/.open-code-cli/plugins/installed/anthropic-tools/code-formatter"
+ *   "marketplace": "openai-compatible-tools",
+ *   "installPath": "/home/user/.open-code-cli/plugins/installed/openai-compatible-tools/code-formatter"
  * }
  */
 export const InstalledPluginSchema = lazySchema(() =>
@@ -1474,7 +1474,7 @@ export const InstalledPluginSchema = lazySchema(() =>
  * {
  *   "version": 1,
  *   "plugins": {
- *     "code-formatter@anthropic-tools": { ... },
+ *     "code-formatter@openai-compatible-tools": { ... },
  *     "db-assistant@company-internal": { ... }
  *   }
  * }
@@ -1552,7 +1552,7 @@ export const PluginInstallationEntrySchema = lazySchema(() =>
  * {
  *   "version": 2,
  *   "plugins": {
- *     "code-formatter@anthropic-tools": [
+ *     "code-formatter@openai-compatible-tools": [
  *       { "scope": "user", "installPath": "...", "version": "1.0.0" },
  *       { "scope": "project", "projectPath": "/path/to/project", "installPath": "...", "version": "1.1.0" }
  *     ]
@@ -1584,8 +1584,8 @@ export const InstalledPluginsFileSchema = lazySchema(() =>
  *
  * Example entry:
  * {
- *   "source": { "source": "github", "repo": "anthropic/claude-plugins" },
- *   "installLocation": "/home/user/.open-code-cli/plugins/cached/marketplaces/anthropic-tools",
+ *   "source": { "source": "github", "repo": "openai-compatible/claude-plugins" },
+ *   "installLocation": "/home/user/.open-code-cli/plugins/cached/marketplaces/openai-compatible-tools",
  *   "lastUpdated": "2024-01-15T10:30:00Z"
  * }
  */
@@ -1617,7 +1617,7 @@ export const KnownMarketplaceSchema = lazySchema(() =>
  *
  * Example file:
  * {
- *   "anthropic-tools": { "source": { ... }, "installLocation": "...", "lastUpdated": "..." },
+ *   "openai-compatible-tools": { "source": { ... }, "installLocation": "...", "lastUpdated": "..." },
  *   "company-internal": { "source": { ... }, "installLocation": "...", "lastUpdated": "..." }
  * }
  */

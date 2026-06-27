@@ -14,7 +14,7 @@ import {
 import { tmpdir } from 'os'
 import { extname, join } from 'path'
 import type { Command } from '../commands.js'
-import { queryWithModel } from '../services/api/claude.js'
+import { queryWithModel } from '../services/api/provider.js'
 import {
   AGENT_TOOL_NAME,
   LEGACY_AGENT_TOOL_NAME,
@@ -416,7 +416,7 @@ const LABEL_MAP: Record<string, string> = {
 
 // Lazy getters: getOpenCodeCliConfigHomeDir() is memoized and reads process.env.
 // Calling it at module scope would populate the memoize cache before
-// entrypoints can set CLAUDE_CONFIG_DIR, breaking all 150+ other callers.
+// entrypoints can set OPEN_CODE_CLI_CONFIG_DIR, breaking all 150+ other callers.
 function getDataDir(): string {
   return join(getOpenCodeCliConfigHomeDir(), 'usage-data')
 }
@@ -1661,7 +1661,7 @@ async function generateParallelInsights(
     facetSummaries +
     '\n\nFRICTION DETAILS:\n' +
     frictionDetails +
-    '\n\nUSER INSTRUCTIONS TO CLAUDE:\n' +
+    '\n\nUSER INSTRUCTIONS TO OPEN_CODE:\n' +
     (userInstructions || 'None captured')
 
   // Run sections in parallel first (excluding at_a_glance)
@@ -3081,8 +3081,8 @@ const usageReport: Command = {
         .slice(0, 15)
       const username = process.env.SAFEUSER || process.env.USER || 'unknown'
       const filename = `${username}_insights_${timestamp}.html`
-      const s3Path = `s3://anthropic-serve/atamkin/cc-user-reports/${filename}`
-      const s3Url = `https://s3-frontend.infra.ant.dev/anthropic-serve/atamkin/cc-user-reports/${filename}`
+      const s3Path = `s3://openai-compatible-serve/atamkin/cc-user-reports/${filename}`
+      const s3Url = `https://s3-frontend.infra.ant.dev/openai-compatible-serve/atamkin/cc-user-reports/${filename}`
 
       reportUrl = s3Url
       try {

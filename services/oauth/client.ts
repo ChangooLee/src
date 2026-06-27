@@ -6,8 +6,8 @@ import {
 } from 'src/services/analytics/index.js'
 import {
   ALL_OAUTH_SCOPES,
-  CLAUDE_AI_INFERENCE_SCOPE,
-  CLAUDE_AI_OAUTH_SCOPES,
+  OPEN_CODE_CLI_INFERENCE_SCOPE,
+  OPEN_CODE_CLI_OAUTH_SCOPES,
   getOauthConfig,
 } from '../../constants/oauth.js'
 import {
@@ -36,7 +36,7 @@ import type {
  * @private Only call this if you're OAuth / auth related code!
  */
 export function shouldUseClaudeAIAuth(scopes: string[] | undefined): boolean {
-  return Boolean(scopes?.includes(CLAUDE_AI_INFERENCE_SCOPE))
+  return Boolean(scopes?.includes(OPEN_CODE_CLI_INFERENCE_SCOPE))
 }
 
 export function parseScopes(scopeString?: string): string[] {
@@ -65,11 +65,11 @@ export function buildAuthUrl({
   loginMethod?: string
 }): string {
   const authUrlBase = loginWithClaudeAi
-    ? getOauthConfig().CLAUDE_AI_AUTHORIZE_URL
+    ? getOauthConfig().OPEN_CODE_CLI_AUTHORIZE_URL
     : getOauthConfig().CONSOLE_AUTHORIZE_URL
 
   const authUrl = new URL(authUrlBase)
-  authUrl.searchParams.append('code', 'true') // this tells the login page to show Claude Max upsell
+  authUrl.searchParams.append('code', 'true') // this tells the login page to show provider plan upsell
   authUrl.searchParams.append('client_id', getOauthConfig().CLIENT_ID)
   authUrl.searchParams.append('response_type', 'code')
   authUrl.searchParams.append(
@@ -79,7 +79,7 @@ export function buildAuthUrl({
       : `http://localhost:${port}/callback`,
   )
   const scopesToUse = inferenceOnly
-    ? [CLAUDE_AI_INFERENCE_SCOPE] // Long-lived inference-only tokens
+    ? [OPEN_CODE_CLI_INFERENCE_SCOPE] // Long-lived inference-only tokens
     : ALL_OAUTH_SCOPES
   authUrl.searchParams.append('scope', scopesToUse.join(' '))
   authUrl.searchParams.append('code_challenge', codeChallenge)
@@ -158,7 +158,7 @@ export async function refreshOAuthToken(
     // registered oauth_scope.
     scope: (requestedScopes?.length
       ? requestedScopes
-      : CLAUDE_AI_OAUTH_SCOPES
+      : OPEN_CODE_CLI_OAUTH_SCOPES
     ).join(' '),
   }
 

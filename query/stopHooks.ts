@@ -107,7 +107,7 @@ export async function* handleStopHooks(
   // string matches.
   if (
     feature('TEMPLATES') &&
-    process.env.CLAUDE_JOB_DIR &&
+    process.env.OPEN_CODE_JOB_DIR &&
     querySource.startsWith('repl_main_thread') &&
     !toolUseContext.agentId
   ) {
@@ -118,7 +118,7 @@ export async function* handleStopHooks(
       (m): m is AssistantMessage => m.type === 'assistant',
     )
     const p = jobClassifierModule!
-      .classifyAndWriteState(process.env.CLAUDE_JOB_DIR, turnAssistantMessages)
+      .classifyAndWriteState(process.env.OPEN_CODE_JOB_DIR, turnAssistantMessages)
       .catch(err => {
         logForDebugging(`[job] classifier error: ${errorMessage(err)}`, {
           level: 'error',

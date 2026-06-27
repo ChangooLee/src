@@ -39,7 +39,7 @@ export type OpenCodeCliConfigDirectory =
   (typeof OPEN_CODE_CLI_CONFIG_DIRECTORIES)[number]
 
 // Compatibility export for existing integrations; primary naming is Open Code CLI.
-export const CLAUDE_CONFIG_DIRECTORIES = OPEN_CODE_CLI_CONFIG_DIRECTORIES
+export const OPEN_CODE_CLI_CONFIG_DIRECTORIES = OPEN_CODE_CLI_CONFIG_DIRECTORIES
 export type ClaudeConfigDirectory = OpenCodeCliConfigDirectory
 
 export type MarkdownFile = {

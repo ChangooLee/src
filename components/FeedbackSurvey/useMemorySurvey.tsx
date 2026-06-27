@@ -165,7 +165,7 @@ export function useMemorySurvey(messages: Message[], isLoading: boolean, hasActi
       return;
     }
 
-    // 3P default: survey off (no GrowthBook on Bedrock/Vertex/Foundry).
+    // 3P default: survey off (no GrowthBook on OpenAICompatibleProvider/OpenAICompatibleProvider/OpenAICompatibleProvider).
     if (!getFeatureValue_CACHED_MAY_BE_STALE(MEMORY_SURVEY_GATE, false)) {
       return;
     }

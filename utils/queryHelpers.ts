@@ -1,4 +1,4 @@
-import type { ToolUseBlock } from '@anthropic-ai/sdk/resources/index.mjs'
+import type { ToolUseBlock } from 'src/services/api/openaiCompatible.js'
 import last from 'lodash-es/last.js'
 import {
   getSessionId,

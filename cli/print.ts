@@ -297,7 +297,7 @@ import {
 import { runWithWorkload, WORKLOAD_CRON } from 'src/utils/workloadContext.js'
 import type { UUID } from 'crypto'
 import { randomUUID } from 'crypto'
-import type { ContentBlockParam } from '@anthropic-ai/sdk/resources/messages.mjs'
+import type { ContentBlockParam } from 'src/services/api/openaiCompatible.js'
 import type { AppState } from 'src/state/AppStateStore.js'
 import {
   fileHistoryRewind,
@@ -838,7 +838,7 @@ export async function runHeadless(
   headlessProfilerCheckpoint('after_loadInitialMessages')
 
   // Ensure model strings are initialized before generating model options.
-  // For Bedrock users, this waits for the profile fetch to get correct region strings.
+  // For OpenAICompatibleProvider users, this waits for the profile fetch to get correct region strings.
   await ensureModelStringsInitialized()
   headlessProfilerCheckpoint('after_modelStrings')
 
@@ -2795,7 +2795,7 @@ function runHeadlessStreaming(
   // extension via handleAuthDone → mcp_reconnect.
   const oauthAuthPromises = new Map<string, Promise<void>>()
 
-  // In-flight Anthropic OAuth flow (claude_authenticate). Single-slot: a
+  // In-flight OpenAICompatibleProvider OAuth flow (claude_authenticate). Single-slot: a
   // second authenticate request cleans up the first. The service holds the
   // PKCE verifier + localhost listener; the promise settles after
   // installOAuthTokens — after it resolves, the in-process memoized token
@@ -3513,7 +3513,7 @@ function runHeadlessStreaming(
             )
           }
         } else if (message.request.subtype === 'claude_authenticate') {
-          // Anthropic OAuth over the control channel. The SDK client owns
+          // OpenAICompatibleProvider OAuth over the control channel. The SDK client owns
           // the user's browser (we're headless in -p mode); we hand back
           // both URLs and wait. Automatic URL → localhost listener catches
           // the redirect if the browser is on this host; manual URL → the

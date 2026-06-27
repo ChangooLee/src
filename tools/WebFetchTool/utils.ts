@@ -4,7 +4,7 @@ import {
   type AnalyticsMetadata_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS,
   logEvent,
 } from '../../services/analytics/index.js'
-import { queryHaiku } from '../../services/api/claude.js'
+import { queryHaiku } from '../../services/api/provider.js'
 import { AbortError } from '../../utils/errors.js'
 import { getWebFetchUserAgent } from '../../utils/http.js'
 import { logError } from '../../utils/log.js'
@@ -70,7 +70,7 @@ const URL_CACHE = new LRUCache<string, CacheEntry>({
 
 // Separate cache for preflight domain checks. URL_CACHE is URL-keyed, so
 // fetching two paths on the same domain triggers two identical preflight
-// HTTP round-trips to api.anthropic.com. This hostname-keyed cache avoids
+// HTTP round-trips to api.openai.com/v1. This hostname-keyed cache avoids
 // that. Only 'allowed' is cached — blocked/failed re-check on next attempt.
 const DOMAIN_CHECK_CACHE = new LRUCache<string, true>({
   max: 128,
@@ -181,7 +181,7 @@ export async function checkDomainBlocklist(
   }
   try {
     const response = await axios.get(
-      `https://api.anthropic.com/api/web/domain_info?domain=${encodeURIComponent(domain)}`,
+      `https://api.openai.com/v1/web/domain_info?domain=${encodeURIComponent(domain)}`,
       { timeout: DOMAIN_CHECK_TIMEOUT_MS },
     )
     if (response.status === 200) {

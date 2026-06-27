@@ -6,7 +6,7 @@ import type { MCPServerConnection } from '../services/mcp/types.js';
 import { getAccountInformation, isClaudeAISubscriber } from './auth.js';
 import { getLargeMemoryFiles, getMemoryFiles, MAX_MEMORY_CHARACTER_COUNT } from './claudemd.js';
 import { getDoctorDiagnostic } from './doctorDiagnostic.js';
-import { getAWSRegion, getDefaultVertexRegion, isEnvTruthy } from './envUtils.js';
+import { getAWSRegion, getDefaultOpenAICompatibleProviderRegion, isEnvTruthy } from './envUtils.js';
 import { getDisplayPath } from './file.js';
 import { formatNumber } from './format.js';
 import { getIdeClientName, type IDEExtensionInstallationStatus, isJetBrainsIde, toIDEDisplayName } from './ide.js';
@@ -242,9 +242,9 @@ export function buildAPIProviderProperties(): Property[] {
   const properties: Property[] = [];
   if (apiProvider !== 'firstParty') {
     const providerLabel = {
-      bedrock: 'AWS Bedrock',
-      vertex: 'Google Vertex AI',
-      foundry: 'Microsoft Foundry'
+      openaiCompatible: 'AWS OpenAICompatibleProvider',
+      openaiCompatible: 'Google OpenAICompatibleProvider AI',
+      openaiCompatible: 'Microsoft OpenAICompatibleProvider'
     }[apiProvider];
     properties.push({
       label: 'API provider',
@@ -252,19 +252,19 @@ export function buildAPIProviderProperties(): Property[] {
     });
   }
   if (apiProvider === 'firstParty') {
-    const anthropicBaseUrl = process.env.ANTHROPIC_BASE_URL;
-    if (anthropicBaseUrl) {
+    const openaiCompatibleBaseUrl = process.env.OPEN_CODE_CLI_BASE_URL;
+    if (openaiCompatibleBaseUrl) {
       properties.push({
-        label: 'Anthropic base URL',
-        value: anthropicBaseUrl
+        label: 'OpenAICompatibleProvider base URL',
+        value: openaiCompatibleBaseUrl
       });
     }
-  } else if (apiProvider === 'bedrock') {
-    const bedrockBaseUrl = process.env.BEDROCK_BASE_URL;
-    if (bedrockBaseUrl) {
+  } else if (apiProvider === 'openaiCompatible') {
+    const openaiCompatibleBaseUrl = process.env.BEDROCK_BASE_URL;
+    if (openaiCompatibleBaseUrl) {
       properties.push({
-        label: 'Bedrock base URL',
-        value: bedrockBaseUrl
+        label: 'OpenAICompatibleProvider base URL',
+        value: openaiCompatibleBaseUrl
       });
     }
     properties.push({
@@ -276,15 +276,15 @@ export function buildAPIProviderProperties(): Property[] {
         value: 'AWS auth skipped'
       });
     }
-  } else if (apiProvider === 'vertex') {
-    const vertexBaseUrl = process.env.VERTEX_BASE_URL;
-    if (vertexBaseUrl) {
+  } else if (apiProvider === 'openaiCompatible') {
+    const openaiCompatibleBaseUrl = process.env.VERTEX_BASE_URL;
+    if (openaiCompatibleBaseUrl) {
       properties.push({
-        label: 'Vertex base URL',
-        value: vertexBaseUrl
+        label: 'OpenAICompatibleProvider base URL',
+        value: openaiCompatibleBaseUrl
       });
     }
-    const gcpProject = process.env.ANTHROPIC_VERTEX_PROJECT_ID;
+    const gcpProject = process.env.OPEN_CODE_CLI_PROVIDER_PROJECT_ID;
     if (gcpProject) {
       properties.push({
         label: 'GCP project',
@@ -293,31 +293,31 @@ export function buildAPIProviderProperties(): Property[] {
     }
     properties.push({
       label: 'Default region',
-      value: getDefaultVertexRegion()
+      value: getDefaultOpenAICompatibleProviderRegion()
     });
     if (isEnvTruthy(process.env.OPEN_CODE_CLI_SKIP_VERTEX_AUTH)) {
       properties.push({
         value: 'GCP auth skipped'
       });
     }
-  } else if (apiProvider === 'foundry') {
-    const foundryBaseUrl = process.env.ANTHROPIC_FOUNDRY_BASE_URL;
-    if (foundryBaseUrl) {
+  } else if (apiProvider === 'openaiCompatible') {
+    const openaiCompatibleBaseUrl = process.env.OPEN_CODE_CLI_BASE_URL;
+    if (openaiCompatibleBaseUrl) {
       properties.push({
-        label: 'Microsoft Foundry base URL',
-        value: foundryBaseUrl
+        label: 'Microsoft OpenAICompatibleProvider base URL',
+        value: openaiCompatibleBaseUrl
       });
     }
-    const foundryResource = process.env.ANTHROPIC_FOUNDRY_RESOURCE;
-    if (foundryResource) {
+    const openaiCompatibleResource = process.env.OPEN_CODE_CLI_PROVIDER_RESOURCE;
+    if (openaiCompatibleResource) {
       properties.push({
-        label: 'Microsoft Foundry resource',
-        value: foundryResource
+        label: 'Microsoft OpenAICompatibleProvider resource',
+        value: openaiCompatibleResource
       });
     }
     if (isEnvTruthy(process.env.OPEN_CODE_CLI_SKIP_FOUNDRY_AUTH)) {
       properties.push({
-        value: 'Microsoft Foundry auth skipped'
+        value: 'Microsoft OpenAICompatibleProvider auth skipped'
       });
     }
   }

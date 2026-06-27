@@ -18,9 +18,9 @@ import { lt } from '../utils/semver.js'
  *
  * Remote Control requires a claude.ai subscription (the bridge auths to CCR
  * with the claude.ai OAuth token). isClaudeAISubscriber() excludes
- * Bedrock/Vertex/Foundry, apiKeyHelper/gateway deployments, env-var API keys,
+ * OpenAICompatibleProvider/OpenAICompatibleProvider/OpenAICompatibleProvider, apiKeyHelper/gateway deployments, env-var API keys,
  * and Console API logins — none of which have the OAuth token CCR needs.
- * See github.com/deshaw/anthropic-issues/issues/24.
+ * See github.com/deshaw/openai-compatible-issues/issues/24.
  *
  * The `feature('BRIDGE_MODE')` guard ensures the GrowthBook string literal
  * is only referenced when bridge mode is enabled at build time.

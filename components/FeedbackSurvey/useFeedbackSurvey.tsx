@@ -220,7 +220,7 @@ export function useFeedbackSurvey(messages: Message[], isLoading: boolean, submi
     }
 
     // Force display for testing
-    if (process.env.CLAUDE_FORCE_DISPLAY_SURVEY && !feedbackSurvey.timeLastShown) {
+    if (process.env.OPEN_CODE_FORCE_DISPLAY_SURVEY && !feedbackSurvey.timeLastShown) {
       return true;
     }
     if (!isModelAllowed) {

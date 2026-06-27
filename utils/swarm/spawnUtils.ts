@@ -100,9 +100,9 @@ const TEAMMATE_ENV_VARS = [
   'OPEN_CODE_CLI_USE_VERTEX',
   'OPEN_CODE_CLI_USE_FOUNDRY',
   // Custom API endpoint
-  'ANTHROPIC_BASE_URL',
+  'OPEN_CODE_CLI_BASE_URL',
   // Config directory override
-  'CLAUDE_CONFIG_DIR',
+  'OPEN_CODE_CLI_CONFIG_DIR',
   // CCR marker — teammates need this for CCR-aware code paths. Auth finds
   // its own way via /home/claude/.open-code-cli/remote/.oauth_token regardless;
   // the FD env var wouldn't help (pipe FDs don't cross tmux).
@@ -129,11 +129,11 @@ const TEAMMATE_ENV_VARS = [
 
 /**
  * Builds the `env KEY=VALUE ...` string for teammate spawn commands.
- * Always includes CLAUDECODE=1 and OPEN_CODE_CLI_EXPERIMENTAL_AGENT_TEAMS=1,
+ * Always includes OPEN_CODE_CLI=1 and OPEN_CODE_CLI_EXPERIMENTAL_AGENT_TEAMS=1,
  * plus any provider/config env vars that are set in the current process.
  */
 export function buildInheritedEnvVars(): string {
-  const envVars = ['CLAUDECODE=1', 'OPEN_CODE_CLI_EXPERIMENTAL_AGENT_TEAMS=1']
+  const envVars = ['OPEN_CODE_CLI=1', 'OPEN_CODE_CLI_EXPERIMENTAL_AGENT_TEAMS=1']
 
   for (const key of TEAMMATE_ENV_VARS) {
     const value = process.env[key]

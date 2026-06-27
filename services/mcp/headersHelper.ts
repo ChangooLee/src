@@ -62,7 +62,7 @@ export async function getMcpHeadersFromHelper(
       shell: true,
       timeout: 10000,
       // Pass server context so one helper script can serve multiple MCP servers
-      // (git credential-helper style). See deshaw/anthropic-issues#28.
+      // (git credential-helper style). See deshaw/openai-compatible-issues#28.
       env: {
         ...process.env,
         OPEN_CODE_CLI_MCP_SERVER_NAME: serverName,
