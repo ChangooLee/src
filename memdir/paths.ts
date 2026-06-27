@@ -18,17 +18,18 @@ import {
   getSettingsForSource,
 } from '../utils/settings/settings.js'
 
+import { getOpenCodeCliEnv } from '../utils/envUtils.js';
 /**
  * Whether auto-memory features are enabled (memdir, agent memory, past session search).
  * Enabled by default. Priority chain (first defined wins):
- *   1. CLAUDE_CODE_DISABLE_AUTO_MEMORY env var (1/true → OFF, 0/false → ON)
- *   2. CLAUDE_CODE_SIMPLE (--bare) → OFF
- *   3. CCR without persistent storage → OFF (no CLAUDE_CODE_REMOTE_MEMORY_DIR)
+ *   1. OPEN_CODE_CLI_DISABLE_AUTO_MEMORY env var (1/true → OFF, 0/false → ON)
+ *   2. OPEN_CODE_CLI_SIMPLE (--bare) → OFF
+ *   3. CCR without persistent storage → OFF (no OPEN_CODE_CLI_REMOTE_MEMORY_DIR)
  *   4. autoMemoryEnabled in settings.json (supports project-level opt-out)
  *   5. Default: enabled
  */
 export function isAutoMemoryEnabled(): boolean {
-  const envVal = process.env.CLAUDE_CODE_DISABLE_AUTO_MEMORY
+  const envVal = getOpenCodeCliEnv('DISABLE_AUTO_MEMORY')
   if (isEnvTruthy(envVal)) {
     return false
   }
@@ -38,12 +39,12 @@ export function isAutoMemoryEnabled(): boolean {
   // --bare / SIMPLE: prompts.ts already drops the memory section from the
   // system prompt via its SIMPLE early-return; this gate stops the other half
   // (extractMemories turn-end fork, autoDream, /remember, /dream, team sync).
-  if (isEnvTruthy(process.env.CLAUDE_CODE_SIMPLE)) {
+  if (isEnvTruthy(getOpenCodeCliEnv('SIMPLE'))) {
     return false
   }
   if (
-    isEnvTruthy(process.env.CLAUDE_CODE_REMOTE) &&
-    !process.env.CLAUDE_CODE_REMOTE_MEMORY_DIR
+    isEnvTruthy(getOpenCodeCliEnv('REMOTE')) &&
+    !getOpenCodeCliEnv('REMOTE_MEMORY_DIR')
   ) {
     return false
   }
@@ -79,12 +80,12 @@ export function isExtractModeActive(): boolean {
 /**
  * Returns the base directory for persistent memory storage.
  * Resolution order:
- *   1. CLAUDE_CODE_REMOTE_MEMORY_DIR env var (explicit override, set in CCR)
+ *   1. OPEN_CODE_CLI_REMOTE_MEMORY_DIR env var (explicit override, set in CCR)
  *   2. ~/.claude (default config home)
  */
 export function getMemoryBaseDir(): string {
-  if (process.env.CLAUDE_CODE_REMOTE_MEMORY_DIR) {
-    return process.env.CLAUDE_CODE_REMOTE_MEMORY_DIR
+  if (getOpenCodeCliEnv('REMOTE_MEMORY_DIR')) {
+    return getOpenCodeCliEnv('REMOTE_MEMORY_DIR')
   }
   return getClaudeConfigHomeDir()
 }

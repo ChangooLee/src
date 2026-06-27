@@ -17,6 +17,7 @@ import { getBranch, getDefaultBranch, getIsGit, gitExe } from './utils/git.js'
 import { shouldIncludeGitInstructions } from './utils/gitSettings.js'
 import { logError } from './utils/log.js'
 
+import { getOpenCodeCliEnv } from 'utils/envUtils.js';
 const MAX_STATUS_CHARS = 2000
 
 // System prompt injection for cache breaking (ant-only, ephemeral debugging state)
@@ -122,7 +123,7 @@ export const getSystemContext = memoize(
 
     // Skip git status in CCR (unnecessary overhead on resume) or when git instructions are disabled
     const gitStatus =
-      isEnvTruthy(process.env.CLAUDE_CODE_REMOTE) ||
+      isEnvTruthy(getOpenCodeCliEnv('REMOTE')) ||
       !shouldIncludeGitInstructions()
         ? null
         : await getGitStatus()

@@ -12,6 +12,7 @@ import { AGENT_TOOL_NAME } from './constants.js'
 import { isForkSubagentEnabled } from './forkSubagent.js'
 import type { AgentDefinition } from './loadAgentsDir.js'
 
+import { getOpenCodeCliEnv } from '../../utils/envUtils.js';
 function getToolsDescription(agent: AgentDefinition): string {
   const { tools, disallowedTools } = agent
   const hasAllowlist = tools && tools.length > 0
@@ -256,7 +257,7 @@ Usage notes:
 - Always include a short description (3-5 words) summarizing what the agent will do${concurrencyNote}
 - When the agent is done, it will return a single message back to you. The result returned by the agent is not visible to the user. To show the user the result, you should send a text message back to the user with a concise summary of the result.${
     // eslint-disable-next-line custom-rules/no-process-env-top-level
-    !isEnvTruthy(process.env.CLAUDE_CODE_DISABLE_BACKGROUND_TASKS) &&
+    !isEnvTruthy(getOpenCodeCliEnv('DISABLE_BACKGROUND_TASKS')) &&
     !isInProcessTeammate() &&
     !forkEnabled
       ? `

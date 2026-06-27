@@ -93,6 +93,7 @@ import {
   userFacingName,
 } from './UI.js'
 
+import { getOpenCodeCliEnv } from '../../utils/envUtils.js';
 // Device files that would hang the process: infinite output or blocking input.
 // Checked by path only (no I/O). Safe devices like /dev/null are intentionally omitted.
 const BLOCKED_DEVICE_PATHS = new Set([
@@ -575,7 +576,7 @@ export const FileReadTool = buildTool({
     // Discover skills from this file's path (fire-and-forget, non-blocking)
     // Skip in simple mode - no skills available
     const cwd = getCwd()
-    if (!isEnvTruthy(process.env.CLAUDE_CODE_SIMPLE)) {
+    if (!isEnvTruthy(getOpenCodeCliEnv('SIMPLE'))) {
       const newSkillDirs = await discoverSkillDirsForPaths([fullFilePath], cwd)
       if (newSkillDirs.length > 0) {
         // Store discovered dirs for attachment display

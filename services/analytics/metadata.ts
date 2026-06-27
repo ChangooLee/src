@@ -41,6 +41,7 @@ import {
 } from '../../utils/teammate.js'
 import { feature } from 'bun:bundle'
 
+import { getOpenCodeCliEnv } from '../../utils/envUtils.js';
 /**
  * Marker type for verifying analytics metadata doesn't contain sensitive data
  *
@@ -593,11 +594,11 @@ const buildEnvContext = memoize(async (): Promise<EnvContext> => {
     isRunningWithBun: env.isRunningWithBun(),
     isCi: isEnvTruthy(process.env.CI),
     isClaubbit: isEnvTruthy(process.env.CLAUBBIT),
-    isClaudeCodeRemote: isEnvTruthy(process.env.CLAUDE_CODE_REMOTE),
+    isClaudeCodeRemote: isEnvTruthy(getOpenCodeCliEnv('REMOTE')),
     isLocalAgentMode: process.env.CLAUDE_CODE_ENTRYPOINT === 'local-agent',
     isConductor: env.isConductor(),
-    ...(process.env.CLAUDE_CODE_REMOTE_ENVIRONMENT_TYPE && {
-      remoteEnvironmentType: process.env.CLAUDE_CODE_REMOTE_ENVIRONMENT_TYPE,
+    ...(getOpenCodeCliEnv('REMOTE_ENVIRONMENT_TYPE') && {
+      remoteEnvironmentType: getOpenCodeCliEnv('REMOTE_ENVIRONMENT_TYPE'),
     }),
     // Gated by feature flag to prevent leaking "coworkerType" string in external builds
     ...(feature('COWORKER_TYPE_TELEMETRY')
@@ -608,8 +609,8 @@ const buildEnvContext = memoize(async (): Promise<EnvContext> => {
     ...(process.env.CLAUDE_CODE_CONTAINER_ID && {
       claudeCodeContainerId: process.env.CLAUDE_CODE_CONTAINER_ID,
     }),
-    ...(process.env.CLAUDE_CODE_REMOTE_SESSION_ID && {
-      claudeCodeRemoteSessionId: process.env.CLAUDE_CODE_REMOTE_SESSION_ID,
+    ...(getOpenCodeCliEnv('REMOTE_SESSION_ID') && {
+      claudeCodeRemoteSessionId: getOpenCodeCliEnv('REMOTE_SESSION_ID'),
     }),
     ...(process.env.CLAUDE_CODE_TAGS && {
       tags: process.env.CLAUDE_CODE_TAGS,

@@ -110,7 +110,7 @@ const TEAMMATE_ENV_VARS = [
   // Auto-memory gate (memdir/paths.ts) checks REMOTE && !MEMORY_DIR to
   // disable memory on ephemeral CCR filesystems. Forwarding REMOTE alone
   // would flip teammates to memory-off when the parent has it on.
-  'CLAUDE_CODE_REMOTE_MEMORY_DIR',
+  'OPEN_CODE_CLI_REMOTE_MEMORY_DIR',
   // Upstream proxy — the parent's MITM relay is reachable from teammates
   // (same container network). Forward the proxy vars so teammates route
   // customer-configured upstream traffic through the relay for credential

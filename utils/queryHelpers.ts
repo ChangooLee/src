@@ -36,6 +36,7 @@ import type {
 import type { ProcessUserInputContext } from './processUserInput/processUserInput.js'
 import { recordTranscript } from './sessionStorage.js'
 
+import { getOpenCodeCliEnv } from '../utils/envUtils.js';
 export type PermissionPromptTool = Tool<
   ReturnType<typeof permissionToolInputSchema>,
   ReturnType<typeof permissionToolOutputSchema>
@@ -161,7 +162,7 @@ export function* normalizeMessage(message: Message): Generator<SDKMessage> {
         // Filter bash progress to send only one per minute
         // Only emit for Open Code CLI Remote for now
         if (
-          !isEnvTruthy(process.env.CLAUDE_CODE_REMOTE) &&
+          !isEnvTruthy(getOpenCodeCliEnv('REMOTE')) &&
           !process.env.CLAUDE_CODE_CONTAINER_ID
         ) {
           break

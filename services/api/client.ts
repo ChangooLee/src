@@ -29,6 +29,7 @@ import {
   isEnvTruthy,
 } from '../../utils/envUtils.js'
 
+import { getOpenCodeCliEnv } from '../../utils/envUtils.js';
 /**
  * Environment variables for different client types:
  *
@@ -99,12 +100,13 @@ export async function getAnthropicClient({
   source?: string
 }): Promise<Anthropic> {
   const containerId = process.env.CLAUDE_CODE_CONTAINER_ID
-  const remoteSessionId = process.env.CLAUDE_CODE_REMOTE_SESSION_ID
+  const remoteSessionId = getOpenCodeCliEnv('REMOTE_SESSION_ID')
   const clientApp = process.env.CLAUDE_AGENT_SDK_CLIENT_APP
   const customHeaders = getCustomHeaders()
   const defaultHeaders: { [key: string]: string } = {
     'x-app': 'cli',
     'User-Agent': getUserAgent(),
+    'X-Open-Code-CLI-Session-Id': getSessionId(),
     'X-Claude-Code-Session-Id': getSessionId(),
     ...customHeaders,
     ...(containerId ? { 'x-claude-remote-container-id': containerId } : {}),

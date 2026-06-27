@@ -53,6 +53,7 @@ import {
 } from './agentMemorySnapshot.js'
 import { getBuiltInAgents } from './builtInAgents.js'
 
+import { getOpenCodeCliEnv } from '../../utils/envUtils.js';
 // Type for MCP server specification in agent definitions
 // Can be either a reference to an existing server by name, or an inline definition as { [name]: config }
 export type AgentMcpServerSpec =
@@ -296,7 +297,7 @@ async function initializeAgentMemorySnapshots(
 export const getAgentDefinitionsWithOverrides = memoize(
   async (cwd: string): Promise<AgentDefinitionsResult> => {
     // Simple mode: skip custom agents, only return built-ins
-    if (isEnvTruthy(process.env.CLAUDE_CODE_SIMPLE)) {
+    if (isEnvTruthy(getOpenCodeCliEnv('SIMPLE'))) {
       const builtInAgents = getBuiltInAgents()
       return {
         activeAgents: builtInAgents,

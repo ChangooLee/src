@@ -710,6 +710,7 @@ export const connectToServer = memoize(
         const wsHeaders = {
           'User-Agent': getMCPUserAgent(),
           ...(serverRef.authToken && {
+            'X-Open-Code-CLI-Ide-Authorization': serverRef.authToken,
             'X-Claude-Code-Ide-Authorization': serverRef.authToken,
           }),
         }

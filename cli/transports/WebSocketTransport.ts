@@ -17,6 +17,7 @@ import {
 import { jsonStringify } from '../../utils/slowOperations.js'
 import type { Transport } from './Transport.js'
 
+import { getOpenCodeCliEnv } from '../../utils/envUtils.js';
 const KEEP_ALIVE_FRAME = '{"type":"keep_alive"}\n'
 
 const DEFAULT_MAX_BUFFER_SIZE = 1000
@@ -768,7 +769,7 @@ export class WebSocketTransport implements Transport {
     this.stopKeepaliveInterval()
 
     // In CCR sessions, session activity heartbeats handle keep-alives
-    if (isEnvTruthy(process.env.CLAUDE_CODE_REMOTE)) {
+    if (isEnvTruthy(getOpenCodeCliEnv('REMOTE'))) {
       return
     }
 

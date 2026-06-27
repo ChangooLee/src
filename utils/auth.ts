@@ -77,6 +77,7 @@ import { sleep } from './sleep.js'
 import { jsonParse } from './slowOperations.js'
 import { clearToolSchemaCache } from './toolSchemaCache.js'
 
+import { getOpenCodeCliEnv } from '../utils/envUtils.js';
 /** Default TTL for API key helper cache in milliseconds (5 minutes) */
 const DEFAULT_API_KEY_HELPER_TTL = 5 * 60 * 1000
 
@@ -90,7 +91,7 @@ const DEFAULT_API_KEY_HELPER_TTL = 5 * 60 * 1000
  */
 function isManagedOAuthContext(): boolean {
   return (
-    isEnvTruthy(process.env.CLAUDE_CODE_REMOTE) ||
+    isEnvTruthy(getOpenCodeCliEnv('REMOTE')) ||
     process.env.CLAUDE_CODE_ENTRYPOINT === 'claude-desktop'
   )
 }

@@ -113,7 +113,7 @@ function generateReservedShortcuts(): string {
 
 const FILE_FORMAT_EXAMPLE: KeybindingsSchemaType = {
   $schema: 'https://www.schemastore.org/open-code-cli-keybindings.json',
-  $docs: 'https://code.claude.com/docs/en/keybindings',
+  $docs: 'https://open-code-cli.dev/docs/keybindings',
   bindings: [
     {
       context: 'Chat',

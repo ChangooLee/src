@@ -466,7 +466,7 @@ const externalTips: Tip[] = [
   {
     id: 'mobile-app',
     content: async () =>
-      '/mobile to use Open Code CLI from the Claude app on your phone',
+      '/mobile to use Open Code CLI from the Open Code CLI web app on your phone',
     cooldownSessions: 15,
     isRelevant: async () => true,
   },

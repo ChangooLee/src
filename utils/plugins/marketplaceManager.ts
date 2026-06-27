@@ -87,6 +87,7 @@ import {
   validateOfficialNameSource,
 } from './schemas.js'
 
+import { getOpenCodeCliEnv } from '../../utils/envUtils.js';
 /**
  * Result of loading and caching a marketplace
  */
@@ -1273,7 +1274,7 @@ async function cacheMarketplaceFromUrl(
   const headers = {
     ...customHeaders,
     // User-Agent must come last to prevent override (for consistency with WebFetch)
-    'User-Agent': 'Claude-Code-Plugin-Manager',
+    'User-Agent': 'Open-Code-CLI-Plugin-Manager',
   }
 
   let response
@@ -2473,7 +2474,7 @@ export async function refreshMarketplace(
         const sshUrl = `git@github.com:${source.repo}.git`
         const httpsUrl = `https://github.com/${source.repo}.git`
 
-        if (isEnvTruthy(process.env.CLAUDE_CODE_REMOTE)) {
+        if (isEnvTruthy(getOpenCodeCliEnv('REMOTE'))) {
           // CCR: always HTTPS (no SSH keys available)
           await cacheMarketplaceFromGit(
             httpsUrl,

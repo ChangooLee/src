@@ -7,6 +7,7 @@ import { refreshActivePlugins } from '../../utils/plugins/refresh.js'
 import { settingsChangeDetector } from '../../utils/settings/changeDetector.js'
 import { plural } from '../../utils/stringUtils.js'
 
+import { getOpenCodeCliEnv } from '../../utils/envUtils.js';
 export const call: LocalCommandCall = async (_args, context) => {
   // CCR: re-pull user settings before the cache sweep so enabledPlugins /
   // extraKnownMarketplaces pushed from the user's local CLI (settingsSync)
@@ -23,7 +24,7 @@ export const call: LocalCommandCall = async (_args, context) => {
   // can re-run /reload-plugins to retry. Startup path keeps its retries.
   if (
     feature('DOWNLOAD_USER_SETTINGS') &&
-    (isEnvTruthy(process.env.CLAUDE_CODE_REMOTE) || getIsRemoteMode())
+    (isEnvTruthy(getOpenCodeCliEnv('REMOTE')) || getIsRemoteMode())
   ) {
     const applied = await redownloadUserSettings()
     // applyRemoteEntriesToLocal uses markInternalWrite to suppress the

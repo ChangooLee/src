@@ -44,7 +44,7 @@ export function generateKeybindingsTemplate(): string {
   // Format as object wrapper with bindings array
   const config = {
     $schema: 'https://www.schemastore.org/open-code-cli-keybindings.json',
-    $docs: 'https://code.claude.com/docs/en/keybindings',
+    $docs: 'https://open-code-cli.dev/docs/keybindings',
     bindings,
   }
 

@@ -50,7 +50,7 @@ jobs:
 
           # Optional: Add claude_args to customize behavior and configuration
           # See https://github.com/anthropics/open-code-cli-action/blob/main/docs/usage.md
-          # or https://code.claude.com/docs/en/cli-reference for available options
+          # or https://open-code-cli.dev/docs/cli-reference for available options
           # claude_args: '--allowed-tools Bash(gh pr:*)'
 
 `
@@ -139,6 +139,6 @@ jobs:
           plugins: 'code-review@open-code-cli-plugins'
           prompt: '/code-review:code-review \${{ github.repository }}/pull/\${{ github.event.pull_request.number }}'
           # See https://github.com/anthropics/open-code-cli-action/blob/main/docs/usage.md
-          # or https://code.claude.com/docs/en/cli-reference for available options
+          # or https://open-code-cli.dev/docs/cli-reference for available options
 
 `

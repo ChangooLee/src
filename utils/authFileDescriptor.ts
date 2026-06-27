@@ -10,6 +10,7 @@ import { isEnvTruthy } from './envUtils.js'
 import { errorMessage, isENOENT } from './errors.js'
 import { getFsImplementation } from './fsOperations.js'
 
+import { getOpenCodeCliEnv } from '../utils/envUtils.js';
 /**
  * Well-known token file locations in CCR. The Go environment-manager creates
  * /home/claude/.claude/remote/ and will (eventually) write these files too.
@@ -32,7 +33,7 @@ export function maybePersistTokenForSubprocesses(
   token: string,
   tokenName: string,
 ): void {
-  if (!isEnvTruthy(process.env.CLAUDE_CODE_REMOTE)) {
+  if (!isEnvTruthy(getOpenCodeCliEnv('REMOTE'))) {
     return
   }
   try {

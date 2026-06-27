@@ -11,6 +11,7 @@ import { isEnvTruthy, isRunningOnHomespace } from '../utils/envUtils.js'
 import { logError } from '../utils/log.js'
 import { getPlatform } from '../utils/platform.js'
 
+import { getOpenCodeCliEnv } from '../utils/envUtils.js';
 // Lazy-loaded native audio module. audio-capture.node links against
 // CoreAudio.framework + AudioUnit.framework; dlopen is synchronous and
 // blocks the event loop for ~1s warm, up to ~8s on cold coreaudiod
@@ -258,7 +259,7 @@ export async function requestMicrophonePermission(): Promise<boolean> {
 
 export async function checkRecordingAvailability(): Promise<RecordingAvailability> {
   // Remote environments have no local microphone
-  if (isRunningOnHomespace() || isEnvTruthy(process.env.CLAUDE_CODE_REMOTE)) {
+  if (isRunningOnHomespace() || isEnvTruthy(getOpenCodeCliEnv('REMOTE'))) {
     return {
       available: false,
       reason:

@@ -47,6 +47,7 @@ import {
 import { REPEATED_529_ERROR_MESSAGE } from './errors.js'
 import { extractConnectionErrorDetails } from './errorUtils.js'
 
+import { getOpenCodeCliEnv } from '../../utils/envUtils.js';
 const abortError = () => new APIUserAbortError()
 
 const DEFAULT_MAX_RETRIES = 10
@@ -710,7 +711,7 @@ function shouldRetry(error: APIError): boolean {
   // credentials. Bypass x-should-retry:false — the server assumes we'd retry
   // the same bad key, but our key is fine.
   if (
-    isEnvTruthy(process.env.CLAUDE_CODE_REMOTE) &&
+    isEnvTruthy(getOpenCodeCliEnv('REMOTE')) &&
     (error.status === 401 || error.status === 403)
   ) {
     return true
