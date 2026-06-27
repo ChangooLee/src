@@ -105,7 +105,6 @@ export async function registerWorker(
       headers: {
         Authorization: `Bearer ${accessToken}`,
         'Content-Type': 'application/json',
-        'openai-compatible-version': '2023-06-01',
       },
       timeout: 10_000,
     },

@@ -305,18 +305,18 @@ export function getExtraBodyParams(betaHeaders?: string[]): JsonObject {
   // Handle beta headers if provided
   if (betaHeaders && betaHeaders.length > 0) {
     if (
-      result['openai-compatible_beta'] &&
-      Array.isArray(result['openai-compatible_beta'])
+      result['open_code_cli_beta'] &&
+      Array.isArray(result['open_code_cli_beta'])
     ) {
       // Add to existing array, avoiding duplicates
-      const existingHeaders = result['openai-compatible_beta'] as string[]
+      const existingHeaders = result['open_code_cli_beta'] as string[]
       const newHeaders = betaHeaders.filter(
         header => !existingHeaders.includes(header),
       )
-      result['openai-compatible_beta'] = [...existingHeaders, ...newHeaders]
+      result['open_code_cli_beta'] = [...existingHeaders, ...newHeaders]
     } else {
       // Create new array with the beta headers
-      result['openai-compatible_beta'] = betaHeaders
+      result['open_code_cli_beta'] = betaHeaders
     }
   }
 
@@ -439,13 +439,13 @@ function configureEffortParams(
     outputConfig.effort = effortValue
     betas.push(EFFORT_BETA_HEADER)
   } else if (process.env.USER_TYPE === 'ant') {
-    // Numeric effort override - ant-only (uses openai-compatible_internal)
+    // Numeric effort override - ant-only (uses open_code_cli_internal)
     const existingInternal =
-      (extraBodyParams['openai-compatible_internal'] as Record<
+      (extraBodyParams['open_code_cli_internal'] as Record<
         string,
         unknown
       >) || {}
-    extraBodyParams['openai-compatible_internal'] = {
+    extraBodyParams['open_code_cli_internal'] = {
       ...existingInternal,
       effort_override: effortValue,
     }
@@ -1154,9 +1154,9 @@ async function* queryModel(
     )
   }
 
-  // Add tool search beta header if enabled - required for defer_loading to be accepted
-  // Header differs by provider: 1P/OpenAI-compatible provider use advanced-tool-use, OpenAI-compatible provider/OpenAI-compatible provider use tool-search-tool
-  // For OpenAI-compatible provider, this header must go in extraBodyParams, not the betas array
+  // Add tool search beta header if enabled - required for defer_loading to be accepted.
+  // The exact header value can differ by provider; for OpenAI-compatible providers it
+  // must go in extraBodyParams rather than the betas array.
   const toolSearchHeader = useToolSearch ? getToolSearchBetaHeader() : null
   if (toolSearchHeader && true) {
     if (!betas.includes(toolSearchHeader)) {
@@ -3362,7 +3362,7 @@ export function adjustParamsForNonStreaming<
 }
 
 function isMaxTokensCapEnabled(): boolean {
-  // 3P default: false (not validated on OpenAI-compatible provider/OpenAI-compatible provider)
+  // 3P default: false (not validated on OpenAI-compatible providers)
   return getFeatureValue_CACHED_MAY_BE_STALE('open_code_cli_otk_slot_v1', false)
 }
 

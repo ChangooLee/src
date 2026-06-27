@@ -255,7 +255,6 @@ export class SSETransport implements Transport {
       ...this.headers,
       ...authHeaders,
       Accept: 'text/event-stream',
-      'openai-compatible-version': '2023-06-01',
       'User-Agent': getOpenCodeCliUserAgent(),
     }
     if (authHeaders['Cookie']) {
@@ -580,7 +579,6 @@ export class SSETransport implements Transport {
     const headers: Record<string, string> = {
       ...authHeaders,
       'Content-Type': 'application/json',
-      'openai-compatible-version': '2023-06-01',
       'User-Agent': getOpenCodeCliUserAgent(),
     }
 

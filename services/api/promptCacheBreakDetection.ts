@@ -54,10 +54,10 @@ type PreviousState = {
    *  (sticky-on latched in open-code-cli.ts). Tracked to verify the fix. */
   cachedMCEnabled: boolean
   /** Resolved effort (env → options → model default). Goes into output_config
-   *  or openai-compatible_internal.effort_override. */
+   *  or open_code_cli_internal.effort_override. */
   effortValue: string
   /** Hash of getExtraBodyParams() — catches OPEN_CODE_CLI_EXTRA_BODY and
-   *  openai-compatible_internal changes. */
+   *  open_code_cli_internal changes. */
   extraBodyHash: number
   callCount: number
   pendingChanges: PendingChanges | null

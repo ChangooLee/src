@@ -84,7 +84,6 @@ export const fetchOpenCodeCliMcpConfigsIfEligible = memoize(
           Authorization: `Bearer ${tokens.accessToken}`,
           'Content-Type': 'application/json',
           'openai-compatible-beta': MCP_SERVERS_BETA_HEADER,
-          'openai-compatible-version': '2023-06-01',
         },
         timeout: FETCH_TIMEOUT_MS,
       })

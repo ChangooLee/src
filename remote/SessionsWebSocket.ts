@@ -114,7 +114,6 @@ export class SessionsWebSocket {
     const accessToken = this.getAccessToken()
     const headers = {
       Authorization: `Bearer ${accessToken}`,
-      'openai-compatible-version': '2023-06-01',
     }
 
     if (typeof Bun !== 'undefined') {

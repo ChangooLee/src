@@ -271,13 +271,12 @@ export async function fetchCodeSessionsFromSessionsAPI(): Promise<
 /**
  * Creates OAuth headers for API requests
  * @param accessToken The OAuth access token
- * @returns Headers object with Authorization, Content-Type, and openai-compatible-version
+ * @returns Headers object with Authorization and Content-Type
  */
 export function getOAuthHeaders(accessToken: string): Record<string, string> {
   return {
     Authorization: `Bearer ${accessToken}`,
     'Content-Type': 'application/json',
-    'openai-compatible-version': '2023-06-01',
   }
 }
 

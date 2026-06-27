@@ -71,8 +71,6 @@ import type {
 } from '../entrypoints/sdk/controlTypes.js'
 import type { PermissionMode } from '../utils/permissions/PermissionMode.js'
 
-const OPENAI_COMPATIBLE_VERSION = '2023-06-01'
-
 // Telemetry discriminator for ws_connected. 'initial' is the default and
 // never passed to rebuildTransport (which can only be called post-init);
 // Exclude<> makes that constraint explicit at both signatures.
@@ -82,7 +80,6 @@ function oauthHeaders(accessToken: string): Record<string, string> {
   return {
     Authorization: `Bearer ${accessToken}`,
     'Content-Type': 'application/json',
-    'OpenAI-Compatible-Version': OPENAI_COMPATIBLE_VERSION,
   }
 }
 

@@ -45,7 +45,7 @@ messages, PR titles, and PR bodies MUST NOT contain ANY OpenAICompatible-interna
 information. Do not blow your cover.
 
 NEVER include in commit messages or PR descriptions:
-- Internal model codenames (animal names like Capybara, Tengu, etc.)
+- Internal model codenames (animal names, etc.)
 - Unreleased model version numbers (e.g., opus-4-7, sonnet-4-8)
 - Internal repo or project names (e.g., open-code-cli-internal, openai-compatibles/…)
 - Internal tooling, Slack channels, or short links (e.g., go/cc, #open-code-cli-…)

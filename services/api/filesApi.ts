@@ -25,7 +25,6 @@ import {
 // Files API is currently in beta. oauth-2025-04-20 enables Bearer OAuth
 // on public-api routes (auth.py: "oauth_auth" not in beta_versions → 404).
 const FILES_API_BETA_HEADER = 'files-api-2025-04-14,oauth-2025-04-20'
-const OPENAI_COMPATIBLE_VERSION = '2023-06-01'
 
 // Files API base URL is provider-facing; remote/product URLs use separate envs.
 function getDefaultApiBaseUrl(): string {
@@ -138,7 +137,6 @@ export async function downloadFile(
 
   const headers = {
     Authorization: `Bearer ${config.oauthToken}`,
-    'OpenAI-Compatible-Version': OPENAI_COMPATIBLE_VERSION,
     'openai-compatible-beta': FILES_API_BETA_HEADER,
   }
 
@@ -386,7 +384,6 @@ export async function uploadFile(
 
   const headers = {
     Authorization: `Bearer ${config.oauthToken}`,
-    'OpenAI-Compatible-Version': OPENAI_COMPATIBLE_VERSION,
     'openai-compatible-beta': FILES_API_BETA_HEADER,
   }
 
@@ -621,7 +618,6 @@ export async function listFilesCreatedAfter(
   const baseUrl = config.baseUrl || getDefaultApiBaseUrl()
   const headers = {
     Authorization: `Bearer ${config.oauthToken}`,
-    'OpenAI-Compatible-Version': OPENAI_COMPATIBLE_VERSION,
     'openai-compatible-beta': FILES_API_BETA_HEADER,
   }
 

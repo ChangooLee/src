@@ -1464,12 +1464,10 @@ export async function initBridgeCore(
               new URL(wsUrl),
               {
                 Authorization: `Bearer ${oauthToken}`,
-                'openai-compatible-version': '2023-06-01',
               },
               workSessionId,
               () => ({
                 Authorization: `Bearer ${getOAuthToken() ?? oauthToken}`,
-                'openai-compatible-version': '2023-06-01',
               }),
               // Cap retries so a persistently-failing session-ingress can't
               // pin the uploader drain loop for the lifetime of the bridge.

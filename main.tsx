@@ -2488,7 +2488,7 @@ async function run(): Promise<CommanderCommand> {
     registerCleanup(async () => {
       logForDiagnosticsNoPII('info', 'exited');
     });
-    void logTenguInit({
+    void logOpenCodeCliInit({
       hasInitialPrompt: Boolean(prompt),
       hasStdin: Boolean(inputPrompt),
       verbose,
@@ -4506,7 +4506,7 @@ Examples:
   profileReport();
   return program;
 }
-async function logTenguInit({
+async function logOpenCodeCliInit({
   hasInitialPrompt,
   hasStdin,
   verbose,
